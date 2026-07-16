@@ -11,18 +11,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CrearEmpleadoDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
+const salario_inicial_dto_1 = require("./salario-inicial.dto");
 class CrearEmpleadoDto {
     codigo;
     nombre;
-    cargo;
+    cedula;
+    posicion;
+    salarioInicial;
 }
 exports.CrearEmpleadoDto = CrearEmpleadoDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'EMP-001' }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)({ message: 'El código del empleado es obligatorio.' }),
-    __metadata("design:type", String)
+    (0, swagger_1.ApiProperty)({ example: 40 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
 ], CrearEmpleadoDto.prototype, "codigo", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Juana Pérez' }),
@@ -31,9 +35,21 @@ __decorate([
     __metadata("design:type", String)
 ], CrearEmpleadoDto.prototype, "nombre", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'Supervisora de línea' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: '001-1234567-8' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CrearEmpleadoDto.prototype, "cargo", void 0);
+], CrearEmpleadoDto.prototype, "cedula", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Supervisora de línea' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'La posición del empleado es obligatoria.' }),
+    __metadata("design:type", String)
+], CrearEmpleadoDto.prototype, "posicion", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: salario_inicial_dto_1.SalarioInicialDto }),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => salario_inicial_dto_1.SalarioInicialDto),
+    __metadata("design:type", salario_inicial_dto_1.SalarioInicialDto)
+], CrearEmpleadoDto.prototype, "salarioInicial", void 0);
 //# sourceMappingURL=crear-empleado.dto.js.map

@@ -1,5 +1,8 @@
+import { SalarioInicialDto } from './salario-inicial.dto';
 export declare class CrearEmpleadoDto {
-    codigo: string;
+    codigo: number;
     nombre: string;
-    cargo?: string;
+    cedula?: string;
+    posicion: string;
+    salarioInicial: SalarioInicialDto;
 }

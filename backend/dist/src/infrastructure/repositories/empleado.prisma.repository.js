@@ -14,15 +14,27 @@ const common_1 = require("@nestjs/common");
 const empleado_entity_1 = require("../../domain/entities/empleado.entity");
 const prisma_service_1 = require("../prisma/prisma.service");
 function aDominio(empleado) {
-    return new empleado_entity_1.Empleado(empleado.id, empleado.codigo, empleado.nombre, empleado.cargo, empleado.activo);
+    return new empleado_entity_1.Empleado(empleado.id, empleado.codigo, empleado.nombre, empleado.cedula, empleado.posicion, empleado.activo);
 }
 let EmpleadoPrismaRepository = class EmpleadoPrismaRepository {
     prisma;
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async listar() {
+    async listar(filtro) {
+        const where = {};
+        if (filtro.activo !== undefined) {
+            where.activo = filtro.activo;
+        }
+        if (filtro.search) {
+            const codigoBuscado = Number(filtro.search);
+            where.OR = [
+                { nombre: { contains: filtro.search } },
+                ...(Number.isInteger(codigoBuscado) ? [{ codigo: codigoBuscado }] : []),
+            ];
+        }
         const empleados = await this.prisma.empleado.findMany({
+            where,
             orderBy: { nombre: 'asc' },
         });
         return empleados.map(aDominio);
@@ -37,8 +49,34 @@ let EmpleadoPrismaRepository = class EmpleadoPrismaRepository {
         });
         return empleado ? aDominio(empleado) : null;
     }
+    async buscarPorCedula(cedula) {
+        const empleado = await this.prisma.empleado.findUnique({
+            where: { cedula },
+        });
+        return empleado ? aDominio(empleado) : null;
+    }
     async crear(datos) {
-        const empleado = await this.prisma.empleado.create({ data: datos });
+        const empleado = await this.prisma.empleado.create({
+            data: {
+                codigo: datos.codigo,
+                nombre: datos.nombre,
+                cedula: datos.cedula,
+                posicion: datos.posicion,
+                salarios: {
+                    create: {
+                        montoMensual: datos.salarioInicial.montoMensual.toString(),
+                        vigenteDesde: datos.salarioInicial.vigenteDesde,
+                    },
+                },
+            },
+        });
+        return aDominio(empleado);
+    }
+    async actualizar(id, datos) {
+        const empleado = await this.prisma.empleado.update({
+            where: { id },
+            data: datos,
+        });
         return aDominio(empleado);
     }
 };

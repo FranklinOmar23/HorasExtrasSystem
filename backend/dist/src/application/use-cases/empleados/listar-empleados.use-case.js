@@ -6,8 +6,8 @@ class ListarEmpleadosUseCase {
     constructor(empleadoRepository) {
         this.empleadoRepository = empleadoRepository;
     }
-    async ejecutar() {
-        return this.empleadoRepository.listar();
+    async ejecutar(filtro) {
+        return this.empleadoRepository.listar(filtro);
     }
 }
 exports.ListarEmpleadosUseCase = ListarEmpleadosUseCase;

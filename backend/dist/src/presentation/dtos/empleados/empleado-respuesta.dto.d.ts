@@ -1,7 +1,8 @@
 export declare class EmpleadoRespuestaDto {
     id: string;
-    codigo: string;
+    codigo: number;
     nombre: string;
-    cargo: string | null;
+    cedula: string | null;
+    posicion: string;
     activo: boolean;
 }

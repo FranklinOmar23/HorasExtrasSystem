@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HealthController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const public_decorator_1 = require("../decorators/public.decorator");
 let HealthController = class HealthController {
     verificar() {
         return { status: 'ok', timestamp: new Date().toISOString() };
@@ -19,6 +20,7 @@ let HealthController = class HealthController {
 };
 exports.HealthController = HealthController;
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Verifica que el servicio esté disponible' }),
     __metadata("design:type", Function),

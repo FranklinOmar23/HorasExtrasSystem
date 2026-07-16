@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AutenticarUsuarioUseCase } from '../../application/use-cases/auth/autenticar-usuario.use-case';
+import { Public } from '../decorators/public.decorator';
 import { LoginRespuestaDto } from '../dtos/auth/login-respuesta.dto';
 import { LoginDto } from '../dtos/auth/login.dto';
 
@@ -19,6 +20,7 @@ export class AuthController {
     private readonly autenticarUsuario: AutenticarUsuarioUseCase,
   ) {}
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autentica un usuario y devuelve un JWT' })

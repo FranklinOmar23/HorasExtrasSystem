@@ -5,13 +5,15 @@ class Empleado {
     id;
     codigo;
     nombre;
-    cargo;
+    cedula;
+    posicion;
     activo;
-    constructor(id, codigo, nombre, cargo, activo) {
+    constructor(id, codigo, nombre, cedula, posicion, activo) {
         this.id = id;
         this.codigo = codigo;
         this.nombre = nombre;
-        this.cargo = cargo;
+        this.cedula = cedula;
+        this.posicion = posicion;
         this.activo = activo;
     }
 }

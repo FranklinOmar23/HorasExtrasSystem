@@ -9,7 +9,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const core_1 = require("@nestjs/core");
 const prisma_module_1 = require("./infrastructure/prisma/prisma.module");
+const jwt_auth_guard_1 = require("./presentation/guards/jwt-auth.guard");
+const roles_guard_1 = require("./presentation/guards/roles.guard");
 const auth_module_1 = require("./presentation/modules/auth.module");
 const empleados_module_1 = require("./presentation/modules/empleados.module");
 const health_module_1 = require("./presentation/modules/health.module");
@@ -24,6 +27,10 @@ exports.AppModule = AppModule = __decorate([
             health_module_1.HealthModule,
             auth_module_1.AuthModule,
             empleados_module_1.EmpleadosModule,
+        ],
+        providers: [
+            { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },
+            { provide: core_1.APP_GUARD, useClass: roles_guard_1.RolesGuard },
         ],
     })
 ], AppModule);

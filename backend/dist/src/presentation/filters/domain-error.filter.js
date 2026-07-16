@@ -13,6 +13,8 @@ const CODIGO_A_STATUS = {
     CREDENCIALES_INVALIDAS: common_1.HttpStatus.UNAUTHORIZED,
     PERIODO_CERRADO: common_1.HttpStatus.CONFLICT,
     EMPLEADO_CODIGO_DUPLICADO: common_1.HttpStatus.CONFLICT,
+    EMPLEADO_CEDULA_DUPLICADA: common_1.HttpStatus.CONFLICT,
+    EMPLEADO_NO_ENCONTRADO: common_1.HttpStatus.NOT_FOUND,
 };
 let DomainErrorFilter = class DomainErrorFilter {
     catch(exception, host) {
@@ -20,7 +22,7 @@ let DomainErrorFilter = class DomainErrorFilter {
         const status = CODIGO_A_STATUS[exception.code] ?? common_1.HttpStatus.UNPROCESSABLE_ENTITY;
         response.status(status).json({
             statusCode: status,
-            codigo: exception.code,
+            error: exception.code,
             message: exception.message,
         });
     }

@@ -1,27 +1,29 @@
-import { DomainError } from '../../../domain/errors/domain.error';
 import { Empleado } from '../../../domain/entities/empleado.entity';
+import { EmpleadoCedulaDuplicadaError } from '../../../domain/errors/empleado-cedula-duplicada.error';
+import { EmpleadoCodigoDuplicadoError } from '../../../domain/errors/empleado-codigo-duplicado.error';
 import {
   CrearEmpleadoDatos,
   EmpleadoRepository,
 } from '../../ports/empleado.repository.port';
 
-export class EmpleadoCodigoDuplicadoError extends DomainError {
-  readonly code = 'EMPLEADO_CODIGO_DUPLICADO';
-
-  constructor(codigo: string) {
-    super(`Ya existe un empleado con el código ${codigo}.`);
-  }
-}
-
 export class CrearEmpleadoUseCase {
   constructor(private readonly empleadoRepository: EmpleadoRepository) {}
 
   async ejecutar(datos: CrearEmpleadoDatos): Promise<Empleado> {
-    const existente = await this.empleadoRepository.buscarPorCodigo(
+    const codigoExistente = await this.empleadoRepository.buscarPorCodigo(
       datos.codigo,
     );
-    if (existente) {
+    if (codigoExistente) {
       throw new EmpleadoCodigoDuplicadoError(datos.codigo);
+    }
+
+    if (datos.cedula) {
+      const cedulaExistente = await this.empleadoRepository.buscarPorCedula(
+        datos.cedula,
+      );
+      if (cedulaExistente) {
+        throw new EmpleadoCedulaDuplicadaError(datos.cedula);
+      }
     }
 
     return this.empleadoRepository.crear(datos);

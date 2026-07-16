@@ -15,7 +15,8 @@ class EmpleadoRespuestaDto {
     id;
     codigo;
     nombre;
-    cargo;
+    cedula;
+    posicion;
     activo;
 }
 exports.EmpleadoRespuestaDto = EmpleadoRespuestaDto;
@@ -24,17 +25,21 @@ __decorate([
     __metadata("design:type", String)
 ], EmpleadoRespuestaDto.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", String)
+    (0, swagger_1.ApiProperty)({ example: 40 }),
+    __metadata("design:type", Number)
 ], EmpleadoRespuestaDto.prototype, "codigo", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], EmpleadoRespuestaDto.prototype, "nombre", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ nullable: true }),
+    (0, swagger_1.ApiPropertyOptional)({ nullable: true, example: '001-1234567-8' }),
     __metadata("design:type", Object)
-], EmpleadoRespuestaDto.prototype, "cargo", void 0);
+], EmpleadoRespuestaDto.prototype, "cedula", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], EmpleadoRespuestaDto.prototype, "posicion", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Boolean)

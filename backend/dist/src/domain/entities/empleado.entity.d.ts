@@ -1,8 +1,9 @@
 export declare class Empleado {
     readonly id: string;
-    readonly codigo: string;
+    readonly codigo: number;
     readonly nombre: string;
-    readonly cargo: string | null;
+    readonly cedula: string | null;
+    readonly posicion: string;
     readonly activo: boolean;
-    constructor(id: string, codigo: string, nombre: string, cargo: string | null, activo: boolean);
+    constructor(id: string, codigo: number, nombre: string, cedula: string | null, posicion: string, activo: boolean);
 }

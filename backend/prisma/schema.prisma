@@ -31,34 +31,35 @@ model Usuario {
 
 model Empleado {
   id        String   @id @default(uuid())
-  codigo    String   @unique
+  codigo    Int      @unique
   nombre    String
-  cargo     String?
+  cedula    String?  @unique
+  posicion  String
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  historialSalarios HistorialSalario[]
-  registrosHoras    RegistroHoras[]
-  calculos          CalculoHorasExtra[]
+  salarios       Salario[]
+  registrosHoras RegistroHoras[]
+  calculos       CalculoHorasExtra[]
 
   @@map("empleados")
 }
 
 /// Historial de salarios con vigencia: el cálculo usa el salario vigente
 /// en la fecha del registro, no el salario actual del empleado.
-model HistorialSalario {
-  id             String    @id @default(uuid())
-  empleadoId     String
-  salarioMensual Decimal   @db.Decimal(12, 2)
-  vigenteDesde   DateTime
-  vigenteHasta   DateTime?
-  createdAt      DateTime  @default(now())
+model Salario {
+  id            String    @id @default(uuid())
+  empleadoId    String
+  montoMensual  Decimal   @db.Decimal(12, 2)
+  vigenteDesde  DateTime  @db.Date
+  vigenteHasta  DateTime? @db.Date
+  createdAt     DateTime  @default(now())
 
   empleado Empleado @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([empleadoId, vigenteDesde])
-  @@map("historial_salarios")
+  @@map("salarios")
 }
 
 /// Parámetros de cálculo con vigencia, para que un cambio de configuración

@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const autenticar_usuario_use_case_1 = require("../../application/use-cases/auth/autenticar-usuario.use-case");
+const public_decorator_1 = require("../decorators/public.decorator");
 const login_respuesta_dto_1 = require("../dtos/auth/login-respuesta.dto");
 const login_dto_1 = require("../dtos/auth/login.dto");
 let AuthController = class AuthController {
@@ -29,6 +30,7 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Autentica un usuario y devuelve un JWT' }),
