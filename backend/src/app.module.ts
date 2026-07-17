@@ -8,8 +8,11 @@ import { AuthModule } from './presentation/modules/auth.module';
 import { ConfiguracionModule } from './presentation/modules/configuracion.module';
 import { EmpleadosModule } from './presentation/modules/empleados.module';
 import { HealthModule } from './presentation/modules/health.module';
+import { ImportacionesModule } from './presentation/modules/importaciones.module';
 import { PeriodosModule } from './presentation/modules/periodos.module';
 import { RegistrosModule } from './presentation/modules/registros.module';
+import { ReportesModule } from './presentation/modules/reportes.module';
+import { UsuariosModule } from './presentation/modules/usuarios.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { RegistrosModule } from './presentation/modules/registros.module';
     ConfiguracionModule,
     PeriodosModule,
     RegistrosModule,
+    ImportacionesModule,
+    ReportesModule,
+    UsuariosModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

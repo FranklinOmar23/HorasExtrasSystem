@@ -11,7 +11,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ActualizarRegistroUseCase } from '../../application/use-cases/registros/actualizar-registro.use-case';
 import { CrearRegistroUseCase } from '../../application/use-cases/registros/crear-registro.use-case';
 import { EliminarRegistroUseCase } from '../../application/use-cases/registros/eliminar-registro.use-case';
@@ -52,7 +57,10 @@ export class RegistrosController {
     @Param('periodoId') periodoId: string,
     @Query('empleadoId') empleadoId?: string,
   ): Promise<RegistroRespuestaDto[]> {
-    const registros = await this.listarRegistros.ejecutar(periodoId, empleadoId);
+    const registros = await this.listarRegistros.ejecutar(
+      periodoId,
+      empleadoId,
+    );
     return registros.map(aRegistroRespuestaDto);
   }
 
@@ -74,7 +82,9 @@ export class RegistrosController {
   }
 
   @Patch('registros/:id')
-  @ApiOperation({ summary: 'Actualiza un registro de horas y recalcula su desglose' })
+  @ApiOperation({
+    summary: 'Actualiza un registro de horas y recalcula su desglose',
+  })
   @ApiResponse({ status: 200, type: RegistroRespuestaDto })
   @ApiResponse({ status: 404, description: 'Registro no encontrado' })
   @ApiResponse({ status: 409, description: 'El periodo está cerrado' })
@@ -107,8 +117,13 @@ export class RegistrosController {
   })
   @ApiResponse({ status: 200, type: [CalculoRespuestaDto] })
   @ApiResponse({ status: 404, description: 'Empleado no encontrado' })
-  @ApiResponse({ status: 422, description: 'El empleado no tiene salario vigente en esa fecha' })
-  async preview(@Body() dto: PreviewCalculoDto): Promise<CalculoRespuestaDto[]> {
+  @ApiResponse({
+    status: 422,
+    description: 'El empleado no tiene salario vigente en esa fecha',
+  })
+  async preview(
+    @Body() dto: PreviewCalculoDto,
+  ): Promise<CalculoRespuestaDto[]> {
     const filas = await this.previewCalculo.ejecutar({
       empleadoId: dto.empleadoId,
       fecha: new Date(dto.fecha),

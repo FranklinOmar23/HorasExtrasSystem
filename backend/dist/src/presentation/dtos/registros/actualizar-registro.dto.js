@@ -29,13 +29,17 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '08:30' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Matches)(FORMATO_HORA, { message: 'La hora de entrada debe tener formato HH:mm.' }),
+    (0, class_validator_1.Matches)(FORMATO_HORA, {
+        message: 'La hora de entrada debe tener formato HH:mm.',
+    }),
     __metadata("design:type", String)
 ], ActualizarRegistroDto.prototype, "horaEntrada", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '19:00' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Matches)(FORMATO_HORA, { message: 'La hora de salida debe tener formato HH:mm.' }),
+    (0, class_validator_1.Matches)(FORMATO_HORA, {
+        message: 'La hora de salida debe tener formato HH:mm.',
+    }),
     __metadata("design:type", String)
 ], ActualizarRegistroDto.prototype, "horaSalida", void 0);
 __decorate([

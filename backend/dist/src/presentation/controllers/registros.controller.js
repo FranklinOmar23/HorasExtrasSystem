@@ -101,7 +101,9 @@ __decorate([
 ], RegistrosController.prototype, "crear", null);
 __decorate([
     (0, common_1.Patch)('registros/:id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Actualiza un registro de horas y recalcula su desglose' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Actualiza un registro de horas y recalcula su desglose',
+    }),
     (0, swagger_1.ApiResponse)({ status: 200, type: registro_respuesta_dto_1.RegistroRespuestaDto }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Registro no encontrado' }),
     (0, swagger_1.ApiResponse)({ status: 409, description: 'El periodo está cerrado' }),
@@ -130,7 +132,10 @@ __decorate([
     }),
     (0, swagger_1.ApiResponse)({ status: 200, type: [calculo_respuesta_dto_1.CalculoRespuestaDto] }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Empleado no encontrado' }),
-    (0, swagger_1.ApiResponse)({ status: 422, description: 'El empleado no tiene salario vigente en esa fecha' }),
+    (0, swagger_1.ApiResponse)({
+        status: 422,
+        description: 'El empleado no tiene salario vigente en esa fecha',
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [preview_calculo_dto_1.PreviewCalculoDto]),

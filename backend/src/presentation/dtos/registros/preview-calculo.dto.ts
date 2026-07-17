@@ -13,10 +13,14 @@ export class PreviewCalculoDto {
   fecha!: string;
 
   @ApiProperty({ example: '08:30' })
-  @Matches(FORMATO_HORA, { message: 'La hora de entrada debe tener formato HH:mm.' })
+  @Matches(FORMATO_HORA, {
+    message: 'La hora de entrada debe tener formato HH:mm.',
+  })
   horaEntrada!: string;
 
   @ApiProperty({ example: '19:00' })
-  @Matches(FORMATO_HORA, { message: 'La hora de salida debe tener formato HH:mm.' })
+  @Matches(FORMATO_HORA, {
+    message: 'La hora de salida debe tener formato HH:mm.',
+  })
   horaSalida!: string;
 }

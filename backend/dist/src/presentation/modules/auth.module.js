@@ -50,7 +50,7 @@ exports.AuthModule = AuthModule = __decorate([
                 inject: [usuario_repository_port_1.USUARIO_REPOSITORY, password_hasher_port_1.PASSWORD_HASHER, token_port_1.TOKEN_SERVICE],
             },
         ],
-        exports: [usuario_repository_port_1.USUARIO_REPOSITORY],
+        exports: [usuario_repository_port_1.USUARIO_REPOSITORY, password_hasher_port_1.PASSWORD_HASHER],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

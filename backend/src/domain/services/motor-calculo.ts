@@ -152,7 +152,9 @@ export class MotorCalculo {
   ): void {
     const tipo = this.buscarTipo(codigo);
     const cantidadHoras = new Decimal(minutos).dividedBy(60);
-    const monto = salarioHoraUsado.times(cantidadHoras).times(tipo.multiplicador());
+    const monto = salarioHoraUsado
+      .times(cantidadHoras)
+      .times(tipo.multiplicador());
 
     filas.push({
       tipoHoraId: tipo.id,

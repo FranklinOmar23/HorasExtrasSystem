@@ -50,6 +50,6 @@ import { AuthController } from '../controllers/auth.controller';
       inject: [USUARIO_REPOSITORY, PASSWORD_HASHER, TOKEN_SERVICE],
     },
   ],
-  exports: [USUARIO_REPOSITORY],
+  exports: [USUARIO_REPOSITORY, PASSWORD_HASHER],
 })
 export class AuthModule {}

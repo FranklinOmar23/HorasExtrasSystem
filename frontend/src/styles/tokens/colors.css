@@ -1,0 +1,90 @@
+/* ============================================================
+   ARCODE · COLORS
+   Caribbean-modern palette: deep sea-teal primary, warm coral
+   accent, Dominican-sun gold, warm paper neutrals on a teal ink.
+   ============================================================ */
+:root {
+  /* --- Brand: Sea (primary) --- */
+  --c-sea-900: #042B28;
+  --c-sea-800: #07433D;
+  --c-sea-700: #0B5E57;
+  --c-sea-600: #0E7A6F; /* primary */
+  --c-sea-500: #14A08F;
+  --c-sea-400: #3FC2AE;
+  --c-sea-300: #7BD8C8;
+  --c-sea-200: #B4ECE0;
+  --c-sea-100: #D8F4ED;
+  --c-sea-50:  #ECFAF6;
+
+  /* --- Brand: Coral (accent) --- */
+  --c-coral-700: #C53A22;
+  --c-coral-600: #E8472A;
+  --c-coral-500: #FF5A3C; /* accent */
+  --c-coral-400: #FF7C63;
+  --c-coral-300: #FFA591;
+  --c-coral-100: #FFE2DA;
+  --c-coral-50:  #FFF1ED;
+
+  /* --- Brand: Sun (highlight) --- */
+  --c-sun-600: #E89414;
+  --c-sun-500: #FFB23E;
+  --c-sun-400: #FFC468;
+  --c-sun-300: #FFD592;
+  --c-sun-100: #FFEFD2;
+  --c-sun-50:  #FFF8EC;
+
+  /* --- Ink (warm teal-black) --- */
+  --c-ink-900: #08171B;
+  --c-ink-800: #0C1F25;
+  --c-ink-700: #122B33;
+  --c-ink-600: #1C3A43;
+
+  /* --- Warm neutral paper scale --- */
+  --c-paper:    #FBFAF7; /* app background */
+  --c-paper-2:  #F5F3ED; /* sunken / alt surface */
+  --c-paper-3:  #EDEAE1;
+  --c-line:     #E4E0D6; /* hairline borders */
+  --c-line-2:   #D6D1C4;
+  --c-mute-600: #6B6A61; /* secondary text */
+  --c-mute-500: #8C8A80; /* tertiary text / placeholder */
+  --c-mute-400: #ABA99E;
+  --c-white:    #FFFFFF;
+
+  /* --- Semantic status --- */
+  --c-success: #1E9E6A;
+  --c-success-bg: #E2F4EC;
+  --c-warning: #E89414;
+  --c-warning-bg: #FCEFD6;
+  --c-danger:  #D8412B;
+  --c-danger-bg: #FBE5E1;
+  --c-info:    #2A7DE1;
+  --c-info-bg: #E4EFFB;
+
+  /* ===========================================================
+     SEMANTIC ALIASES — reference these in components/screens
+     =========================================================== */
+  --brand:            var(--c-sea-600);
+  --brand-strong:     var(--c-sea-700);
+  --brand-soft:       var(--c-sea-100);
+  --accent:           var(--c-coral-500);
+  --accent-strong:    var(--c-coral-600);
+  --accent-soft:      var(--c-coral-100);
+  --highlight:        var(--c-sun-500);
+
+  --bg:               var(--c-paper);
+  --bg-sunken:        var(--c-paper-2);
+  --surface:          var(--c-white);
+  --surface-alt:      var(--c-paper-2);
+  --surface-ink:      var(--c-ink-800);
+
+  --text:             var(--c-ink-900);
+  --text-secondary:   var(--c-mute-600);
+  --text-tertiary:    var(--c-mute-500);
+  --text-on-brand:    #EAFBF6;
+  --text-on-ink:      #E8F1EE;
+  --text-on-accent:   #FFFFFF;
+
+  --border:           var(--c-line);
+  --border-strong:    var(--c-line-2);
+  --focus-ring:       color-mix(in oklab, var(--c-sea-500) 55%, transparent);
+}

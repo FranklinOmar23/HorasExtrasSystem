@@ -75,6 +75,10 @@ import { TiposHoraExtraController } from '../controllers/tipos-hora-extra.contro
       inject: [FERIADO_REPOSITORY],
     },
   ],
-  exports: [CONFIGURACION_REPOSITORY, TIPO_HORA_EXTRA_REPOSITORY, FERIADO_REPOSITORY],
+  exports: [
+    CONFIGURACION_REPOSITORY,
+    TIPO_HORA_EXTRA_REPOSITORY,
+    FERIADO_REPOSITORY,
+  ],
 })
 export class ConfiguracionModule {}

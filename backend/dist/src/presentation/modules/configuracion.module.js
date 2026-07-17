@@ -80,7 +80,11 @@ exports.ConfiguracionModule = ConfiguracionModule = __decorate([
                 inject: [feriado_repository_port_1.FERIADO_REPOSITORY],
             },
         ],
-        exports: [configuracion_repository_port_1.CONFIGURACION_REPOSITORY, tipo_hora_extra_repository_port_1.TIPO_HORA_EXTRA_REPOSITORY, feriado_repository_port_1.FERIADO_REPOSITORY],
+        exports: [
+            configuracion_repository_port_1.CONFIGURACION_REPOSITORY,
+            tipo_hora_extra_repository_port_1.TIPO_HORA_EXTRA_REPOSITORY,
+            feriado_repository_port_1.FERIADO_REPOSITORY,
+        ],
     })
 ], ConfiguracionModule);
 //# sourceMappingURL=configuracion.module.js.map

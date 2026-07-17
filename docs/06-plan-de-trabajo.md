@@ -82,30 +82,152 @@ Convenciones transversales a todas las etapas:
       fechas duplicadas (409), listar, obtener, 404, cerrar, doble cierre
       (409 `PERIODO_CERRADO`), 401 sin token.
 
-## ETAPA 4 — Recurso: Registros de horas
+## ETAPA 4 — Recurso: Registros de horas ✅ completada
 
-- [ ] Tabla `registros_horas` (periodo, empleado, fecha, entrada/salida,
-      origen EXCEL/MANUAL, comentario).
-- [ ] Tabla `calculos` (desglose por tipo de hora, porcentaje y salario/hora
-      congelados).
-- [ ] Motor de cálculo en `domain/services/motor-calculo.ts` según
-      `docs/02-reglas-de-negocio.md` (pendiente de crear/confirmar reglas
-      exactas antes de implementar el motor).
-- [ ] Endpoints: `GET /periodos/:id/registros`, `POST/PATCH/DELETE /registros`,
-      `POST /registros/preview`.
+`docs/02-reglas-de-negocio.md` seguía sin existir, así que las reglas exactas
+del motor se confirmaron directamente con el usuario (no se infirieron):
 
-## ETAPA 5 — Recurso: Importaciones
+- **HE_35** (lunes-viernes): exceso sobre `horas_jornada` (tras descontar
+  `horas_almuerzo`). Pago completo: `salario_hora × horas × 1.35`.
+- **HE_100**: todas las horas de domingo, y el exceso de sábado más allá de
+  `salida_sabado`. Pago completo: `× 2.00`.
+- **FERIADO**: todas las horas trabajadas en un día de la tabla `feriados`
+  (no se clasifica como HE_100). Solo el adicional: `× 1.00` (no `× 2.00`).
+- **NOCTURNA_15**: horas desde `inicio_nocturna` en adelante, **se suma**
+  como fila aparte sobre lo que ya se clasificó arriba, pagando *solo* el
+  recargo (`× 0.15`) para no duplicar la base.
+- El multiplicador por tipo (no una fórmula genérica) vive en
+  `tipos_hora_extra.modoValorizacion` (`COMPLETA` = `1 + %`, `SOLO_RECARGO` =
+  solo `%`) — configurable, no hardcodeado en el motor
+  (`TipoHoraExtra.multiplicador()`).
+- [x] Tabla `registros_horas` (periodo, empleado, fecha, horaEntrada/horaSalida
+      como "HH:mm", origen EXCEL/MANUAL, importacionId nullable sin FK aún,
+      comentario). Tabla `calculos` (registroId onDelete Cascade, tipoHoraId,
+      cantidadHoras/porcentajeAplicado/salarioHoraUsado/monto congelados).
+- [x] Migración `20260717011633_registros_calculos` (+ `modoValorizacion` en
+      `tipos_hora_extra`, con default temporal para no romper las filas ya
+      sembradas; el seed corrige NOCTURNA_15/FERIADO a `SOLO_RECARGO`).
+- [x] Dominio: `MotorCalculo` (puro, sin DB) en `domain/services/motor-calculo.ts`,
+      utilidades de horas en `hora.util.ts`, entidades `RegistroHoras`/`Calculo`,
+      error `SalarioNoVigenteError` (422).
+- [x] Aplicación: `CalcularDesgloseService` orquesta salario vigente +
+      feriado + configuración + tipos activos y ejecuta el motor; reutilizado
+      por crear/actualizar/preview para no triplicar la orquestación.
+- [x] Endpoints: `GET /periodos/:id/registros?empleadoId=`,
+      `POST/PATCH/DELETE /registros`, `POST /registros/preview`.
+      `PATCH` siempre recalcula por completo (reemplaza los `calculos`).
+- [x] Tests unitarios: 9 casos del motor de cálculo (día normal sin exceso,
+      HE_35, sábado sin exceso, HE_100 sábado, HE_100 domingo, FERIADO,
+      HE_35+NOCTURNA_15 combinados, cruce de medianoche, entrada=salida).
+      Un test atrapó un bug real: entrada=salida se interpretaba como turno
+      de 24h en vez de 0h (corregido en `hora.util.ts`).
+- [x] Probado end-to-end contra SQL Server real: preview, crear con
+      HE_35+NOCTURNA_15, recalculo al editar, cascada de calculos al
+      eliminar, 409 en periodo cerrado, 404 (periodo/empleado/registro),
+      422 sin salario vigente en la fecha.
 
-- [ ] Tabla `importaciones` (periodo, usuario, archivo, resumen de filas).
-- [ ] Flujo en dos pasos: `POST /periodos/:id/importaciones` (parseo/validación
-      sin persistir) → `POST /importaciones/:id/confirmar` (persiste y calcula).
-- [ ] `GET /periodos/:id/importaciones` (historial).
+## ETAPA 5 — Recurso: Importaciones ✅ completada
 
-## ETAPA 6 — Recurso: Reportes + Usuarios
+- [x] Tabla `importaciones` (periodo, usuario, archivo, `contenido` binario
+      del .xlsx original, resumen filas_ok/advertencia/error, `confirmadaEn`
+      nullable). `registros_horas.importacionId` pasó de FK lógica (comentario)
+      a FK real ahora que la tabla existe.
+- [x] Migración `20260717014159_importaciones`.
+- [x] Dependencia `xlsx` (SheetJS) instalada desde el CDN oficial de SheetJS
+      (`cdn.sheetjs.com`), no desde npm: la versión publicada en el registro
+      de npm (0.18.5) tiene dos vulnerabilidades altas sin parchear
+      (prototype pollution y ReDoS) que SheetJS solo corrigió en releases
+      posteriores distribuidos por su propio CDN.
+- [x] Dominio: entidad `Importacion`, enum `EstadoFilaImportacion`
+      (OK/ADVERTENCIA/ERROR), errores `ImportacionNoEncontradaError` (404),
+      `ImportacionYaConfirmadaError` (409), `ImportacionFormatoInvalidoError` (422).
+- [x] Infraestructura: `XlsxParserAdapter` (puerto `ExcelParserPort`) —
+      reconoce encabezados con o sin tildes/variantes (fecha, código, nombre,
+      entrada, salida), interpreta fechas y horas venga como texto, número
+      serial de Excel o `Date`, e ignora filas totalmente vacías (padding
+      al final de la hoja).
+- [x] Aplicación: `ValidarFilasImportacionService` clasifica cada fila:
+      - **ERROR** (nunca se persiste): código inexistente, empleado inactivo,
+        sin salario vigente en la fecha (extensión sobre el spec original:
+        evita que `confirmar` reviente a medio lote con `SalarioNoVigenteError`),
+        horas de entrada/salida vacías ("fila ignorada").
+      - **ADVERTENCIA** (se persiste solo si `incluirAdvertencias=true`):
+        fecha fuera del rango del periodo, fila duplicada (dentro del mismo
+        archivo o contra un `registro_horas` ya existente), cruce de
+        medianoche con duración > 12h (umbral fijo, pensado para detectar
+        probables errores de captura tipo AM/PM invertido).
+      - **OK**: se persiste siempre.
+- [x] `ParsearImportacionUseCase`: valida que el periodo exista y esté
+      abierto, parsea+valida, y crea la fila `importaciones` (guarda el
+      archivo original en `contenido` para poder re-parsear al confirmar).
+- [x] `ConfirmarImportacionUseCase`: re-parsea y re-valida el archivo
+      original (no confía en la vista previa, que pudo quedar desactualizada
+      si otra importación se confirmó mientras tanto), calcula el desglose
+      de **todas** las filas a persistir antes de escribir ninguna (si el
+      salario de un empleado dejó de estar vigente entre el parseo y la
+      confirmación, la importación completa falla en vez de aplicarse a
+      medias), y solo entonces crea los `registros_horas` (origen EXCEL).
+- [x] Endpoints: `POST /periodos/:id/importaciones` (multipart, campo
+      `archivo`, límite 10MB), `POST /importaciones/:id/confirmar`
+      (`{ incluirAdvertencias }`), `GET /periodos/:id/importaciones`.
+- [x] Tests unitarios: `XlsxParserAdapter` (8 casos: fechas/horas en texto,
+      serial de Excel, `DD/MM/YYYY`, filas vacías ignoradas, numeración de
+      línea, valores no interpretables, archivo sin columnas reconocibles,
+      archivo no-xlsx), `ValidarFilasImportacionService` (10 casos, una por
+      regla de clasificación), `ConfirmarImportacionUseCase` (7 casos:
+      persiste solo OK, persiste OK+ADVERTENCIA, nunca persiste ERROR,
+      marca confirmada, y los 404/409/409 de importación inexistente/ya
+      confirmada/periodo cerrado).
+- [x] Probado end-to-end contra SQL Server real con un .xlsx generado
+      cubriendo las 9 combinaciones (fila OK con HE_35, duplicado en
+      archivo, código inexistente, empleado inactivo, sin salario vigente,
+      fecha fuera del periodo, horas vacías, nocturna razonable, cruce de
+      medianoche inusual): la clasificación devuelta coincidió exactamente
+      con lo esperado, y tras confirmar con `incluirAdvertencias: true` se
+      crearon los 5 registros esperados (2 OK + 3 ADVERTENCIA) con montos
+      verificados a mano contra la configuración real (`divisor_salario`
+      vigente en la BD: 24.00). Se probaron también: reconfirmar (409
+      `IMPORTACION_YA_CONFIRMADA`), confirmar inexistente (404), subir a un
+      periodo cerrado (409 `PERIODO_CERRADO`), subir sin archivo o un
+      archivo no-xlsx (422 `IMPORTACION_FORMATO_INVALIDO`), sin token (401).
 
-- [ ] Endpoints de `usuarios` (solo ADMIN): `GET/POST/PATCH`.
-- [ ] Reportes de solo lectura sobre `calculos`: reporte de periodo,
-      detalle por empleado, export a Excel, histórico.
+## ETAPA 6 — Recurso: Reportes + Usuarios ✅ completada
+
+No requirió migración: la tabla `usuarios` ya existía (etapa 1, para auth) y
+los reportes son de solo lectura sobre `registros_horas`/`calculos`.
+
+**Usuarios** (todo bajo `@Roles(ADMIN)` a nivel de controller):
+- [x] `UsuarioRepository` extendido con `listar/crear/actualizar` (antes solo
+      tenía los métodos que necesitaba el login).
+- [x] Errores `UsuarioEmailDuplicadoError` (409), `UsuarioNoEncontradoError` (404).
+- [x] `CrearUsuarioUseCase`/`ActualizarUsuarioUseCase` hashean la contraseña
+      vía el mismo `PasswordHasher` (bcrypt) que usa el login; `Actualizar`
+      solo re-hashea si se envía una `password` nueva.
+- [x] `UsuarioRespuestaDto` nunca incluye `passwordHash` — es la única forma
+      en que un usuario sale de la API.
+- [x] Endpoints: `GET/POST /usuarios`, `PATCH /usuarios/:id`.
+
+**Reportes** (solo lectura, agregan `calculos` ya congelados — no recalculan):
+- [x] `ReportePeriodoService`: agrupa los `registros_horas` de un periodo por
+      empleado y suma horas/montos por tipo (`he35/he100/nocturna/feriado`).
+      Si un empleado no tiene ningún `calculo` en el periodo (días normales
+      sin exceso), resuelve `salarioHora` en vivo vía `SalarioRepository` +
+      `divisor_salario` en vez de dejarlo en blanco.
+- [x] Endpoints: `GET /periodos/:id/reporte` (por empleado + granTotal),
+      `GET /periodos/:id/reporte/empleados/:empleadoId` (día por día, un
+      `StreamableFile` para `GET /periodos/:id/reporte/excel` con SheetJS),
+      `GET /reportes/historico?meses=` (default 6; granTotal por periodo).
+- [x] Tests unitarios: `CrearUsuarioUseCase` (2), `ActualizarUsuarioUseCase` (3),
+      `ReportePeriodoService` (4: suma por tipo, orden y gran total entre
+      empleados, fallback de salario/hora sin calculos, fila en ceros para
+      un empleado sin registros ese periodo).
+- [x] Probado end-to-end contra SQL Server real: crear usuario RRHH, 409 con
+      email duplicado, un RRHH real recibe 403 al listar `/usuarios`, PATCH
+      desactiva un usuario, 404 sobre usuario inexistente; reporte de periodo
+      y reporte por empleado con montos verificados a mano (coinciden con los
+      registros creados en la prueba de ETAPA 5), descarga del .xlsx
+      verificada abriéndolo con SheetJS, histórico con `meses` por defecto y
+      personalizado, 404 de periodo/empleado inexistente, 401 sin token.
 
 ---
 

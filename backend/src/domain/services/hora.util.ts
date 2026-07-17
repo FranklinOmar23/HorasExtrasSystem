@@ -7,8 +7,10 @@ export function parsearHora(horaHHmm: string): number {
 }
 
 /**
- * Ajusta entrada/salida a un eje continuo de minutos. Si la salida es menor
- * o igual a la entrada se asume que el turno cruzó la medianoche.
+ * Ajusta entrada/salida a un eje continuo de minutos. Si la salida es
+ * estrictamente menor a la entrada se asume que el turno cruzó la
+ * medianoche. Entrada y salida iguales se tratan como 0 minutos trabajados
+ * (dato vacío/inválido), no como un turno de 24 horas.
  */
 export function entradaSalidaAjustadas(
   horaEntrada: string,
@@ -16,7 +18,7 @@ export function entradaSalidaAjustadas(
 ): { entrada: number; salida: number } {
   const entrada = parsearHora(horaEntrada);
   let salida = parsearHora(horaSalida);
-  if (salida <= entrada) {
+  if (salida < entrada) {
     salida += MINUTOS_POR_DIA;
   }
   return { entrada, salida };

@@ -14,16 +14,17 @@ datasource db {
 // y se validan/tipan con los enums de dominio (src/domain/enums) en la app.
 
 model Usuario {
-  id           String     @id @default(uuid())
+  id           String   @id @default(uuid())
   nombre       String
-  email        String     @unique
+  email        String   @unique
   passwordHash String
-  rol          String     @db.VarChar(10)
-  activo       Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  rol          String   @db.VarChar(10)
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  periodosCerrados Periodo[] @relation("PeriodoCerradoPor")
+  periodosCerrados Periodo[]     @relation("PeriodoCerradoPor")
+  importaciones    Importacion[]
 
   @@map("usuarios")
 }
@@ -47,12 +48,12 @@ model Empleado {
 /// Historial de salarios con vigencia: el cálculo usa el salario vigente
 /// en la fecha del registro, no el salario actual del empleado.
 model Salario {
-  id            String    @id @default(uuid())
-  empleadoId    String
-  montoMensual  Decimal   @db.Decimal(12, 2)
-  vigenteDesde  DateTime  @db.Date
-  vigenteHasta  DateTime? @db.Date
-  createdAt     DateTime  @default(now())
+  id           String    @id @default(uuid())
+  empleadoId   String
+  montoMensual Decimal   @db.Decimal(12, 2)
+  vigenteDesde DateTime  @db.Date
+  vigenteHasta DateTime? @db.Date
+  createdAt    DateTime  @default(now())
 
   empleado Empleado @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -118,6 +119,7 @@ model Periodo {
 
   cerradoPor     Usuario?        @relation("PeriodoCerradoPor", fields: [cerradoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   registrosHoras RegistroHoras[]
+  importaciones  Importacion[]
 
   @@unique([fechaInicio, fechaFin])
   @@map("periodos")
@@ -135,15 +137,15 @@ model RegistroHoras {
   horaEntrada   String   @db.VarChar(5)
   horaSalida    String   @db.VarChar(5)
   origen        String   @db.VarChar(10)
-  /// FK lógica a `importaciones` (etapa 5); no existe la tabla todavía.
   importacionId String?
   comentario    String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  periodo  Periodo   @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  empleado Empleado  @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  calculos Calculo[]
+  periodo     Periodo      @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empleado    Empleado     @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  importacion Importacion? @relation(fields: [importacionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  calculos    Calculo[]
 
   @@index([periodoId, empleadoId])
   @@map("registros_horas")
@@ -167,4 +169,30 @@ model Calculo {
 
   @@index([registroId])
   @@map("calculos")
+}
+
+/// Carga de un archivo .xlsx con marcaciones de un periodo, en dos pasos:
+/// esta fila se crea al parsear/validar (sin tocar registros_horas todavía)
+/// y `confirmadaEn` se llena cuando se confirma y se generan los
+/// `registros_horas` (origen EXCEL). `contenido` guarda el archivo original
+/// para poder re-parsear y re-validar exactamente igual al confirmar, en vez
+/// de confiar en una vista previa que pudo quedar desactualizada.
+model Importacion {
+  id               String    @id @default(uuid())
+  periodoId        String
+  usuarioId        String
+  archivo          String
+  contenido        Bytes
+  filasOk          Int
+  filasAdvertencia Int
+  filasError       Int
+  importadoEn      DateTime  @default(now())
+  confirmadaEn     DateTime?
+
+  periodo        Periodo         @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario        Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  registrosHoras RegistroHoras[]
+
+  @@index([periodoId])
+  @@map("importaciones")
 }

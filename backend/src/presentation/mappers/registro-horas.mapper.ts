@@ -18,7 +18,9 @@ export function aCalculoRespuestaDto(calculo: Calculo): CalculoRespuestaDto {
   };
 }
 
-export function aFilaCalculoRespuestaDto(fila: FilaCalculo): CalculoRespuestaDto {
+export function aFilaCalculoRespuestaDto(
+  fila: FilaCalculo,
+): CalculoRespuestaDto {
   return {
     tipoHoraCodigo: fila.tipoHoraCodigo,
     cantidadHoras: fila.cantidadHoras.toFixed(4),

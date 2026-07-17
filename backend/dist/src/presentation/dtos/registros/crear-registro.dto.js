@@ -39,12 +39,16 @@ __decorate([
 ], CrearRegistroDto.prototype, "fecha", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '08:30' }),
-    (0, class_validator_1.Matches)(FORMATO_HORA, { message: 'La hora de entrada debe tener formato HH:mm.' }),
+    (0, class_validator_1.Matches)(FORMATO_HORA, {
+        message: 'La hora de entrada debe tener formato HH:mm.',
+    }),
     __metadata("design:type", String)
 ], CrearRegistroDto.prototype, "horaEntrada", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '19:00' }),
-    (0, class_validator_1.Matches)(FORMATO_HORA, { message: 'La hora de salida debe tener formato HH:mm.' }),
+    (0, class_validator_1.Matches)(FORMATO_HORA, {
+        message: 'La hora de salida debe tener formato HH:mm.',
+    }),
     __metadata("design:type", String)
 ], CrearRegistroDto.prototype, "horaSalida", void 0);
 __decorate([

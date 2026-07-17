@@ -11,12 +11,16 @@ export class ActualizarRegistroDto {
 
   @ApiPropertyOptional({ example: '08:30' })
   @IsOptional()
-  @Matches(FORMATO_HORA, { message: 'La hora de entrada debe tener formato HH:mm.' })
+  @Matches(FORMATO_HORA, {
+    message: 'La hora de entrada debe tener formato HH:mm.',
+  })
   horaEntrada?: string;
 
   @ApiPropertyOptional({ example: '19:00' })
   @IsOptional()
-  @Matches(FORMATO_HORA, { message: 'La hora de salida debe tener formato HH:mm.' })
+  @Matches(FORMATO_HORA, {
+    message: 'La hora de salida debe tener formato HH:mm.',
+  })
   horaSalida?: string;
 
   @ApiPropertyOptional({ example: 'Corrección de salida' })

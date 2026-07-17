@@ -34,7 +34,10 @@ exports.RegistrosModule = RegistrosModule = __decorate([
         imports: [empleados_module_1.EmpleadosModule, periodos_module_1.PeriodosModule, configuracion_module_1.ConfiguracionModule],
         controllers: [registros_controller_1.RegistrosController],
         providers: [
-            { provide: registro_horas_repository_port_1.REGISTRO_HORAS_REPOSITORY, useClass: registro_horas_prisma_repository_1.RegistroHorasPrismaRepository },
+            {
+                provide: registro_horas_repository_port_1.REGISTRO_HORAS_REPOSITORY,
+                useClass: registro_horas_prisma_repository_1.RegistroHorasPrismaRepository,
+            },
             {
                 provide: calcular_desglose_service_1.CalcularDesgloseService,
                 useFactory: (salarioRepo, feriadoRepo, configuracionRepo, tipoHoraExtraRepo) => new calcular_desglose_service_1.CalcularDesgloseService(salarioRepo, feriadoRepo, configuracionRepo, tipoHoraExtraRepo),
@@ -80,6 +83,7 @@ exports.RegistrosModule = RegistrosModule = __decorate([
                 inject: [empleado_repository_port_1.EMPLEADO_REPOSITORY, calcular_desglose_service_1.CalcularDesgloseService],
             },
         ],
+        exports: [registro_horas_repository_port_1.REGISTRO_HORAS_REPOSITORY, calcular_desglose_service_1.CalcularDesgloseService],
     })
 ], RegistrosModule);
 //# sourceMappingURL=registros.module.js.map

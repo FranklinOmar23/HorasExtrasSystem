@@ -29,7 +29,10 @@ import { PeriodosModule } from './periodos.module';
   imports: [EmpleadosModule, PeriodosModule, ConfiguracionModule],
   controllers: [RegistrosController],
   providers: [
-    { provide: REGISTRO_HORAS_REPOSITORY, useClass: RegistroHorasPrismaRepository },
+    {
+      provide: REGISTRO_HORAS_REPOSITORY,
+      useClass: RegistroHorasPrismaRepository,
+    },
     {
       provide: CalcularDesgloseService,
       useFactory: (
@@ -87,7 +90,11 @@ import { PeriodosModule } from './periodos.module';
         registroRepo: RegistroHorasRepository,
         calcularDesglose: CalcularDesgloseService,
       ) =>
-        new ActualizarRegistroUseCase(periodoRepo, registroRepo, calcularDesglose),
+        new ActualizarRegistroUseCase(
+          periodoRepo,
+          registroRepo,
+          calcularDesglose,
+        ),
       inject: [
         PERIODO_REPOSITORY,
         REGISTRO_HORAS_REPOSITORY,
@@ -111,5 +118,6 @@ import { PeriodosModule } from './periodos.module';
       inject: [EMPLEADO_REPOSITORY, CalcularDesgloseService],
     },
   ],
+  exports: [REGISTRO_HORAS_REPOSITORY, CalcularDesgloseService],
 })
 export class RegistrosModule {}

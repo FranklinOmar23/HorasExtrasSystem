@@ -21,6 +21,12 @@ let UsuarioPrismaRepository = class UsuarioPrismaRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async listar() {
+        const usuarios = await this.prisma.usuario.findMany({
+            orderBy: { nombre: 'asc' },
+        });
+        return usuarios.map(aDominio);
+    }
     async buscarPorEmail(email) {
         const usuario = await this.prisma.usuario.findUnique({ where: { email } });
         return usuario ? aDominio(usuario) : null;
@@ -28,6 +34,29 @@ let UsuarioPrismaRepository = class UsuarioPrismaRepository {
     async buscarPorId(id) {
         const usuario = await this.prisma.usuario.findUnique({ where: { id } });
         return usuario ? aDominio(usuario) : null;
+    }
+    async crear(datos) {
+        const usuario = await this.prisma.usuario.create({
+            data: {
+                nombre: datos.nombre,
+                email: datos.email,
+                passwordHash: datos.passwordHash,
+                rol: datos.rol,
+            },
+        });
+        return aDominio(usuario);
+    }
+    async actualizar(id, datos) {
+        const usuario = await this.prisma.usuario.update({
+            where: { id },
+            data: {
+                nombre: datos.nombre,
+                rol: datos.rol,
+                activo: datos.activo,
+                passwordHash: datos.passwordHash,
+            },
+        });
+        return aDominio(usuario);
     }
 };
 exports.UsuarioPrismaRepository = UsuarioPrismaRepository;

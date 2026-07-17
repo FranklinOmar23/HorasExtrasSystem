@@ -60,7 +60,9 @@ class MotorCalculo {
     agregarFila(filas, codigo, minutos, salarioHoraUsado) {
         const tipo = this.buscarTipo(codigo);
         const cantidadHoras = new decimal_js_1.default(minutos).dividedBy(60);
-        const monto = salarioHoraUsado.times(cantidadHoras).times(tipo.multiplicador());
+        const monto = salarioHoraUsado
+            .times(cantidadHoras)
+            .times(tipo.multiplicador());
         filas.push({
             tipoHoraId: tipo.id,
             tipoHoraCodigo: tipo.codigo,

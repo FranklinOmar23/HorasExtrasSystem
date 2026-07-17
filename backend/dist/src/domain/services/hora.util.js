@@ -12,7 +12,7 @@ function parsearHora(horaHHmm) {
 function entradaSalidaAjustadas(horaEntrada, horaSalida) {
     const entrada = parsearHora(horaEntrada);
     let salida = parsearHora(horaSalida);
-    if (salida <= entrada) {
+    if (salida < entrada) {
         salida += MINUTOS_POR_DIA;
     }
     return { entrada, salida };
