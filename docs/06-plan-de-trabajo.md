@@ -11,7 +11,8 @@ Convenciones transversales a todas las etapas:
 - Dinero y horas siempre `Decimal` (columna `@db.Decimal` en Prisma,
   `decimal.js` en el dominio, `string` en las respuestas JSON).
 - Errores de negocio: `{ statusCode, error: "CODIGO_ESTABLE", message }`
-  vía `DomainErrorFilter`.
+  vía `DomainErrorFilter`. Cada `DomainError` declara su propio `httpStatus`
+  (no hay mapa manual que mantener — evita olvidar registrar un código nuevo).
 
 ## ETAPA 1 — Recurso: Empleados ✅ completada
 
@@ -31,25 +32,55 @@ Convenciones transversales a todas las etapas:
 - [x] Tests unitarios: `CrearEmpleadoUseCase`, `CrearSalarioUseCase`.
 - [x] Probado end-to-end contra SQL Server real (login, CRUD, 401/404/409).
 
-## ETAPA 2 — Recurso: Configuración
+## ETAPA 2 — Recurso: Configuración ✅ completada
 
-- [ ] Tabla `tipos_hora_extra` (enum código HE_35/HE_100/NOCTURNA_15/FERIADO,
-      porcentaje, activo) + seed.
-- [ ] Tabla `configuracion` (clave-valor) + seed (divisor_salario,
-      horas_jornada, horarios, tolerancia, redondeo...).
-- [ ] Tabla `feriados` (fecha única, descripción).
-- [ ] Endpoints: `GET/PATCH /configuracion`, `GET/PATCH /tipos-hora-extra/:id`,
-      `GET/POST/DELETE /feriados`.
-- [ ] Solo rol ADMIN puede modificar configuración.
+- [x] Tabla `tipos_hora_extra` (codigo único HE_35/HE_100/NOCTURNA_15/FERIADO,
+      nombre, porcentaje, activo) + seed con los 4 tipos.
+- [x] Tabla `configuracion` (clave-valor) + seed de los 10 parámetros
+      (divisor_salario, horas_jornada, horarios, tolerancia, redondeo...).
+- [x] Tabla `feriados` (fecha única, descripción) — redefinida (antes tenía
+      `nombre`, ahora `descripcion`).
+- [x] Migración `20260717000542_configuracion` aplicada.
+- [x] Dominio: entidades `TipoHoraExtra`/`Feriado`, enum `TipoHoraExtraCodigo`,
+      errores `TipoHoraExtraNoEncontradoError`, `FeriadoFechaDuplicadaError`,
+      `FeriadoNoEncontradoError`.
+- [x] Endpoints: `GET/PATCH /configuracion` (recibe `{clave: valor, ...}`),
+      `GET/PATCH /tipos-hora-extra/:id`, `GET/POST/DELETE /feriados`
+      (`?anio=` en el listado). 3 tags de Swagger separados
+      (`configuracion`, `tipos-hora-extra`, `feriados`) en un mismo
+      `ConfiguracionModule`.
+- [x] Solo rol ADMIN puede modificar (`@Roles(ADMIN)` en los PATCH/POST/DELETE);
+      GET abierto a ADMIN y RRHH.
+- [x] Tests unitarios: `CrearFeriadoUseCase` (fecha duplicada),
+      `ActualizarTipoHoraExtraUseCase` (no encontrado).
+- [x] Probado end-to-end contra SQL Server real, incluyendo 403 con un
+      usuario RRHH intentando mutar configuración/feriados.
+- [x] Refactor transversal: `DomainError` ahora declara `httpStatus` en
+      cada subclase (se detectó que el mapa manual del filtro se había
+      quedado desactualizado con los nuevos códigos de esta etapa).
 
-## ETAPA 3 — Recurso: Periodos
+## ETAPA 3 — Recurso: Periodos ✅ completada
 
-- [ ] Tabla `periodos` (fecha_inicio/fecha_fin únicos, estado
-      ABIERTO/CERRADO, cerrado_en, cerrado_por).
-- [ ] Endpoints: `GET /periodos`, `GET /periodos/:id`, `POST /periodos`,
-      `POST /periodos/:id/cerrar`.
-- [ ] Regla transversal desde aquí: periodo cerrado es inmutable
-      (`PeriodoCerradoError` → 409).
+- [x] Tabla `periodos` (fechaInicio/fechaFin únicos compuestos, estado
+      ABIERTO/CERRADO, cerradoEn, cerradoPorId → usuarios).
+- [x] Migración `20260717001812_periodos` — de paso, eliminó las tablas
+      placeholder `periodos_quincenales`, `registros_horas`,
+      `calculos_horas_extra`, `importaciones_excel` (nunca llegaron a tener
+      dominio/aplicación/presentación; las etapas 4-5 las recrean con la
+      forma exacta ya especificada).
+- [x] Dominio: entidad `Periodo` (`estaCerrado()`), enum `EstadoPeriodo`,
+      errores `PeriodoNoEncontradoError`, `PeriodoFechasDuplicadasError`,
+      `PeriodoRangoFechasInvalidoError` (fechaFin < fechaInicio → 400),
+      y reutiliza `PeriodoCerradoError` (ya existía desde la etapa 1) para
+      "cerrar un periodo ya cerrado" → 409.
+- [x] Endpoints: `GET/POST /periodos`, `GET /periodos/:id`,
+      `POST /periodos/:id/cerrar` (usa `@UsuarioActual()` para registrar
+      `cerradoPorId`). Abiertos a cualquier usuario autenticado (ADMIN/RRHH);
+      el spec no pidió restringir el cierre a un rol específico.
+- [x] Tests unitarios: `CerrarPeriodoUseCase` (cierra, 404, 409).
+- [x] Probado end-to-end contra SQL Server real: crear, rango inválido (400),
+      fechas duplicadas (409), listar, obtener, 404, cerrar, doble cierre
+      (409 `PERIODO_CERRADO`), 401 sin token.
 
 ## ETAPA 4 — Recurso: Registros de horas
 

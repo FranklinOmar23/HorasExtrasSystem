@@ -1,1 +1,0 @@
-{"version":3,"file":"empleado-no-encontrado.error.js","sourceRoot":"","sources":["../../../../src/domain/errors/empleado-no-encontrado.error.ts"],"names":[],"mappings":";;;AAAA,iDAA6C;AAE7C,MAAa,yBAA0B,SAAQ,0BAAW;IAC/C,IAAI,GAAG,wBAAwB,CAAC;IAEzC,YAAY,EAAU;QACpB,KAAK,CAAC,8BAA8B,EAAE,GAAG,CAAC,CAAC;IAC7C,CAAC;CACF;AAND,8DAMC"}

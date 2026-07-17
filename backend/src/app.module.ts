@@ -5,8 +5,10 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { JwtAuthGuard } from './presentation/guards/jwt-auth.guard';
 import { RolesGuard } from './presentation/guards/roles.guard';
 import { AuthModule } from './presentation/modules/auth.module';
+import { ConfiguracionModule } from './presentation/modules/configuracion.module';
 import { EmpleadosModule } from './presentation/modules/empleados.module';
 import { HealthModule } from './presentation/modules/health.module';
+import { PeriodosModule } from './presentation/modules/periodos.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { HealthModule } from './presentation/modules/health.module';
     HealthModule,
     AuthModule,
     EmpleadosModule,
+    ConfiguracionModule,
+    PeriodosModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

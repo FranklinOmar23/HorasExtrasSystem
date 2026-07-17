@@ -4,6 +4,7 @@ exports.CredencialesInvalidasError = void 0;
 const domain_error_1 = require("./domain.error");
 class CredencialesInvalidasError extends domain_error_1.DomainError {
     code = 'CREDENCIALES_INVALIDAS';
+    httpStatus = 401;
     constructor() {
         super('El correo o la contraseña son incorrectos.');
     }

@@ -59,6 +59,44 @@ async function main() {
         },
     });
     console.log(`Usuario admin listo: ${usuario.email}`);
+    const tiposHoraExtra = [
+        { codigo: 'HE_35', nombre: 'Hora extra 35%', porcentaje: '35.00' },
+        { codigo: 'HE_100', nombre: 'Hora extra 100%', porcentaje: '100.00' },
+        {
+            codigo: 'NOCTURNA_15',
+            nombre: 'Recargo nocturno 15%',
+            porcentaje: '15.00',
+        },
+        { codigo: 'FERIADO', nombre: 'Hora feriado 100%', porcentaje: '100.00' },
+    ];
+    for (const tipo of tiposHoraExtra) {
+        await prisma.tipoHoraExtra.upsert({
+            where: { codigo: tipo.codigo },
+            update: {},
+            create: tipo,
+        });
+    }
+    console.log(`Tipos de hora extra listos: ${tiposHoraExtra.length}`);
+    const configuracion = {
+        divisor_salario: '23.83',
+        horas_jornada: '8',
+        horas_almuerzo: '1',
+        entrada_semana: '08:30',
+        salida_semana: '17:30',
+        entrada_sabado: '09:00',
+        salida_sabado: '13:00',
+        inicio_nocturna: '21:00',
+        tolerancia_minutos: '0',
+        redondeo: 'ninguno',
+    };
+    for (const [clave, valor] of Object.entries(configuracion)) {
+        await prisma.configuracion.upsert({
+            where: { clave },
+            update: {},
+            create: { clave, valor },
+        });
+    }
+    console.log(`Parámetros de configuración listos: ${Object.keys(configuracion).length}`);
     await prisma.$disconnect();
 }
 main().catch((error) => {

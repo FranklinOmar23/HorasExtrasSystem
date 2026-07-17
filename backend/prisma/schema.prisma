@@ -23,8 +23,7 @@ model Usuario {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  periodosCerrados PeriodoQuincenal[] @relation("PeriodoCerradoPor")
-  importaciones     ImportacionExcel[]
+  periodosCerrados Periodo[] @relation("PeriodoCerradoPor")
 
   @@map("usuarios")
 }
@@ -39,9 +38,7 @@ model Empleado {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  salarios       Salario[]
-  registrosHoras RegistroHoras[]
-  calculos       CalculoHorasExtra[]
+  salarios Salario[]
 
   @@map("empleados")
 }
@@ -62,122 +59,52 @@ model Salario {
   @@map("salarios")
 }
 
-/// Parámetros de cálculo con vigencia, para que un cambio de configuración
-/// hoy no altere periodos ya calculados en el pasado.
-model ConfiguracionCalculo {
-  id                          String    @id @default(uuid())
-  porcentajeHoraExtra35       Decimal   @db.Decimal(5, 2)
-  porcentajeHoraExtra100      Decimal   @db.Decimal(5, 2)
-  porcentajeRecargoNocturno15 Decimal   @db.Decimal(5, 2)
-  divisorSalarioMensual       Decimal   @db.Decimal(6, 2)
-  horasJornadaDiaria          Decimal   @db.Decimal(4, 2)
-  horaInicioJornada           String
-  horaFinJornada              String
-  minutosDescuentoAlmuerzo    Int
-  horaInicioNocturna          String
-  toleranciaMinutos           Int
-  decimalesRedondeo           Int       @default(2)
-  vigenteDesde                DateTime
-  vigenteHasta                DateTime?
-  createdAt                   DateTime  @default(now())
+/// Catálogo de tipos de hora extra y su porcentaje de recargo vigente.
+/// El motor de cálculo (etapa 4) copia el porcentaje en `calculos` para
+/// que un cambio aquí no altere cálculos ya hechos.
+model TipoHoraExtra {
+  id         String  @id @default(uuid())
+  codigo     String  @unique @db.VarChar(20)
+  nombre     String
+  porcentaje Decimal @db.Decimal(6, 2)
+  activo     Boolean @default(true)
 
-  @@index([vigenteDesde])
-  @@map("configuraciones_calculo")
+  @@map("tipos_hora_extra")
+}
+
+/// Parámetros de cálculo como clave-valor (divisor de salario, horarios,
+/// tolerancia, redondeo...). Nunca hardcodear estos valores en el dominio.
+model Configuracion {
+  clave     String   @id @db.VarChar(50)
+  valor     String
+  updatedAt DateTime @updatedAt
+
+  @@map("configuracion")
 }
 
 model Feriado {
-  id        String   @id @default(uuid())
-  fecha     DateTime @unique @db.Date
-  nombre    String
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  fecha       DateTime @unique @db.Date
+  descripcion String
+  createdAt   DateTime @default(now())
 
   @@map("feriados")
 }
 
-model PeriodoQuincenal {
-  id            String        @id @default(uuid())
-  anio          Int
-  mes           Int
-  quincena      Int
-  fechaInicio   DateTime      @db.Date
-  fechaFin      DateTime      @db.Date
-  estado        String        @default("ABIERTO") @db.VarChar(10)
-  cerradoEn     DateTime?
-  cerradoPorId  String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+/// Un periodo CERRADO es inmutable: cualquier escritura sobre sus registros
+/// o cálculos (etapas 4-5) debe lanzar PeriodoCerradoError.
+model Periodo {
+  id           String    @id @default(uuid())
+  fechaInicio  DateTime  @db.Date
+  fechaFin     DateTime  @db.Date
+  estado       String    @default("ABIERTO") @db.VarChar(10)
+  cerradoEn    DateTime?
+  cerradoPorId String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  cerradoPor      Usuario?            @relation("PeriodoCerradoPor", fields: [cerradoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  importaciones   ImportacionExcel[]
-  registrosHoras  RegistroHoras[]
-  calculos        CalculoHorasExtra[]
+  cerradoPor Usuario? @relation("PeriodoCerradoPor", fields: [cerradoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([anio, mes, quincena])
-  @@map("periodos_quincenales")
-}
-
-/// Un registro por cada archivo Excel subido para un periodo.
-model ImportacionExcel {
-  id                 String   @id @default(uuid())
-  periodoId          String
-  nombreArchivo      String
-  importadoPorId     String
-  cantidadRegistros  Int
-  importadoEn        DateTime @default(now())
-
-  periodo      PeriodoQuincenal @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  importadoPor Usuario          @relation(fields: [importadoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  registrosHoras RegistroHoras[]
-
-  @@map("importaciones_excel")
-}
-
-/// Fila cruda importada del Excel (marcaciones de entrada/salida por día).
-model RegistroHoras {
-  id             String    @id @default(uuid())
-  periodoId      String
-  empleadoId     String
-  importacionId  String
-  fecha          DateTime  @db.Date
-  horaEntrada    DateTime?
-  horaSalida     DateTime?
-  createdAt      DateTime  @default(now())
-
-  periodo     PeriodoQuincenal   @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  empleado    Empleado           @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  importacion ImportacionExcel   @relation(fields: [importacionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  calculo     CalculoHorasExtra?
-
-  @@index([periodoId, empleadoId])
-  @@map("registros_horas")
-}
-
-/// Resultado del motor de cálculo para un registro de horas, con los
-/// valores de porcentaje y salario/hora congelados al momento del cálculo.
-model CalculoHorasExtra {
-  id                       String   @id @default(uuid())
-  registroHorasId          String   @unique
-  periodoId                String
-  empleadoId               String
-  horasNormales            Decimal  @db.Decimal(6, 2)
-  horasExtra35             Decimal  @db.Decimal(6, 2)
-  horasExtra100            Decimal  @db.Decimal(6, 2)
-  horasRecargoNocturno15   Decimal  @db.Decimal(6, 2)
-  salarioHoraUsado         Decimal  @db.Decimal(12, 4)
-  porcentajeExtra35Usado   Decimal  @db.Decimal(5, 2)
-  porcentajeExtra100Usado  Decimal  @db.Decimal(5, 2)
-  porcentajeRecargo15Usado Decimal  @db.Decimal(5, 2)
-  montoNormal              Decimal  @db.Decimal(12, 2)
-  montoExtra35             Decimal  @db.Decimal(12, 2)
-  montoExtra100            Decimal  @db.Decimal(12, 2)
-  montoRecargoNocturno     Decimal  @db.Decimal(12, 2)
-  montoTotal               Decimal  @db.Decimal(12, 2)
-  createdAt                DateTime @default(now())
-
-  registroHoras RegistroHoras    @relation(fields: [registroHorasId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  periodo       PeriodoQuincenal @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  empleado      Empleado         @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@index([periodoId, empleadoId])
-  @@map("calculos_horas_extra")
+  @@unique([fechaInicio, fechaFin])
+  @@map("periodos")
 }

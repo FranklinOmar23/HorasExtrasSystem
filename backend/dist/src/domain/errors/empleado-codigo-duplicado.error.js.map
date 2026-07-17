@@ -1,1 +1,0 @@
-{"version":3,"file":"empleado-codigo-duplicado.error.js","sourceRoot":"","sources":["../../../../src/domain/errors/empleado-codigo-duplicado.error.ts"],"names":[],"mappings":";;;AAAA,iDAA6C;AAE7C,MAAa,4BAA6B,SAAQ,0BAAW;IAClD,IAAI,GAAG,2BAA2B,CAAC;IAE5C,YAAY,MAAc;QACxB,KAAK,CAAC,uCAAuC,MAAM,GAAG,CAAC,CAAC;IAC1D,CAAC;CACF;AAND,oEAMC"}

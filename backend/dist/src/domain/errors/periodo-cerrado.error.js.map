@@ -1,1 +1,0 @@
-{"version":3,"file":"periodo-cerrado.error.js","sourceRoot":"","sources":["../../../../src/domain/errors/periodo-cerrado.error.ts"],"names":[],"mappings":";;;AAAA,iDAA6C;AAE7C,MAAa,mBAAoB,SAAQ,0BAAW;IACzC,IAAI,GAAG,iBAAiB,CAAC;IAElC,YAAY,SAAiB;QAC3B,KAAK,CAAC,cAAc,SAAS,uCAAuC,CAAC,CAAC;IACxE,CAAC;CACF;AAND,kDAMC"}
