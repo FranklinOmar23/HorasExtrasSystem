@@ -9,6 +9,7 @@ import { ConfiguracionModule } from './presentation/modules/configuracion.module
 import { EmpleadosModule } from './presentation/modules/empleados.module';
 import { HealthModule } from './presentation/modules/health.module';
 import { PeriodosModule } from './presentation/modules/periodos.module';
+import { RegistrosModule } from './presentation/modules/registros.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PeriodosModule } from './presentation/modules/periodos.module';
     EmpleadosModule,
     ConfiguracionModule,
     PeriodosModule,
+    RegistrosModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

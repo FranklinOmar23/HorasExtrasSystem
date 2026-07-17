@@ -60,19 +60,39 @@ async function main() {
     });
     console.log(`Usuario admin listo: ${usuario.email}`);
     const tiposHoraExtra = [
-        { codigo: 'HE_35', nombre: 'Hora extra 35%', porcentaje: '35.00' },
-        { codigo: 'HE_100', nombre: 'Hora extra 100%', porcentaje: '100.00' },
+        {
+            codigo: 'HE_35',
+            nombre: 'Hora extra 35%',
+            porcentaje: '35.00',
+            modoValorizacion: 'COMPLETA',
+        },
+        {
+            codigo: 'HE_100',
+            nombre: 'Hora extra 100%',
+            porcentaje: '100.00',
+            modoValorizacion: 'COMPLETA',
+        },
         {
             codigo: 'NOCTURNA_15',
             nombre: 'Recargo nocturno 15%',
             porcentaje: '15.00',
+            modoValorizacion: 'SOLO_RECARGO',
         },
-        { codigo: 'FERIADO', nombre: 'Hora feriado 100%', porcentaje: '100.00' },
+        {
+            codigo: 'FERIADO',
+            nombre: 'Hora feriado 100%',
+            porcentaje: '100.00',
+            modoValorizacion: 'SOLO_RECARGO',
+        },
     ];
     for (const tipo of tiposHoraExtra) {
         await prisma.tipoHoraExtra.upsert({
             where: { codigo: tipo.codigo },
-            update: {},
+            update: {
+                nombre: tipo.nombre,
+                porcentaje: tipo.porcentaje,
+                modoValorizacion: tipo.modoValorizacion,
+            },
             create: tipo,
         });
     }

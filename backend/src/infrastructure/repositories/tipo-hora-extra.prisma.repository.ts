@@ -5,6 +5,7 @@ import {
   TipoHoraExtraRepository,
 } from '../../application/ports/tipo-hora-extra.repository.port';
 import { TipoHoraExtra } from '../../domain/entities/tipo-hora-extra.entity';
+import { ModoValorizacion } from '../../domain/enums/modo-valorizacion.enum';
 import { TipoHoraExtraCodigo } from '../../domain/enums/tipo-hora-extra-codigo.enum';
 import { decimalDesdeDb } from '../prisma/decimal.mapper';
 import { PrismaService } from '../prisma/prisma.service';
@@ -15,6 +16,7 @@ function aDominio(tipo: TipoHoraExtraPrisma): TipoHoraExtra {
     tipo.codigo as TipoHoraExtraCodigo,
     tipo.nombre,
     decimalDesdeDb(tipo.porcentaje),
+    tipo.modoValorizacion as ModoValorizacion,
     tipo.activo,
   );
 }
@@ -46,6 +48,7 @@ export class TipoHoraExtraPrismaRepository implements TipoHoraExtraRepository {
       data: {
         nombre: datos.nombre,
         porcentaje: datos.porcentaje?.toString(),
+        modoValorizacion: datos.modoValorizacion,
         activo: datos.activo,
       },
     });

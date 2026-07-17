@@ -1,5 +1,6 @@
 import Decimal from 'decimal.js';
 import { TipoHoraExtra } from '../../../domain/entities/tipo-hora-extra.entity';
+import { ModoValorizacion } from '../../../domain/enums/modo-valorizacion.enum';
 import { TipoHoraExtraCodigo } from '../../../domain/enums/tipo-hora-extra-codigo.enum';
 import { TipoHoraExtraNoEncontradoError } from '../../../domain/errors/tipo-hora-extra-no-encontrado.error';
 import {
@@ -13,6 +14,7 @@ const TIPO = new TipoHoraExtra(
   TipoHoraExtraCodigo.HE_35,
   'Hora extra 35%',
   new Decimal('35.00'),
+  ModoValorizacion.COMPLETA,
   true,
 );
 
@@ -41,6 +43,7 @@ class TipoHoraExtraRepositoryFake implements TipoHoraExtraRepository {
         actual.codigo,
         datos.nombre ?? actual.nombre,
         datos.porcentaje ?? actual.porcentaje,
+        datos.modoValorizacion ?? actual.modoValorizacion,
         datos.activo ?? actual.activo,
       ),
     );

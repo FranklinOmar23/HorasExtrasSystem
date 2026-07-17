@@ -1,0 +1,1 @@
+{"version":3,"file":"salario-no-vigente.error.js","sourceRoot":"","sources":["../../../../src/domain/errors/salario-no-vigente.error.ts"],"names":[],"mappings":";;;AAAA,iDAA6C;AAE7C,MAAa,qBAAsB,SAAQ,0BAAW;IAC3C,IAAI,GAAG,oBAAoB,CAAC;IAC5B,UAAU,GAAG,GAAG,CAAC;IAE1B,YAAY,UAAkB,EAAE,KAAa;QAC3C,KAAK,CACH,eAAe,UAAU,4CAA4C,KAAK,GAAG,CAC9E,CAAC;IACJ,CAAC;CACF;AATD,sDASC"}

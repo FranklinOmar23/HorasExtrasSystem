@@ -16,4 +16,6 @@ export interface SalarioRepository {
     datos: CrearSalarioDatos,
     cerrarVigenteAnteriorHasta: Date,
   ): Promise<Salario>;
+  /** Salario vigente del empleado en una fecha dada (vigenteDesde <= fecha <= vigenteHasta|∞). */
+  buscarVigenteEn(empleadoId: string, fecha: Date): Promise<Salario | null>;
 }

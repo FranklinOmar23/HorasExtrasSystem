@@ -58,6 +58,6 @@ import { EmpleadosController } from '../controllers/empleados.controller';
       inject: [EMPLEADO_REPOSITORY, SALARIO_REPOSITORY],
     },
   ],
-  exports: [EMPLEADO_REPOSITORY],
+  exports: [EMPLEADO_REPOSITORY, SALARIO_REPOSITORY],
 })
 export class EmpleadosModule {}

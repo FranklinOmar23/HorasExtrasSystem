@@ -38,7 +38,8 @@ model Empleado {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  salarios Salario[]
+  salarios       Salario[]
+  registrosHoras RegistroHoras[]
 
   @@map("empleados")
 }
@@ -60,14 +61,26 @@ model Salario {
 }
 
 /// Catálogo de tipos de hora extra y su porcentaje de recargo vigente.
-/// El motor de cálculo (etapa 4) copia el porcentaje en `calculos` para
-/// que un cambio aquí no altere cálculos ya hechos.
+/// El motor de cálculo copia el porcentaje en `calculos` para que un cambio
+/// aquí no altere cálculos ya hechos.
+///
+/// `modoValorizacion` determina cómo se traduce el porcentaje a un monto:
+/// - COMPLETA: la hora se paga completa más el recargo (multiplicador = 1 + porcentaje/100).
+///   Usado por HE_35 (×1.35) y HE_100 (×2.00): son horas que el salario
+///   mensual no cubre en absoluto.
+/// - SOLO_RECARGO: solo se paga el recargo (multiplicador = porcentaje/100).
+///   Usado por NOCTURNA_15 (×0.15, un adicional sobre horas ya pagadas por
+///   otro tipo) y FERIADO (×1.00, la hora adicional completa pero sin volver
+///   a duplicarla como si fuera 200%).
 model TipoHoraExtra {
-  id         String  @id @default(uuid())
-  codigo     String  @unique @db.VarChar(20)
-  nombre     String
-  porcentaje Decimal @db.Decimal(6, 2)
-  activo     Boolean @default(true)
+  id               String  @id @default(uuid())
+  codigo           String  @unique @db.VarChar(20)
+  nombre           String
+  porcentaje       Decimal @db.Decimal(6, 2)
+  modoValorizacion String  @default("COMPLETA") @db.VarChar(20)
+  activo           Boolean @default(true)
+
+  calculos Calculo[]
 
   @@map("tipos_hora_extra")
 }
@@ -103,8 +116,55 @@ model Periodo {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  cerradoPor Usuario? @relation("PeriodoCerradoPor", fields: [cerradoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cerradoPor     Usuario?        @relation("PeriodoCerradoPor", fields: [cerradoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  registrosHoras RegistroHoras[]
 
   @@unique([fechaInicio, fechaFin])
   @@map("periodos")
+}
+
+/// Marcación de entrada/salida de un empleado en un día de un periodo.
+/// horaEntrada/horaSalida se guardan como "HH:mm" (mismo formato que los
+/// horarios en `configuracion`) para evitar el manejo de zonas horarias del
+/// tipo TIME nativo de SQL Server.
+model RegistroHoras {
+  id            String   @id @default(uuid())
+  periodoId     String
+  empleadoId    String
+  fecha         DateTime @db.Date
+  horaEntrada   String   @db.VarChar(5)
+  horaSalida    String   @db.VarChar(5)
+  origen        String   @db.VarChar(10)
+  /// FK lógica a `importaciones` (etapa 5); no existe la tabla todavía.
+  importacionId String?
+  comentario    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  periodo  Periodo   @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  empleado Empleado  @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  calculos Calculo[]
+
+  @@index([periodoId, empleadoId])
+  @@map("registros_horas")
+}
+
+/// Desglose de horas extra de un registro, con el porcentaje y salario/hora
+/// congelados al momento del cálculo (cambios posteriores en tipos_hora_extra
+/// o en el salario del empleado no alteran calculos ya generados).
+model Calculo {
+  id                 String   @id @default(uuid())
+  registroId         String
+  tipoHoraId         String
+  cantidadHoras      Decimal  @db.Decimal(8, 4)
+  porcentajeAplicado Decimal  @db.Decimal(6, 2)
+  salarioHoraUsado   Decimal  @db.Decimal(12, 4)
+  monto              Decimal  @db.Decimal(12, 2)
+  calculadoEn        DateTime @default(now())
+
+  registro RegistroHoras @relation(fields: [registroId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tipoHora TipoHoraExtra @relation(fields: [tipoHoraId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([registroId])
+  @@map("calculos")
 }

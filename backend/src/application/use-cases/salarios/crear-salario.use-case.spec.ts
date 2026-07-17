@@ -53,6 +53,10 @@ class SalarioRepositoryFake implements SalarioRepository {
     return Promise.resolve([]);
   }
 
+  buscarVigenteEn(): Promise<Salario | null> {
+    return Promise.resolve(null);
+  }
+
   crear(
     empleadoId: string,
     datos: CrearSalarioDatos,

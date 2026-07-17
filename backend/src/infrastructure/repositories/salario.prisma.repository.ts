@@ -50,4 +50,19 @@ export class SalarioPrismaRepository implements SalarioRepository {
     ]);
     return aDominio(nuevo);
   }
+
+  async buscarVigenteEn(
+    empleadoId: string,
+    fecha: Date,
+  ): Promise<Salario | null> {
+    const salario = await this.prisma.salario.findFirst({
+      where: {
+        empleadoId,
+        vigenteDesde: { lte: fecha },
+        OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: fecha } }],
+      },
+      orderBy: { vigenteDesde: 'desc' },
+    });
+    return salario ? aDominio(salario) : null;
+  }
 }
