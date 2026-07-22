@@ -100,6 +100,17 @@ del motor se confirmaron directamente con el usuario (no se infirieron):
   `tipos_hora_extra.modoValorizacion` (`COMPLETA` = `1 + %`, `SOLO_RECARGO` =
   solo `%`) — configurable, no hardcodeado en el motor
   (`TipoHoraExtra.multiplicador()`).
+- **`salario_hora` = `(salario_mensual ÷ divisor_salario) ÷ horas_jornada`**
+  (dos divisiones: `divisor_salario`, 23.83, convierte mensual → **diario**,
+  el estándar dominicano de días hábiles promedio por mes; luego se divide
+  entre las horas de la jornada para llegar al valor por hora). **Bug
+  corregido el 2026-07-17**: `CalcularDesgloseService` y el fallback de
+  `ReportePeriodoService` se quedaban en la primera división (calculaban el
+  salario *diario* y lo usaban como si fuera el salario *por hora*, ~8×
+  demasiado alto). Se detectó al cargar la nómina real de Hartemanía y
+  cruzar sus columnas de salario diario/por hora contra la fórmula — no
+  afectó datos reales porque los únicos `calculos` persistidos hasta ese
+  momento eran de pruebas (empleado de QA, periodo nunca cerrado).
 - [x] Tabla `registros_horas` (periodo, empleado, fecha, horaEntrada/horaSalida
       como "HH:mm", origen EXCEL/MANUAL, importacionId nullable sin FK aún,
       comentario). Tabla `calculos` (registroId onDelete Cascade, tipoHoraId,
@@ -142,10 +153,21 @@ del motor se confirmaron directamente con el usuario (no se infirieron):
       (OK/ADVERTENCIA/ERROR), errores `ImportacionNoEncontradaError` (404),
       `ImportacionYaConfirmadaError` (409), `ImportacionFormatoInvalidoError` (422).
 - [x] Infraestructura: `XlsxParserAdapter` (puerto `ExcelParserPort`) —
-      reconoce encabezados con o sin tildes/variantes (fecha, código, nombre,
-      entrada, salida), interpreta fechas y horas venga como texto, número
-      serial de Excel o `Date`, e ignora filas totalmente vacías (padding
-      al final de la hoja).
+      reconoce encabezados sin importar tildes/espacios/guiones (`"Hora
+      Entrada"`, `hora_entrada`, `HoraEntrada`... todos normalizan igual),
+      interpreta fechas y horas venga como texto o número serial de Excel,
+      e ignora filas totalmente vacías (padding al final de la hoja).
+- [x] **Bug corregido el 2026-07-17** (reportado por el usuario con un Excel
+      real): las horas importadas salían corridas ~4h32min. Causa: se leía
+      el archivo con `cellDates: true`, que hace que SheetJS convierta las
+      celdas de fecha/hora a objetos `Date`; esa conversión quedó afectada
+      por la zona horaria del sistema para el "día 0" ficticio de Excel
+      (1899-12-30). Se corrigió leyendo **sin** `cellDates` y parseando
+      siempre desde el número de serie crudo con aritmética pura (sin
+      `Date` de por medio, inmune a cualquier zona horaria) — se eliminaron
+      las ramas que aceptaban un `Date` directamente porque ya no son
+      alcanzables. Se agregó un test que fija horas no-redondas (09:01,
+      21:44) para que cualquier desfase, por pequeño que sea, falle.
 - [x] Aplicación: `ValidarFilasImportacionService` clasifica cada fila:
       - **ERROR** (nunca se persiste): código inexistente, empleado inactivo,
         sin salario vigente en la fecha (extensión sobre el spec original:

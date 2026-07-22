@@ -79,7 +79,7 @@ export class ReportePeriodoService {
       registrosPorEmpleado.set(empleadoId, lista);
     }
 
-    const divisorSalario = await this.obtenerDivisorSalario();
+    const parametrosSalario = await this.obtenerParametrosSalario();
 
     const filas: FilaReportePeriodo[] = [];
     for (const [empleadoId, registrosEmpleado] of registrosPorEmpleado) {
@@ -91,7 +91,7 @@ export class ReportePeriodoService {
         await this.agregarFilaEmpleado(
           empleado,
           registrosEmpleado,
-          divisorSalario,
+          parametrosSalario,
         ),
       );
     }
@@ -117,24 +117,29 @@ export class ReportePeriodoService {
       periodo.id,
       empleado.id,
     );
-    const divisorSalario = await this.obtenerDivisorSalario();
+    const parametrosSalario = await this.obtenerParametrosSalario();
     const fila = await this.agregarFilaEmpleado(
       empleado,
       registros,
-      divisorSalario,
+      parametrosSalario,
     );
     return { fila, registros };
   }
 
-  private async obtenerDivisorSalario(): Promise<Decimal> {
+  private async obtenerParametrosSalario(): Promise<{
+    divisorSalario: Decimal;
+    horasJornada: Decimal;
+  }> {
     const configuracion = await this.configuracionRepository.obtenerTodos();
-    return parsearConfiguracionCalculo(configuracion).divisorSalario;
+    const { divisorSalario, parametrosMotor } =
+      parsearConfiguracionCalculo(configuracion);
+    return { divisorSalario, horasJornada: parametrosMotor.horasJornada };
   }
 
   private async agregarFilaEmpleado(
     empleado: Empleado,
     registros: RegistroConCalculos[],
-    divisorSalario: Decimal,
+    parametrosSalario: { divisorSalario: Decimal; horasJornada: Decimal },
   ): Promise<FilaReportePeriodo> {
     const horas = desgloseCero();
     const montos = desgloseCero();
@@ -158,8 +163,13 @@ export class ReportePeriodoService {
         empleado.id,
         ultimaFecha ?? new Date(),
       );
+      // divisorSalario (23.83) convierte el salario mensual a DIARIO; hay
+      // que dividir ese diario entre las horas de la jornada para llegar
+      // al salario/hora (misma fórmula que CalcularDesgloseService).
       salarioHora = salario
-        ? salario.montoMensual.dividedBy(divisorSalario)
+        ? salario.montoMensual
+            .dividedBy(parametrosSalario.divisorSalario)
+            .dividedBy(parametrosSalario.horasJornada)
         : new Decimal(0);
     }
 

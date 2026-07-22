@@ -1,3 +1,5 @@
+import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
@@ -104,6 +106,47 @@ const navItems = [
   },
 ];
 
+const iconoNomina = (
+  <svg {...iconProps}>
+    <rect x="2" y="6" width="20" height="12" rx="2" />
+    <circle cx="12" cy="12" r="2" />
+    <path d="M6 12h.01M18 12h.01" />
+  </svg>
+);
+
+function NavItemProximamente({ label, icono }: { label: string; icono: React.ReactNode }) {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [rebote, setRebote] = useState(0);
+
+  function onClick() {
+    const rect = btnRef.current?.getBoundingClientRect();
+    if (rect) setPos({ top: rect.top + rect.height / 2, left: rect.right + 10 });
+    setRebote((n) => n + 1);
+    window.setTimeout(() => setPos(null), 2600);
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button ref={btnRef} type="button" className="hx-navitem-soon" onClick={onClick}>
+        <span key={rebote} className={`hx-navitem-soon-icon${rebote > 0 ? ' bounce' : ''}`}>{icono}</span>
+        {label}
+        <span className="hx-pill-pronto">Pronto</span>
+      </button>
+      {pos && createPortal(
+        <div className="hx-soon-pop" role="status" style={{ top: pos.top, left: pos.left }}>
+          <span className="hx-soon-pop-emoji" aria-hidden>🚀</span>
+          <div>
+            <div className="hx-soon-pop-title">¡Próximamente!</div>
+            <div className="hx-soon-pop-sub">Le estamos dando los últimos toques.</div>
+          </div>
+        </div>,
+        document.body,
+      )}
+    </div>
+  );
+}
+
 function iniciales(nombre: string): string {
   return nombre
     .split(' ')
@@ -144,6 +187,7 @@ export function Sidebar() {
                 {item.label}
               </NavLink>
             ))}
+            {grupo.grupo === 'Operación' && <NavItemProximamente label="Nómina" icono={iconoNomina} />}
           </div>
         ))}
       </nav>

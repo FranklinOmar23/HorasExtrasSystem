@@ -16,11 +16,24 @@ export async function obtenerReporteEmpleado(
   return data;
 }
 
-export async function descargarReporteExcel(periodoId: string): Promise<Blob> {
-  const { data } = await apiClient.get(`/periodos/${periodoId}/reporte/excel`, {
+export interface ArchivoDescargado {
+  blob: Blob;
+  nombreArchivo: string;
+}
+
+function nombreDesdeContentDisposition(valor: string | undefined, fallback: string): string {
+  const match = valor ? /filename="?([^";]+)"?/.exec(valor) : null;
+  return match ? match[1] : fallback;
+}
+
+export async function descargarReporteExcel(periodoId: string): Promise<ArchivoDescargado> {
+  const response = await apiClient.get(`/periodos/${periodoId}/reporte/excel`, {
     responseType: 'blob',
   });
-  return data;
+  return {
+    blob: response.data,
+    nombreArchivo: nombreDesdeContentDisposition(response.headers['content-disposition'], `reporte-${periodoId}.xlsx`),
+  };
 }
 
 export async function obtenerHistorico(meses = 6): Promise<HistoricoPeriodo[]> {

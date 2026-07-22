@@ -29,7 +29,9 @@ class CalcularDesgloseService {
             throw new salario_no_vigente_error_1.SalarioNoVigenteError(empleadoId, aFechaISO(fecha));
         }
         const { divisorSalario, parametrosMotor } = (0, configuracion_calculo_mapper_1.parsearConfiguracionCalculo)(configuracionCruda);
-        const salarioHoraUsado = salario.montoMensual.dividedBy(divisorSalario);
+        const salarioHoraUsado = salario.montoMensual
+            .dividedBy(divisorSalario)
+            .dividedBy(parametrosMotor.horasJornada);
         const motor = new motor_calculo_1.MotorCalculo(tiposHoraExtra);
         return motor.calcular({
             fecha,

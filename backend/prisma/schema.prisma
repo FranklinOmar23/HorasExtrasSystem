@@ -33,6 +33,13 @@ model Empleado {
   id        String   @id @default(uuid())
   codigo    Int      @unique
   nombre    String
+  /// `@unique` aquí genera una UNIQUE CONSTRAINT normal en el `db push`/diff
+  /// inicial, pero en producción se reemplazó por un índice único FILTRADO
+  /// (`WHERE cedula IS NOT NULL`, ver migración `cedula_indice_filtrado_nulos`)
+  /// porque SQL Server exige unicidad también entre NULLs bajo una
+  /// constraint normal, y muchos empleados reales no tienen cédula registrada.
+  /// Si se regenera una migración desde este schema, hay que volver a aplicar
+  /// ese ajuste manualmente.
   cedula    String?  @unique
   posicion  String
   activo    Boolean  @default(true)
@@ -57,6 +64,13 @@ model Salario {
 
   empleado Empleado @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  /// Prisma no puede expresar un índice único FILTRADO en el schema: en
+  /// producción existe además `salarios_empleadoId_vigente_key`, un índice
+  /// único en `empleadoId` con `WHERE vigenteHasta IS NULL` (ver migración
+  /// `salario_unico_vigente_por_empleado`). Evita que dos POST
+  /// `/empleados/:id/salarios` casi simultáneos dejen a un empleado con dos
+  /// salarios "vigentes" a la vez (se detectó en producción). Si se
+  /// regenera una migración desde este schema, hay que volver a aplicarlo.
   @@index([empleadoId, vigenteDesde])
   @@map("salarios")
 }

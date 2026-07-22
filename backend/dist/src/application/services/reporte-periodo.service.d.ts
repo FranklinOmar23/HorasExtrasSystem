@@ -39,6 +39,6 @@ export declare class ReportePeriodoService {
     constructor(registroHorasRepository: RegistroHorasRepository, empleadoRepository: EmpleadoRepository, salarioRepository: SalarioRepository, configuracionRepository: ConfiguracionRepository);
     generar(periodo: Periodo): Promise<ReportePeriodo>;
     generarFilaEmpleado(periodo: Periodo, empleado: Empleado): Promise<ReporteFilaEmpleado>;
-    private obtenerDivisorSalario;
+    private obtenerParametrosSalario;
     private agregarFilaEmpleado;
 }

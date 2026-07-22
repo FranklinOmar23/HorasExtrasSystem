@@ -4,6 +4,8 @@ import { actualizarEmpleado, crearEmpleado, crearSalario, listarSalarios } from 
 import { mensajeError } from '../api/client';
 import type { Empleado } from '../types/api';
 import { formatFechaDia, formatMonto } from '../utils/format';
+import { SkeletonLine } from './Skeleton';
+import { Spinner } from './Spinner';
 
 function hoy(): string {
   return new Date().toISOString().slice(0, 10);
@@ -26,7 +28,7 @@ export function EmpleadoDrawer({ empleado, onClose }: { empleado: Empleado | nul
   const [montoNuevo, setMontoNuevo] = useState('');
   const [vigenteNuevo, setVigenteNuevo] = useState(hoy());
 
-  const { data: salarios = [] } = useQuery({
+  const { data: salarios = [], isLoading: cargandoSalarios } = useQuery({
     queryKey: ['salarios', empleado?.id],
     queryFn: () => listarSalarios(empleado!.id),
     enabled: !esNuevo,
@@ -130,13 +132,19 @@ export function EmpleadoDrawer({ empleado, onClose }: { empleado: Empleado | nul
                   <input className="hx-in tnum" placeholder="Monto mensual" value={montoNuevo} onChange={(e) => setMontoNuevo(e.target.value)} />
                   <input className="hx-in" type="date" value={vigenteNuevo} onChange={(e) => setVigenteNuevo(e.target.value)} style={{ maxWidth: 160 }} />
                   <button type="button" className="hx-btn hx-btn-primary hx-btn-sm" disabled={agregarSalario.isPending} onClick={() => agregarSalario.mutate()}>
-                    OK
+                    {agregarSalario.isPending ? <Spinner /> : 'OK'}
                   </button>
                 </div>
               )}
               <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-                {salarios.map((s) => (
-                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', borderBottom: '1px solid var(--border)', background: s.vigenteHasta === null ? 'var(--c-sea-50)' : undefined }}>
+                {cargandoSalarios && (
+                  <div style={{ padding: '11px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <SkeletonLine width="55%" height={14} />
+                    <SkeletonLine width="35%" height={10} />
+                  </div>
+                )}
+                {!cargandoSalarios && salarios.map((s) => (
+                  <div key={s.id} className="hx-fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', borderBottom: '1px solid var(--border)', background: s.vigenteHasta === null ? 'var(--c-sea-50)' : undefined }}>
                     <div>
                       <div className="tnum" style={{ fontSize: 14, fontWeight: s.vigenteHasta === null ? 700 : 600 }}>{formatMonto(s.montoMensual)}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
@@ -148,7 +156,7 @@ export function EmpleadoDrawer({ empleado, onClose }: { empleado: Empleado | nul
                     {s.vigenteHasta === null && <span className="hx-badge hx-badge-success">Actual</span>}
                   </div>
                 ))}
-                {salarios.length === 0 && <div style={{ padding: 14, fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center' }}>Sin historial.</div>}
+                {!cargandoSalarios && salarios.length === 0 && <div style={{ padding: 14, fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center' }}>Sin historial.</div>}
               </div>
             </div>
           )}
@@ -156,6 +164,7 @@ export function EmpleadoDrawer({ empleado, onClose }: { empleado: Empleado | nul
         <div className="hx-drawer-foot">
           <button type="button" className="hx-btn hx-btn-secondary" onClick={onClose}>Cancelar</button>
           <button type="button" className="hx-btn hx-btn-primary" disabled={guardarEmpleado.isPending} onClick={() => guardarEmpleado.mutate()}>
+            {guardarEmpleado.isPending && <Spinner />}
             {guardarEmpleado.isPending ? 'Guardando…' : 'Guardar empleado'}
           </button>
         </div>

@@ -7,7 +7,10 @@ import { DomainErrorFilter } from './presentation/filters/domain-error.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  // `exposedHeaders` es necesario para que el frontend pueda leer el nombre
+  // de archivo real (Content-Disposition) al descargar el Excel del reporte
+  // — por defecto el navegador no expone ese header a JS entre orígenes.
+  app.enableCors({ exposedHeaders: ['Content-Disposition'] });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

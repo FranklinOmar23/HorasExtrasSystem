@@ -328,7 +328,7 @@ const EMPLEADO = new Empleado(
 const SALARIO = new Salario(
   'salario-1',
   EMPLEADO.id,
-  new Decimal('23830.00'), // salario/hora = 1000.00 con divisor 23.83
+  new Decimal('23830.00'), // salario/hora = 125.00 (23830/23.83/8)
   new Date('2026-01-01T00:00:00.000Z'),
   null,
 );

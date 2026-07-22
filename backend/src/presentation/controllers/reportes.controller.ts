@@ -16,7 +16,10 @@ import {
 import { ObtenerReporteEmpleadoUseCase } from '../../application/use-cases/reportes/obtener-reporte-empleado.use-case';
 import { ObtenerReporteHistoricoUseCase } from '../../application/use-cases/reportes/obtener-reporte-historico.use-case';
 import { ObtenerReportePeriodoUseCase } from '../../application/use-cases/reportes/obtener-reporte-periodo.use-case';
-import { construirReporteExcel } from '../../infrastructure/excel/reporte-excel.builder';
+import {
+  construirReporteExcel,
+  nombreArchivoReporteExcel,
+} from '../../infrastructure/excel/reporte-excel.builder';
 import { HistoricoPeriodoDto } from '../dtos/reportes/historico-periodo.dto';
 import { HistoricoQueryDto } from '../dtos/reportes/historico-query.dto';
 import { ReporteEmpleadoRespuestaDto } from '../dtos/reportes/reporte-empleado-respuesta.dto';
@@ -85,9 +88,9 @@ export class ReportesController {
     @Param('periodoId') periodoId: string,
   ): Promise<StreamableFile> {
     const reporte = await this.obtenerReportePeriodo.ejecutar(periodoId);
-    const buffer = construirReporteExcel(reporte);
+    const buffer = await construirReporteExcel(reporte);
     return new StreamableFile(buffer, {
-      disposition: `attachment; filename="reporte-${periodoId}.xlsx"`,
+      disposition: `attachment; filename="${nombreArchivoReporteExcel(reporte)}"`,
     });
   }
 

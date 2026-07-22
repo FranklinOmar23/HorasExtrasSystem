@@ -2,6 +2,8 @@ import { Fragment, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
 import { PageHeader } from '../components/PageHeader';
+import { SkeletonLine, SkeletonTableRows } from '../components/Skeleton';
+import { Spinner } from '../components/Spinner';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { mensajeError } from '../api/client';
 import { cerrarPeriodo } from '../api/periodos';
@@ -22,7 +24,11 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
             Detalle día por día
           </div>
           {isLoading ? (
-            <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>Cargando…</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 480 }}>
+              <SkeletonLine width="90%" height={13} />
+              <SkeletonLine width="75%" height={13} />
+              <SkeletonLine width="82%" height={13} />
+            </div>
           ) : !data || data.dias.length === 0 ? (
             <div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>Sin registros en este periodo.</div>
           ) : (
@@ -77,11 +83,12 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
 
 export function ReportePage() {
   const queryClient = useQueryClient();
-  const { periodoActivo, periodoActivoId } = usePeriodoActivo();
+  const { periodoActivo, periodoActivoId, cargando: cargandoPeriodos } = usePeriodoActivo();
   const [expandido, setExpandido] = useState<Record<string, boolean>>({});
   const [modalCerrar, setModalCerrar] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [descargando, setDescargando] = useState(false);
+  const [query, setQuery] = useState('');
 
   const { data: reporte, isLoading } = useQuery({
     queryKey: ['reporte-periodo', periodoActivoId],
@@ -103,11 +110,11 @@ export function ReportePage() {
     if (!periodoActivoId) return;
     setDescargando(true);
     try {
-      const blob = await descargarReporteExcel(periodoActivoId);
+      const { blob, nombreArchivo } = await descargarReporteExcel(periodoActivoId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `reporte-${periodoActivoId}.xlsx`;
+      a.download = nombreArchivo;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
@@ -115,6 +122,18 @@ export function ReportePage() {
     } finally {
       setDescargando(false);
     }
+  }
+
+  if (cargandoPeriodos) {
+    return (
+      <div className="hx-page">
+        <PageHeader eyebrow="Cálculo de pago" title="Reporte del periodo" />
+        <SkeletonLine width={280} height={38} style={{ marginBottom: 16 }} />
+        <div className="hx-table-wrap" style={{ padding: 16 }}>
+          <SkeletonLine width="100%" height={280} />
+        </div>
+      </div>
+    );
   }
 
   if (!periodoActivo) {
@@ -126,7 +145,16 @@ export function ReportePage() {
     );
   }
 
-  const filas = reporte?.filas ?? [];
+  const todasLasFilas = reporte?.filas ?? [];
+  const queryNormalizada = query.trim().toLowerCase();
+  const filas = queryNormalizada
+    ? todasLasFilas.filter(
+        (f) =>
+          f.empleado.nombre.toLowerCase().includes(queryNormalizada) ||
+          String(f.empleado.codigo).includes(queryNormalizada),
+      )
+    : todasLasFilas;
+  const filtrando = queryNormalizada !== '';
   const totales = filas.reduce(
     (acc, f) => ({
       he35: acc.he35 + Number(f.horas.he35), he100: acc.he100 + Number(f.horas.he100),
@@ -155,6 +183,7 @@ export function ReportePage() {
         actions={
           <>
             <button type="button" className="hx-btn hx-btn-secondary hx-btn-sm" onClick={exportarExcel} disabled={descargando}>
+              {descargando && <Spinner />}
               {descargando ? 'Descargando…' : 'Exportar Excel'}
             </button>
             {periodoActivo.estado === 'ABIERTO' && (
@@ -171,6 +200,22 @@ export function ReportePage() {
           {error}
         </div>
       )}
+
+      <div style={{ position: 'relative', maxWidth: 360, marginBottom: 16 }}>
+        <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)', display: 'flex' }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+        <input
+          className="hx-in"
+          style={{ paddingLeft: 38 }}
+          placeholder="Buscar por código o nombre…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
       <div className="hx-table-wrap">
         <div style={{ overflowX: 'auto' }}>
@@ -194,14 +239,26 @@ export function ReportePage() {
             </thead>
             <tbody>
               {isLoading && (
-                <tr><td className="hx-td" colSpan={13}><div className="hx-empty">Cargando…</div></td></tr>
+                <SkeletonTableRows
+                  columns={13}
+                  rows={10}
+                  align={['left', 'left', 'left', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right']}
+                />
               )}
               {!isLoading && filas.length === 0 && (
-                <tr><td className="hx-td" colSpan={13}><div className="hx-empty">Sin registros en este periodo todavía.</div></td></tr>
+                <tr>
+                  <td className="hx-td" colSpan={13}>
+                    <div className="hx-empty">
+                      {filtrando
+                        ? 'Ningún empleado coincide con tu búsqueda.'
+                        : 'Sin registros en este periodo todavía.'}
+                    </div>
+                  </td>
+                </tr>
               )}
               {filas.map((f) => (
                 <Fragment key={f.empleado.id}>
-                  <tr className="hx-row" style={{ cursor: 'pointer' }} onClick={() => setExpandido((s) => ({ ...s, [f.empleado.id]: !s[f.empleado.id] }))}>
+                  <tr className="hx-row hx-row-in" style={{ cursor: 'pointer' }} onClick={() => setExpandido((s) => ({ ...s, [f.empleado.id]: !s[f.empleado.id] }))}>
                     <td className="hx-td" style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>{expandido[f.empleado.id] ? '▾' : '▸'}</td>
                     <td className="hx-td tnum">{f.empleado.codigo}</td>
                     <td className="hx-td"><div style={{ fontWeight: 600 }}>{f.empleado.nombre}</div></td>
@@ -226,7 +283,9 @@ export function ReportePage() {
               <tfoot>
                 <tr style={{ background: 'var(--c-ink-900)', color: 'var(--text-on-ink)' }}>
                   <td className="hx-td" style={{ border: 'none' }} />
-                  <td className="hx-td" style={{ border: 'none', color: 'inherit', fontWeight: 700 }} colSpan={3}>GRAN TOTAL · {filas.length} empleados</td>
+                  <td className="hx-td" style={{ border: 'none', color: 'inherit', fontWeight: 700 }} colSpan={3}>
+                    {filtrando ? 'SUBTOTAL FILTRADO' : 'GRAN TOTAL'} · {filas.length} empleado{filas.length === 1 ? '' : 's'}
+                  </td>
                   <td className="hx-td tnum" style={{ border: 'none', textAlign: 'right', color: 'inherit' }}>{formatNumero(totales.he35)}</td>
                   <td className="hx-td tnum" style={{ border: 'none', textAlign: 'right', color: 'inherit' }}>{formatNumero(totales.he100)}</td>
                   <td className="hx-td tnum" style={{ border: 'none', textAlign: 'right', color: 'inherit' }}>{formatNumero(totales.nocturna)}</td>
@@ -236,7 +295,9 @@ export function ReportePage() {
                   <td className="hx-td tnum" style={{ border: 'none', textAlign: 'right', color: 'inherit' }}>{formatNumero(totales.vNocturna)}</td>
                   <td className="hx-td tnum" style={{ border: 'none', textAlign: 'right', color: 'inherit' }}>{formatNumero(totales.vFeriado)}</td>
                   <td className="hx-td tnum" style={{ border: 'none', textAlign: 'right', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--c-sun-400)' }}>
-                    {formatMonto(reporte?.granTotal ?? '0')}
+                    {filtrando
+                      ? formatMonto(totales.v35 + totales.v100 + totales.vNocturna + totales.vFeriado)
+                      : formatMonto(reporte?.granTotal ?? '0')}
                   </td>
                 </tr>
               </tfoot>
@@ -267,6 +328,7 @@ export function ReportePage() {
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button type="button" className="hx-btn hx-btn-secondary" onClick={() => setModalCerrar(false)}>Cancelar</button>
               <button type="button" className="hx-btn hx-btn-accent" disabled={cerrar.isPending} onClick={() => cerrar.mutate()}>
+                {cerrar.isPending && <Spinner />}
                 {cerrar.isPending ? 'Cerrando…' : 'Sí, cerrar periodo'}
               </button>
             </div>

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { mensajeError } from '../api/client';
+import { Spinner } from '../components/Spinner';
 
 export function LoginPage() {
   const { estaAutenticado, ingresar } = useAuth();
@@ -78,6 +79,7 @@ export function LoginPage() {
               </div>
             )}
             <button type="submit" className="hx-btn hx-btn-primary" style={{ marginTop: 8, height: 48, fontSize: 16 }} disabled={cargando}>
+              {cargando && <Spinner />}
               {cargando ? 'Entrando…' : 'Entrar'}
             </button>
           </form>

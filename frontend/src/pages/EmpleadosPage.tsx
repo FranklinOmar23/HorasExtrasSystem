@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { EmpleadoDrawer } from '../components/EmpleadoDrawer';
 import { PageHeader } from '../components/PageHeader';
+import { SkeletonLine, SkeletonTableRows } from '../components/Skeleton';
 import { listarEmpleados, listarSalarios } from '../api/empleados';
 import type { Empleado } from '../types/api';
 import { formatMonto } from '../utils/format';
@@ -65,12 +66,12 @@ export function EmpleadosPage() {
           </thead>
           <tbody>
             {isLoading && (
-              <tr><td className="hx-td" colSpan={7}><div className="hx-empty">Cargando…</div></td></tr>
+              <SkeletonTableRows columns={7} rows={8} align={['left', 'left', 'left', 'left', 'right', 'left', 'right']} />
             )}
             {!isLoading && empleados.length === 0 && (
               <tr><td className="hx-td" colSpan={7}><div className="hx-empty">Sin empleados que coincidan.</div></td></tr>
             )}
-            {empleados.map((e) => (
+            {!isLoading && empleados.map((e) => (
               <EmpleadoRow key={e.id} empleado={e} onEditar={() => setDrawer(e)} />
             ))}
           </tbody>
@@ -85,19 +86,21 @@ export function EmpleadosPage() {
 }
 
 function EmpleadoRow({ empleado, onEditar }: { empleado: Empleado; onEditar: () => void }) {
-  const { data: salarios } = useQuery({
+  const { data: salarios, isLoading: cargandoSalario } = useQuery({
     queryKey: ['salarios', empleado.id, 'resumen'],
     queryFn: () => listarSalarios(empleado.id),
   });
   const actual = salarios?.find((s) => s.vigenteHasta === null);
 
   return (
-    <tr className="hx-row">
+    <tr className="hx-row hx-row-in">
       <td className="hx-td tnum">{empleado.codigo}</td>
       <td className="hx-td" style={{ fontWeight: 600 }}>{empleado.nombre}</td>
       <td className="hx-td tnum" style={{ color: 'var(--text-secondary)' }}>{empleado.cedula ?? '—'}</td>
       <td className="hx-td" style={{ color: 'var(--text-secondary)' }}>{empleado.posicion}</td>
-      <td className="hx-td tnum" style={{ textAlign: 'right' }}>{actual ? formatMonto(actual.montoMensual) : '—'}</td>
+      <td className="hx-td tnum" style={{ textAlign: 'right' }}>
+        {cargandoSalario ? <SkeletonLine width={70} align="right" /> : actual ? formatMonto(actual.montoMensual) : '—'}
+      </td>
       <td className="hx-td">
         <span className={`hx-badge ${empleado.activo ? 'hx-badge-success' : 'hx-badge-neutral'}`}>
           {empleado.activo ? 'Activo' : 'Inactivo'}

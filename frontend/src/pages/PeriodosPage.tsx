@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 import { PageHeader } from '../components/PageHeader';
+import { SkeletonLine, SkeletonTableRows } from '../components/Skeleton';
+import { Spinner } from '../components/Spinner';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { crearPeriodo } from '../api/periodos';
 import { mensajeError } from '../api/client';
@@ -15,17 +17,18 @@ function hoy(): string {
 }
 
 function TotalPeriodo({ periodo }: { periodo: Periodo }) {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['reporte-periodo', periodo.id],
     queryFn: () => obtenerReportePeriodo(periodo.id),
   });
+  if (isLoading) return <SkeletonLine width={80} align="right" style={{ marginLeft: 'auto' }} />;
   return <>{data ? formatMonto(data.granTotal) : '—'}</>;
 }
 
 export function PeriodosPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { periodos, seleccionarPeriodo } = usePeriodoActivo();
+  const { periodos, seleccionarPeriodo, cargando } = usePeriodoActivo();
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [fechaInicio, setFechaInicio] = useState(hoy());
@@ -69,6 +72,7 @@ export function PeriodosPage() {
             <input className="hx-in" type="date" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
           </label>
           <button type="button" className="hx-btn hx-btn-primary" disabled={crear.isPending} onClick={() => crear.mutate()}>
+            {crear.isPending && <Spinner />}
             {crear.isPending ? 'Creando…' : 'Crear'}
           </button>
         </div>
@@ -91,8 +95,11 @@ export function PeriodosPage() {
             </tr>
           </thead>
           <tbody>
-            {ordenados.map((p) => (
-              <tr key={p.id} className="hx-row">
+            {cargando && (
+              <SkeletonTableRows columns={5} rows={5} align={['left', 'left', 'right', 'left', 'right']} />
+            )}
+            {!cargando && ordenados.map((p) => (
+              <tr key={p.id} className="hx-row hx-row-in">
                 <td className="hx-td" style={{ fontWeight: 600 }}>{formatRangoPeriodo(p.fechaInicio, p.fechaFin)}</td>
                 <td className="hx-td">
                   <Badge tono={p.estado === 'ABIERTO' ? 'success' : 'neutral'} dot>{p.estado === 'ABIERTO' ? 'Abierto' : 'Cerrado'}</Badge>
@@ -106,7 +113,7 @@ export function PeriodosPage() {
                 </td>
               </tr>
             ))}
-            {ordenados.length === 0 && (
+            {!cargando && ordenados.length === 0 && (
               <tr><td className="hx-td" colSpan={5}><div className="hx-empty">Sin periodos todavía.</div></td></tr>
             )}
           </tbody>

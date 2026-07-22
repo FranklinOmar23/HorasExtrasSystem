@@ -45,7 +45,12 @@ export class CalcularDesgloseService {
 
     const { divisorSalario, parametrosMotor } =
       parsearConfiguracionCalculo(configuracionCruda);
-    const salarioHoraUsado = salario.montoMensual.dividedBy(divisorSalario);
+    // divisorSalario (23.83) convierte el salario mensual a DIARIO (es el
+    // estándar dominicano de días hábiles promedio por mes); hay que dividir
+    // ese diario entre las horas de la jornada para llegar al salario/hora.
+    const salarioHoraUsado = salario.montoMensual
+      .dividedBy(divisorSalario)
+      .dividedBy(parametrosMotor.horasJornada);
 
     const motor = new MotorCalculo(tiposHoraExtra);
     return motor.calcular(

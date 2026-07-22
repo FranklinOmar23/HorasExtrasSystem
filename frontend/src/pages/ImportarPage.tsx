@@ -3,6 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '../components/PageHeader';
+import { Spinner } from '../components/Spinner';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { confirmarImportacion, subirImportacion } from '../api/importaciones';
 import { mensajeError } from '../api/client';
@@ -147,11 +148,15 @@ export function ImportarPage() {
         <div {...getRootProps()} className={`hx-dropzone${isDragActive ? ' active' : ''}`}>
           <input {...getInputProps()} />
           <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--c-sea-50)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
+            {subir.isPending ? (
+              <Spinner size={26} />
+            ) : (
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            )}
           </div>
           <div style={{ fontSize: 18, fontWeight: 600, fontFamily: 'var(--font-display)' }}>
             {subir.isPending ? 'Leyendo archivo…' : 'Arrastra tu archivo .xlsx aquí'}
@@ -167,7 +172,7 @@ export function ImportarPage() {
       )}
 
       {paso === 2 && resultado && (
-        <div>
+        <div className="hx-fade-in">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
             <span className="hx-badge hx-badge-success">{numOk} válidas</span>
             <span className="hx-badge hx-badge-warning">{numAdvertencia} advertencias</span>
@@ -226,6 +231,7 @@ export function ImportarPage() {
               disabled={aConfirmar === 0 || confirmar.isPending}
               onClick={() => confirmar.mutate()}
             >
+              {confirmar.isPending && <Spinner />}
               {confirmar.isPending ? 'Confirmando…' : `Confirmar importación (${aConfirmar} válidas)`}
             </button>
           </div>
@@ -233,8 +239,8 @@ export function ImportarPage() {
       )}
 
       {paso === 3 && confirmacion && (
-        <div className="hx-card" style={{ maxWidth: 600, padding: '44px 40px', textAlign: 'center' }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--c-success-bg)', color: 'var(--c-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
+        <div className="hx-card hx-fade-in" style={{ maxWidth: 600, padding: '44px 40px', textAlign: 'center' }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--c-success-bg)', color: 'var(--c-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', animation: 'hx-scale-in 420ms var(--ease-spring) both' }}>
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
             </svg>

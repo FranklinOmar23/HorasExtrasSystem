@@ -44,14 +44,18 @@ const common_1 = require("@nestjs/common");
 const XLSX = __importStar(require("xlsx"));
 const importacion_formato_invalido_error_1 = require("../../domain/errors/importacion-formato-invalido.error");
 const ALIAS_FECHA = ['fecha', 'date'];
-const ALIAS_CODIGO = ['codigo', 'código', 'cod', 'code'];
+const ALIAS_CODIGO = ['codigo', 'cod', 'code'];
 const ALIAS_NOMBRE = ['nombre', 'empleado', 'name'];
-const ALIAS_ENTRADA = ['entrada', 'horaentrada', 'hora_entrada', 'in'];
-const ALIAS_SALIDA = ['salida', 'horasalida', 'hora_salida', 'out'];
+const ALIAS_ENTRADA = ['entrada', 'horaentrada', 'in'];
+const ALIAS_SALIDA = ['salida', 'horasalida', 'out'];
 const EPOCA_EXCEL_MS = Date.UTC(1899, 11, 30);
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 function normalizarEncabezado(valor) {
-    return valor.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+    return valor
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
 }
 function encontrarColumna(encabezados, alias) {
     const encontrado = encabezados.find((encabezado) => alias.includes(normalizarEncabezado(encabezado)));
@@ -63,9 +67,6 @@ function formatearHora(horas, minutos) {
     return `${hh}:${mm}`;
 }
 function parsearFecha(valor) {
-    if (valor instanceof Date && !isNaN(valor.getTime())) {
-        return new Date(Date.UTC(valor.getUTCFullYear(), valor.getUTCMonth(), valor.getUTCDate()));
-    }
     if (typeof valor === 'number' && Number.isFinite(valor)) {
         const dias = Math.floor(valor);
         return new Date(EPOCA_EXCEL_MS + dias * MS_POR_DIA);
@@ -84,9 +85,6 @@ function parsearFecha(valor) {
     return null;
 }
 function parsearHora(valor) {
-    if (valor instanceof Date && !isNaN(valor.getTime())) {
-        return formatearHora(valor.getUTCHours(), valor.getUTCMinutes());
-    }
     if (typeof valor === 'number' && Number.isFinite(valor)) {
         const fraccion = valor - Math.floor(valor);
         const minutosTotales = Math.round(fraccion * 24 * 60);
@@ -126,7 +124,7 @@ let XlsxParserAdapter = class XlsxParserAdapter {
     parsear(contenido) {
         let libro;
         try {
-            libro = XLSX.read(contenido, { type: 'buffer', cellDates: true });
+            libro = XLSX.read(contenido, { type: 'buffer' });
         }
         catch {
             throw new importacion_formato_invalido_error_1.ImportacionFormatoInvalidoError('no se pudo leer el archivo como Excel (.xlsx).');

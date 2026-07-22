@@ -7,17 +7,24 @@ import {
 import { ImportacionFormatoInvalidoError } from '../../domain/errors/importacion-formato-invalido.error';
 
 const ALIAS_FECHA = ['fecha', 'date'];
-const ALIAS_CODIGO = ['codigo', 'código', 'cod', 'code'];
+const ALIAS_CODIGO = ['codigo', 'cod', 'code'];
 const ALIAS_NOMBRE = ['nombre', 'empleado', 'name'];
-const ALIAS_ENTRADA = ['entrada', 'horaentrada', 'hora_entrada', 'in'];
-const ALIAS_SALIDA = ['salida', 'horasalida', 'hora_salida', 'out'];
+const ALIAS_ENTRADA = ['entrada', 'horaentrada', 'in'];
+const ALIAS_SALIDA = ['salida', 'horasalida', 'out'];
 
 /** Excel cuenta los días desde 1899-12-30 (incluye el "día 0" ficticio de 1900). */
 const EPOCA_EXCEL_MS = Date.UTC(1899, 11, 30);
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
+/** Compacta un encabezado a minúsculas sin acentos ni espacios/guiones/etc.
+ *  ("Hora Entrada", "hora_entrada", "Hora-Entrada" → "horaentrada") para que
+ *  no dependamos de que el Excel use exactamente un separador u otro. */
 function normalizarEncabezado(valor: string): string {
-  return valor.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+  return valor
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
 }
 
 function encontrarColumna(
@@ -36,12 +43,10 @@ function formatearHora(horas: number, minutos: number): string {
   return `${hh}:${mm}`;
 }
 
+/** Solo maneja number/string a propósito: como `XLSX.read` se llama sin
+ *  `cellDates`, una celda de fecha/hora siempre llega como el número de
+ *  serie crudo de Excel (fracción de día), nunca como `Date`. */
 function parsearFecha(valor: unknown): Date | null {
-  if (valor instanceof Date && !isNaN(valor.getTime())) {
-    return new Date(
-      Date.UTC(valor.getUTCFullYear(), valor.getUTCMonth(), valor.getUTCDate()),
-    );
-  }
   if (typeof valor === 'number' && Number.isFinite(valor)) {
     const dias = Math.floor(valor);
     return new Date(EPOCA_EXCEL_MS + dias * MS_POR_DIA);
@@ -61,9 +66,6 @@ function parsearFecha(valor: unknown): Date | null {
 }
 
 function parsearHora(valor: unknown): string | null {
-  if (valor instanceof Date && !isNaN(valor.getTime())) {
-    return formatearHora(valor.getUTCHours(), valor.getUTCMinutes());
-  }
   if (typeof valor === 'number' && Number.isFinite(valor)) {
     const fraccion = valor - Math.floor(valor);
     const minutosTotales = Math.round(fraccion * 24 * 60);
@@ -107,7 +109,15 @@ export class XlsxParserAdapter implements ExcelParserPort {
   parsear(contenido: Buffer): FilaExcelCruda[] {
     let libro: XLSX.WorkBook;
     try {
-      libro = XLSX.read(contenido, { type: 'buffer', cellDates: true });
+      // Deliberadamente SIN `cellDates: true`: esa opción hace que SheetJS
+      // convierta las celdas de fecha/hora a objetos `Date`, y esa conversión
+      // puede quedar contaminada por la zona horaria del sistema para el
+      // "día 0" ficticio de Excel (1899-12-30) — se detectó un desfase real
+      // de horas al importar un archivo real. Se dejan los valores como el
+      // número de serie crudo (fracción de día) y se parsean a mano con
+      // aritmética pura (`parsearFecha`/`parsearHora`), que no depende de
+      // ninguna zona horaria.
+      libro = XLSX.read(contenido, { type: 'buffer' });
     } catch {
       throw new ImportacionFormatoInvalidoError(
         'no se pudo leer el archivo como Excel (.xlsx).',

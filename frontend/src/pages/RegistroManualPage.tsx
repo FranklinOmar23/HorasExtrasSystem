@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '../components/PageHeader';
+import { SkeletonTableRows } from '../components/Skeleton';
+import { Spinner } from '../components/Spinner';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { listarEmpleados } from '../api/empleados';
 import { mensajeError } from '../api/client';
@@ -27,7 +29,7 @@ const FORM_VACIO = {
 
 export function RegistroManualPage() {
   const queryClient = useQueryClient();
-  const { periodoActivo, periodoActivoId } = usePeriodoActivo();
+  const { periodoActivo, periodoActivoId, cargando: cargandoPeriodos } = usePeriodoActivo();
 
   const [regQuery, setRegQuery] = useState('');
   const [regFocus, setRegFocus] = useState(false);
@@ -49,7 +51,7 @@ export function RegistroManualPage() {
   });
   const empleadosPorId = useMemo(() => new Map(empleadosTodos.map((e) => [e.id, e])), [empleadosTodos]);
 
-  const { data: registros = [] } = useQuery({
+  const { data: registros = [], isLoading: cargandoRegistros } = useQuery({
     queryKey: ['registros', periodoActivoId],
     queryFn: () => listarRegistros(periodoActivoId as string),
     enabled: !!periodoActivoId,
@@ -126,6 +128,18 @@ export function RegistroManualPage() {
 
   const resultados = candidatos.slice(0, 6);
   const totalPreview = (preview ?? []).reduce((acc, c) => acc + Number(c.monto), 0);
+
+  if (cargandoPeriodos) {
+    return (
+      <div className="hx-page">
+        <PageHeader eyebrow="Entrada individual" title="Registro manual de horas" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 20 }}>
+          <div className="hx-card" style={{ padding: 24 }}><span className="hx-skel hx-skel-block" style={{ display: 'block', width: '100%', height: 240 }} /></div>
+          <div className="hx-card" style={{ padding: 24 }}><span className="hx-skel hx-skel-block" style={{ display: 'block', width: '100%', height: 240 }} /></div>
+        </div>
+      </div>
+    );
+  }
 
   if (!periodoActivo) {
     return (
@@ -219,6 +233,7 @@ export function RegistroManualPage() {
               disabled={!empleado || guardar.isPending}
               onClick={() => guardar.mutate()}
             >
+              {guardar.isPending && <Spinner />}
               {guardar.isPending ? 'Guardando…' : editandoId ? 'Actualizar registro' : 'Guardar registro'}
             </button>
             <button type="button" className="hx-btn hx-btn-secondary" onClick={limpiar}>
@@ -238,7 +253,9 @@ export function RegistroManualPage() {
               <div style={{ fontSize: 15, fontWeight: 600 }}>{empleado.nombre}</div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginBottom: 20 }}>{empleado.posicion}</div>
               {cargandoPreview ? (
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>Calculando…</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <Spinner size={13} /> Calculando…
+                </div>
               ) : !preview || preview.length === 0 ? (
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>Sin exceso de horas para estos datos (jornada normal).</div>
               ) : (
@@ -282,11 +299,14 @@ export function RegistroManualPage() {
             </tr>
           </thead>
           <tbody>
-            {recientes.map((r) => {
+            {cargandoRegistros && (
+              <SkeletonTableRows columns={8} rows={5} align={['left', 'left', 'left', 'left', 'left', 'left', 'right', 'right']} />
+            )}
+            {!cargandoRegistros && recientes.map((r) => {
               const emp = empleadosPorId.get(r.empleadoId);
               const total = r.calculos.reduce((acc, c) => acc + Number(c.monto), 0);
               return (
-                <tr key={r.id} className="hx-row">
+                <tr key={r.id} className="hx-row hx-row-in">
                   <td className="hx-td tnum">{formatFechaDia(r.fecha)}</td>
                   <td className="hx-td tnum">{emp?.codigo ?? '—'}</td>
                   <td className="hx-td" style={{ fontWeight: 600 }}>{emp?.nombre ?? '—'}</td>
@@ -310,7 +330,7 @@ export function RegistroManualPage() {
                 </tr>
               );
             })}
-            {recientes.length === 0 && (
+            {!cargandoRegistros && recientes.length === 0 && (
               <tr><td className="hx-td" colSpan={8}><div className="hx-empty">Sin registros todavía en este periodo.</div></td></tr>
             )}
           </tbody>

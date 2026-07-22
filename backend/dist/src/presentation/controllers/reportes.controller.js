@@ -44,9 +44,9 @@ let ReportesController = class ReportesController {
     }
     async reportePeriodoExcel(periodoId) {
         const reporte = await this.obtenerReportePeriodo.ejecutar(periodoId);
-        const buffer = (0, reporte_excel_builder_1.construirReporteExcel)(reporte);
+        const buffer = await (0, reporte_excel_builder_1.construirReporteExcel)(reporte);
         return new common_1.StreamableFile(buffer, {
-            disposition: `attachment; filename="reporte-${periodoId}.xlsx"`,
+            disposition: `attachment; filename="${(0, reporte_excel_builder_1.nombreArchivoReporteExcel)(reporte)}"`,
         });
     }
     async historico(query) {

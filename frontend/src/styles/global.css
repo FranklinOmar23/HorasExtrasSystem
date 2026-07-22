@@ -1,6 +1,30 @@
 html, body, #root { height: 100%; }
 body { background: var(--bg); }
 
+/* ---------- Motion ---------- */
+@keyframes hx-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes hx-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hx-scale-in { from { opacity: 0; transform: scale(.96) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes hx-slide-in-right { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes hx-shimmer { 0% { background-position: -320px 0; } 100% { background-position: 320px 0; } }
+@keyframes hx-spin { to { transform: rotate(360deg); } }
+
+/* Ojo: intencionalmente sin transform. `.hx-page` es el contenedor de los
+   overlays `position: fixed` (modal, drawer) — un transform residual (incluso
+   translateY(0) via animation-fill-mode) convierte a `.hx-page` en el marco de
+   referencia de esos `fixed`, sacándolos de la pantalla en vez de centrarlos
+   en el viewport. Solo opacidad aquí. */
+.hx-page { animation: hx-fade-in var(--dur-slow) var(--ease-out) both; }
+.hx-fade-in { animation: hx-fade-in var(--dur-slow) var(--ease-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-page, .hx-fade-in, .hx-skel, .hx-modal, .hx-drawer, .hx-overlay, .hx-drawer-overlay,
+  .hx-kpi-grid > *, .hx-spinner, .hx-navitem, .hx-btn, .hx-in, .hx-dropzone {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 .tnum {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -80,8 +104,9 @@ table.hx-table { width: 100%; border-collapse: collapse; }
   top: 0;
   z-index: 1;
 }
-.hx-td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); vertical-align: middle; }
+.hx-td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); vertical-align: middle; transition: background var(--dur) var(--ease-out); }
 .hx-row:hover .hx-td { background: var(--c-sea-50); }
+.hx-row-in { animation: hx-fade-up var(--dur-slow) var(--ease-out) both; }
 
 /* ---------- Badges / chips ---------- */
 .hx-badge {
@@ -124,17 +149,23 @@ table.hx-table { width: 100%; border-collapse: collapse; }
 /* ---------- KPI cards ---------- */
 .hx-kpi-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 @media (max-width: 1100px) { .hx-kpi-grid { grid-template-columns: 1fr 1fr; } }
-.hx-kpi-hero { position: relative; overflow: hidden; border-radius: 16px; background: linear-gradient(135deg, var(--c-sea-800), var(--c-ink-900)); color: var(--text-on-ink); padding: 22px 24px; box-shadow: var(--shadow-md); border-top: 3px solid var(--accent); }
+.hx-kpi-grid > * { animation: hx-fade-up var(--dur-slow) var(--ease-out) both; }
+.hx-kpi-grid > *:nth-child(1) { animation-delay: 0ms; }
+.hx-kpi-grid > *:nth-child(2) { animation-delay: 60ms; }
+.hx-kpi-grid > *:nth-child(3) { animation-delay: 120ms; }
+.hx-kpi-grid > *:nth-child(4) { animation-delay: 180ms; }
+.hx-kpi-hero { position: relative; overflow: hidden; border-radius: 16px; background: linear-gradient(135deg, var(--c-sea-800), var(--c-ink-900)); color: var(--text-on-ink); padding: 22px 24px; box-shadow: var(--shadow-md); border-top: 3px solid var(--accent); transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out); }
 .hx-kpi-hero::before { content: ''; position: absolute; top: -60px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,90,60,.28), transparent 70%); }
-.hx-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); }
+.hx-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out); }
+.hx-kpi:hover, .hx-kpi-hero:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .hx-kpi-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-tertiary); }
 .hx-kpi-value { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1; margin-top: 12px; }
 
 /* ---------- Modal / Drawer ---------- */
-.hx-overlay { position: fixed; inset: 0; background: rgba(8,23,27,.55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; }
-.hx-modal { background: var(--surface); border-radius: 18px; max-width: 460px; width: 100%; padding: 30px; box-shadow: var(--shadow-lg); }
-.hx-drawer-overlay { position: fixed; inset: 0; background: rgba(8,23,27,.5); z-index: 50; display: flex; justify-content: flex-end; }
-.hx-drawer { width: 460px; max-width: 100%; height: 100%; background: var(--surface); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; overflow-y: auto; }
+.hx-overlay { position: fixed; inset: 0; background: rgba(8,23,27,.55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; animation: hx-fade-in var(--dur) var(--ease-out) both; }
+.hx-modal { background: var(--surface); border-radius: 18px; max-width: 460px; width: 100%; padding: 30px; box-shadow: var(--shadow-lg); animation: hx-scale-in var(--dur-slow) var(--ease-spring) both; }
+.hx-drawer-overlay { position: fixed; inset: 0; background: rgba(8,23,27,.5); z-index: 50; display: flex; justify-content: flex-end; animation: hx-fade-in var(--dur) var(--ease-out) both; }
+.hx-drawer { width: 460px; max-width: 100%; height: 100%; background: var(--surface); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; overflow-y: auto; animation: hx-slide-in-right var(--dur-slow) var(--ease-out) both; }
 .hx-drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 22px 26px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
 .hx-drawer-body { padding: 24px 26px; display: flex; flex-direction: column; gap: 16px; }
 .hx-drawer-foot { margin-top: auto; display: flex; gap: 12px; justify-content: flex-end; padding: 18px 26px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: var(--surface); }
@@ -143,7 +174,9 @@ table.hx-table { width: 100%; border-collapse: collapse; }
 .hx-login { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; font-family: var(--font-sans); }
 @media (max-width: 860px) { .hx-login { grid-template-columns: 1fr; } .hx-login-visual { display: none; } }
 .hx-login-form { display: flex; flex-direction: column; justify-content: center; padding: 0 72px; background: var(--surface); }
+.hx-login-form > div { animation: hx-fade-up var(--dur-slow) var(--ease-out) both; }
 .hx-login-visual { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--c-sea-800), var(--c-ink-900)); color: var(--text-on-ink); display: flex; flex-direction: column; justify-content: center; padding: 0 72px; }
+.hx-login-visual > div:last-child { animation: hx-fade-up var(--dur-slow) var(--ease-out) 90ms both; }
 
 /* ---------- Import dropzone ---------- */
 .hx-dropzone { border: 2px dashed var(--border-strong); border-radius: 16px; background: var(--surface); padding: 56px 24px; text-align: center; cursor: pointer; max-width: 720px; transition: border-color .2s, background .2s; }
@@ -157,6 +190,97 @@ table.hx-table { width: 100%; border-collapse: collapse; }
 .hx-tab { padding: 11px 16px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s; color: var(--text-secondary); background: none; border-left: none; border-right: none; border-top: none; }
 .hx-tab.active { color: var(--brand-strong); border-bottom-color: var(--brand); }
 
-.hx-empty { padding: 40px; text-align: center; color: var(--text-tertiary); font-size: 14px; }
-.hx-spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: currentColor; animation: hx-spin .7s linear infinite; }
-@keyframes hx-spin { to { transform: rotate(360deg); } }
+.hx-empty { padding: 40px; text-align: center; color: var(--text-tertiary); font-size: 14px; animation: hx-fade-in var(--dur-slow) var(--ease-out) both; }
+
+/* ---------- Gran total por quincena (histograma) ---------- */
+.hx-hist-slot { outline-offset: 3px; border-radius: 6px; cursor: pointer; }
+.hx-hist-slot:focus-visible { outline: 2px solid var(--focus-ring); }
+.hx-hist-bar { transition: filter var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out); }
+.hx-hist-slot:hover .hx-hist-bar, .hx-hist-slot:focus-visible .hx-hist-bar { filter: brightness(1.1); }
+.hx-hist-tooltip {
+  position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%) translateY(4px);
+  background: var(--c-ink-900); color: var(--text-on-ink); border-radius: 10px; padding: 9px 13px;
+  font-size: 12px; white-space: nowrap; box-shadow: var(--shadow-lg); pointer-events: none; z-index: 5;
+  opacity: 0; transition: opacity var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+.hx-hist-slot:hover .hx-hist-tooltip, .hx-hist-slot:focus-visible .hx-hist-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
+.hx-hist-tooltip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--c-ink-900);
+}
+
+/* ---------- Nav item "Próximamente" (sidebar) ---------- */
+@keyframes hx-bounce-once {
+  0% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.22) rotate(-12deg); }
+  50% { transform: scale(0.92) rotate(8deg); }
+  70% { transform: scale(1.1) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes hx-bounce-loop {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-5px) rotate(4deg); }
+}
+@keyframes hx-ring-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,90,60,.55); }
+  100% { box-shadow: 0 0 0 18px rgba(255,90,60,0); }
+}
+@keyframes hx-pop-in-right {
+  from { opacity: 0; transform: translateY(-50%) translateX(-10px) scale(.9); }
+  to { opacity: 1; transform: translateY(-50%) translateX(0) scale(1); }
+}
+.hx-navitem-soon {
+  position: relative; display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; cursor: pointer; color: rgba(255,255,255,.72); background: none; border: none;
+  width: 100%; text-align: left; font-family: inherit; transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+.hx-navitem-soon:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.92); }
+.hx-navitem-soon .hx-navitem-soon-icon {
+  flex: none; width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,90,60,.16); color: var(--c-coral-400, #FF7C63);
+}
+.hx-navitem-soon .hx-navitem-soon-icon.bounce { animation: hx-bounce-once 480ms var(--ease-spring) both, hx-ring-pulse 700ms var(--ease-out) both; }
+.hx-navitem-soon .hx-pill-pronto {
+  margin-left: auto; flex: none; font-family: var(--font-mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; background: rgba(255,90,60,.18); color: var(--c-coral-400, #FF7C63);
+}
+/* `position: fixed` con top/left calculados en JS a partir del botón: el popover
+   vive dentro de `.hx-nav`, que tiene `overflow-y: auto` — por spec CSS, eso fuerza
+   también `overflow-x` a recortar, así que un `position: absolute` quedaría invisible
+   fuera de esos límites. `fixed` no se recorta por overflow de un ancestro (solo por
+   transform/filter, que `.hx-aside`/`.hx-nav` no usan). */
+.hx-soon-pop {
+  position: fixed; background: var(--c-ink-900); color: var(--text-on-ink);
+  border-radius: 12px; padding: 12px 16px; font-size: 13px; white-space: nowrap;
+  box-shadow: var(--shadow-lg); z-index: 40; display: flex; align-items: center; gap: 10px;
+  animation: hx-pop-in-right 320ms var(--ease-spring) both; border: 1px solid var(--c-ink-600);
+}
+.hx-soon-pop .hx-soon-pop-emoji { font-size: 20px; display: inline-block; animation: hx-bounce-loop 900ms ease-in-out infinite; }
+.hx-soon-pop .hx-soon-pop-title { font-weight: 700; }
+.hx-soon-pop .hx-soon-pop-sub { color: rgba(255,255,255,.55); font-size: 11.5px; margin-top: 1px; }
+.hx-soon-pop::before {
+  content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+  border: 6px solid transparent; border-right-color: var(--c-ink-900);
+}
+
+/* ---------- Spinner (color-agnostic: rides on currentColor, works on any button/surface) ---------- */
+.hx-spinner {
+  width: 15px; height: 15px; flex: none; border-radius: 50%;
+  border: 2px solid color-mix(in oklab, currentColor 28%, transparent);
+  border-top-color: currentColor;
+  animation: hx-spin .65s linear infinite;
+}
+
+/* ---------- Skeleton loading ---------- */
+.hx-skel {
+  display: block;
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--c-paper-2) 22%, var(--c-paper-3) 40%, var(--c-paper-2) 58%);
+  background-size: 640px 100%;
+  animation: hx-shimmer 1.5s ease-in-out infinite;
+}
+.hx-skel-line { height: 12px; }
+.hx-skel-title { height: 16px; border-radius: var(--r-xs); }
+.hx-skel-circle { border-radius: 50%; flex: none; }
+.hx-skel-block { border-radius: var(--r-md); }
+td .hx-skel, th .hx-skel { margin: 2px 0; }

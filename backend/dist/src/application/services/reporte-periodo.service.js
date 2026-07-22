@@ -41,14 +41,14 @@ class ReportePeriodoService {
             lista.push(registroConCalculos);
             registrosPorEmpleado.set(empleadoId, lista);
         }
-        const divisorSalario = await this.obtenerDivisorSalario();
+        const parametrosSalario = await this.obtenerParametrosSalario();
         const filas = [];
         for (const [empleadoId, registrosEmpleado] of registrosPorEmpleado) {
             const empleado = await this.empleadoRepository.buscarPorId(empleadoId);
             if (!empleado) {
                 continue;
             }
-            filas.push(await this.agregarFilaEmpleado(empleado, registrosEmpleado, divisorSalario));
+            filas.push(await this.agregarFilaEmpleado(empleado, registrosEmpleado, parametrosSalario));
         }
         filas.sort((a, b) => a.empleado.codigo - b.empleado.codigo);
         const granTotal = filas.reduce((acumulado, fila) => acumulado.plus(fila.total), new decimal_js_1.default(0));
@@ -56,15 +56,16 @@ class ReportePeriodoService {
     }
     async generarFilaEmpleado(periodo, empleado) {
         const registros = await this.registroHorasRepository.listarPorPeriodo(periodo.id, empleado.id);
-        const divisorSalario = await this.obtenerDivisorSalario();
-        const fila = await this.agregarFilaEmpleado(empleado, registros, divisorSalario);
+        const parametrosSalario = await this.obtenerParametrosSalario();
+        const fila = await this.agregarFilaEmpleado(empleado, registros, parametrosSalario);
         return { fila, registros };
     }
-    async obtenerDivisorSalario() {
+    async obtenerParametrosSalario() {
         const configuracion = await this.configuracionRepository.obtenerTodos();
-        return (0, configuracion_calculo_mapper_1.parsearConfiguracionCalculo)(configuracion).divisorSalario;
+        const { divisorSalario, parametrosMotor } = (0, configuracion_calculo_mapper_1.parsearConfiguracionCalculo)(configuracion);
+        return { divisorSalario, horasJornada: parametrosMotor.horasJornada };
     }
-    async agregarFilaEmpleado(empleado, registros, divisorSalario) {
+    async agregarFilaEmpleado(empleado, registros, parametrosSalario) {
         const horas = desgloseCero();
         const montos = desgloseCero();
         let salarioHora = null;
@@ -83,7 +84,9 @@ class ReportePeriodoService {
         if (salarioHora === null) {
             const salario = await this.salarioRepository.buscarVigenteEn(empleado.id, ultimaFecha ?? new Date());
             salarioHora = salario
-                ? salario.montoMensual.dividedBy(divisorSalario)
+                ? salario.montoMensual
+                    .dividedBy(parametrosSalario.divisorSalario)
+                    .dividedBy(parametrosSalario.horasJornada)
                 : new decimal_js_1.default(0);
         }
         const total = montos.he35

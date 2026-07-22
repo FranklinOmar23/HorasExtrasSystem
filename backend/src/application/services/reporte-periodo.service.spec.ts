@@ -283,7 +283,7 @@ describe('ReportePeriodoService', () => {
 
     const reporte = await servicio.generar(PERIODO);
 
-    expect(reporte.filas[0].salarioHora.toString()).toBe('1000'); // 24000/24
+    expect(reporte.filas[0].salarioHora.toString()).toBe('125'); // 24000/24/8
     expect(reporte.filas[0].total.toString()).toBe('0');
   });
 
