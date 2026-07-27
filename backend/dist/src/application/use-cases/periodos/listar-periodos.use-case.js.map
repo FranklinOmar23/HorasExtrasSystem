@@ -1,1 +1,0 @@
-{"version":3,"file":"listar-periodos.use-case.js","sourceRoot":"","sources":["../../../../../src/application/use-cases/periodos/listar-periodos.use-case.ts"],"names":[],"mappings":";;;AAGA,MAAa,qBAAqB;IACH;IAA7B,YAA6B,UAA6B;QAA7B,eAAU,GAAV,UAAU,CAAmB;IAAG,CAAC;IAE9D,KAAK,CAAC,QAAQ;QACZ,OAAO,IAAI,CAAC,UAAU,CAAC,MAAM,EAAE,CAAC;IAClC,CAAC;CACF;AAND,sDAMC"}

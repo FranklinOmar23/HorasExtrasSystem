@@ -1,1 +1,0 @@
-{"version":3,"file":"periodo-fechas-duplicadas.error.js","sourceRoot":"","sources":["../../../../src/domain/errors/periodo-fechas-duplicadas.error.ts"],"names":[],"mappings":";;;AAAA,iDAA6C;AAE7C,MAAa,4BAA6B,SAAQ,0BAAW;IAClD,IAAI,GAAG,2BAA2B,CAAC;IACnC,UAAU,GAAG,GAAG,CAAC;IAE1B,YAAY,WAAmB,EAAE,QAAgB;QAC/C,KAAK,CAAC,uCAAuC,WAAW,OAAO,QAAQ,GAAG,CAAC,CAAC;IAC9E,CAAC;CACF;AAPD,oEAOC"}

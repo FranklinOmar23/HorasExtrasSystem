@@ -1,9 +1,0 @@
-import { HistoricoPeriodo } from '../../application/use-cases/reportes/obtener-reporte-historico.use-case';
-import { ReporteEmpleadoPeriodo } from '../../application/use-cases/reportes/obtener-reporte-empleado.use-case';
-import { ReportePeriodo } from '../../application/services/reporte-periodo.service';
-import { HistoricoPeriodoDto } from '../dtos/reportes/historico-periodo.dto';
-import { ReporteEmpleadoRespuestaDto } from '../dtos/reportes/reporte-empleado-respuesta.dto';
-import { ReportePeriodoRespuestaDto } from '../dtos/reportes/reporte-periodo-respuesta.dto';
-export declare function aReportePeriodoRespuestaDto(reporte: ReportePeriodo): ReportePeriodoRespuestaDto;
-export declare function aReporteEmpleadoRespuestaDto(reporte: ReporteEmpleadoPeriodo): ReporteEmpleadoRespuestaDto;
-export declare function aHistoricoPeriodoDto(historico: HistoricoPeriodo): HistoricoPeriodoDto;
