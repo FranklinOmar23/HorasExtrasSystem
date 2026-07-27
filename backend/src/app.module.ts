@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { JwtAuthGuard } from './presentation/guards/jwt-auth.guard';
 import { RolesGuard } from './presentation/guards/roles.guard';
+import { AuditoriaModule } from './presentation/modules/auditoria.module';
 import { AuthModule } from './presentation/modules/auth.module';
 import { ConfiguracionModule } from './presentation/modules/configuracion.module';
 import { EmpleadosModule } from './presentation/modules/empleados.module';
@@ -18,6 +19,7 @@ import { UsuariosModule } from './presentation/modules/usuarios.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    AuditoriaModule,
     HealthModule,
     AuthModule,
     EmpleadosModule,

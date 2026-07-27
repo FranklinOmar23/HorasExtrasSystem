@@ -13,5 +13,7 @@ export function aPeriodoRespuestaDto(periodo: Periodo): PeriodoRespuestaDto {
     estado: periodo.estado,
     cerradoEn: periodo.cerradoEn ? periodo.cerradoEn.toISOString() : null,
     cerradoPorId: periodo.cerradoPorId,
+    eliminadoEn: periodo.eliminadoEn ? periodo.eliminadoEn.toISOString() : null,
+    eliminadoPorId: periodo.eliminadoPorId,
   };
 }

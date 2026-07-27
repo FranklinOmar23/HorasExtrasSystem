@@ -3,6 +3,17 @@ export type EstadoPeriodo = 'ABIERTO' | 'CERRADO';
 export type OrigenRegistro = 'EXCEL' | 'MANUAL';
 export type TipoHoraExtraCodigo = 'HE_35' | 'HE_100' | 'NOCTURNA_15' | 'FERIADO';
 export type EstadoFilaImportacion = 'OK' | 'ADVERTENCIA' | 'ERROR';
+export type AccionAuditoria = 'CREAR' | 'ACTUALIZAR' | 'ELIMINAR' | 'CERRAR' | 'RESTAURAR' | 'CONFIRMAR';
+export type EntidadAuditoria =
+  | 'PERIODO'
+  | 'EMPLEADO'
+  | 'SALARIO'
+  | 'CONFIGURACION'
+  | 'FERIADO'
+  | 'TIPO_HORA_EXTRA'
+  | 'REGISTRO_HORAS'
+  | 'IMPORTACION'
+  | 'USUARIO';
 
 export interface UsuarioActual {
   id: string;
@@ -56,6 +67,19 @@ export interface Periodo {
   estado: EstadoPeriodo;
   cerradoEn: string | null;
   cerradoPorId: string | null;
+  eliminadoEn: string | null;
+  eliminadoPorId: string | null;
+}
+
+export interface Auditoria {
+  id: string;
+  usuarioId: string;
+  usuarioNombre: string;
+  accion: AccionAuditoria;
+  entidad: EntidadAuditoria;
+  entidadId: string | null;
+  descripcion: string;
+  creadoEn: string;
 }
 
 export interface Calculo {

@@ -16,6 +16,8 @@ function aDominio(periodo: PeriodoPrisma): Periodo {
     periodo.estado as EstadoPeriodo,
     periodo.cerradoEn,
     periodo.cerradoPorId,
+    periodo.eliminadoEn,
+    periodo.eliminadoPorId,
   );
 }
 
@@ -25,7 +27,16 @@ export class PeriodoPrismaRepository implements PeriodoRepository {
 
   async listar(): Promise<Periodo[]> {
     const periodos = await this.prisma.periodo.findMany({
+      where: { eliminadoEn: null },
       orderBy: { fechaInicio: 'desc' },
+    });
+    return periodos.map(aDominio);
+  }
+
+  async listarEliminados(): Promise<Periodo[]> {
+    const periodos = await this.prisma.periodo.findMany({
+      where: { eliminadoEn: { not: null } },
+      orderBy: { eliminadoEn: 'desc' },
     });
     return periodos.map(aDominio);
   }
@@ -58,6 +69,26 @@ export class PeriodoPrismaRepository implements PeriodoRepository {
     const periodo = await this.prisma.periodo.update({
       where: { id },
       data: { estado: EstadoPeriodo.CERRADO, cerradoPorId, cerradoEn },
+    });
+    return aDominio(periodo);
+  }
+
+  async eliminar(
+    id: string,
+    eliminadoPorId: string,
+    eliminadoEn: Date,
+  ): Promise<Periodo> {
+    const periodo = await this.prisma.periodo.update({
+      where: { id },
+      data: { eliminadoPorId, eliminadoEn },
+    });
+    return aDominio(periodo);
+  }
+
+  async restaurar(id: string): Promise<Periodo> {
+    const periodo = await this.prisma.periodo.update({
+      where: { id },
+      data: { eliminadoPorId: null, eliminadoEn: null },
     });
     return aDominio(periodo);
   }

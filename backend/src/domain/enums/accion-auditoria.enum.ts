@@ -1,0 +1,8 @@
+export enum AccionAuditoria {
+  CREAR = 'CREAR',
+  ACTUALIZAR = 'ACTUALIZAR',
+  ELIMINAR = 'ELIMINAR',
+  CERRAR = 'CERRAR',
+  RESTAURAR = 'RESTAURAR',
+  CONFIRMAR = 'CONFIRMAR',
+}

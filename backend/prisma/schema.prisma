@@ -23,8 +23,10 @@ model Usuario {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  periodosCerrados Periodo[]     @relation("PeriodoCerradoPor")
-  importaciones    Importacion[]
+  periodosCerrados   Periodo[]     @relation("PeriodoCerradoPor")
+  periodosEliminados Periodo[]     @relation("PeriodoEliminadoPor")
+  importaciones      Importacion[]
+  auditorias         Auditoria[]
 
   @@map("usuarios")
 }
@@ -121,17 +123,25 @@ model Feriado {
 
 /// Un periodo CERRADO es inmutable: cualquier escritura sobre sus registros
 /// o cálculos (etapas 4-5) debe lanzar PeriodoCerradoError.
+///
+/// La eliminación es un soft-delete (`eliminadoEn`/`eliminadoPorId`): nunca se
+/// borra la fila ni sus registros/cálculos/importaciones asociados (es
+/// historial de dinero), solo se oculta de los listados. Es restaurable
+/// dentro de un plazo de 30 días desde `eliminadoEn` (ver RestaurarPeriodoUseCase).
 model Periodo {
-  id           String    @id @default(uuid())
-  fechaInicio  DateTime  @db.Date
-  fechaFin     DateTime  @db.Date
-  estado       String    @default("ABIERTO") @db.VarChar(10)
-  cerradoEn    DateTime?
-  cerradoPorId String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  fechaInicio    DateTime  @db.Date
+  fechaFin       DateTime  @db.Date
+  estado         String    @default("ABIERTO") @db.VarChar(10)
+  cerradoEn      DateTime?
+  cerradoPorId   String?
+  eliminadoEn    DateTime?
+  eliminadoPorId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   cerradoPor     Usuario?        @relation("PeriodoCerradoPor", fields: [cerradoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  eliminadoPor   Usuario?        @relation("PeriodoEliminadoPor", fields: [eliminadoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   registrosHoras RegistroHoras[]
   importaciones  Importacion[]
 
@@ -209,4 +219,24 @@ model Importacion {
 
   @@index([periodoId])
   @@map("importaciones")
+}
+
+/// Bitácora de auditoría: quién hizo qué cambio y cuándo, en todo el sistema
+/// (periodos, empleados, salarios, configuración, feriados, tipos de hora
+/// extra, registros de horas, importaciones y usuarios). Solo de lectura para
+/// la UI — nunca se edita ni se borra una fila de auditoría.
+model Auditoria {
+  id          String   @id @default(uuid())
+  usuarioId   String
+  accion      String   @db.VarChar(20)
+  entidad     String   @db.VarChar(30)
+  entidadId   String?
+  descripcion String
+  creadoEn    DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([entidad, entidadId])
+  @@index([creadoEn])
+  @@map("auditorias")
 }

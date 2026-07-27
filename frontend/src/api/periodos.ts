@@ -25,3 +25,17 @@ export async function cerrarPeriodo(id: string): Promise<Periodo> {
   const { data } = await apiClient.post<Periodo>(`/periodos/${id}/cerrar`);
   return data;
 }
+
+export async function eliminarPeriodo(id: string): Promise<void> {
+  await apiClient.delete(`/periodos/${id}`);
+}
+
+export async function listarPeriodosEliminados(): Promise<Periodo[]> {
+  const { data } = await apiClient.get<Periodo[]>('/periodos/eliminados');
+  return data;
+}
+
+export async function restaurarPeriodo(id: string): Promise<Periodo> {
+  const { data } = await apiClient.post<Periodo>(`/periodos/${id}/restaurar`);
+  return data;
+}

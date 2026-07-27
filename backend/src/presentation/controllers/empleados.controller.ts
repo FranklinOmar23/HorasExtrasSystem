@@ -15,12 +15,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import Decimal from 'decimal.js';
+import { RegistrarAuditoriaUseCase } from '../../application/use-cases/auditoria/registrar-auditoria.use-case';
 import { ActualizarEmpleadoUseCase } from '../../application/use-cases/empleados/actualizar-empleado.use-case';
 import { CrearEmpleadoUseCase } from '../../application/use-cases/empleados/crear-empleado.use-case';
 import { ListarEmpleadosUseCase } from '../../application/use-cases/empleados/listar-empleados.use-case';
 import { ObtenerEmpleadoUseCase } from '../../application/use-cases/empleados/obtener-empleado.use-case';
 import { CrearSalarioUseCase } from '../../application/use-cases/salarios/crear-salario.use-case';
 import { ListarSalariosUseCase } from '../../application/use-cases/salarios/listar-salarios.use-case';
+import { Usuario } from '../../domain/entities/usuario.entity';
+import { AccionAuditoria } from '../../domain/enums/accion-auditoria.enum';
+import { EntidadAuditoria } from '../../domain/enums/entidad-auditoria.enum';
+import { UsuarioActual } from '../decorators/usuario-actual.decorator';
 import { ActualizarEmpleadoDto } from '../dtos/empleados/actualizar-empleado.dto';
 import { CrearEmpleadoDto } from '../dtos/empleados/crear-empleado.dto';
 import { EmpleadoRespuestaDto } from '../dtos/empleados/empleado-respuesta.dto';
@@ -47,6 +52,8 @@ export class EmpleadosController {
     private readonly listarSalarios: ListarSalariosUseCase,
     @Inject(CrearSalarioUseCase)
     private readonly crearSalario: CrearSalarioUseCase,
+    @Inject(RegistrarAuditoriaUseCase)
+    private readonly registrarAuditoria: RegistrarAuditoriaUseCase,
   ) {}
 
   @Get()
@@ -74,7 +81,10 @@ export class EmpleadosController {
   @ApiOperation({ summary: 'Crea un empleado con su salario inicial' })
   @ApiResponse({ status: 201, type: EmpleadoRespuestaDto })
   @ApiResponse({ status: 409, description: 'Código o cédula duplicados' })
-  async crear(@Body() dto: CrearEmpleadoDto): Promise<EmpleadoRespuestaDto> {
+  async crear(
+    @Body() dto: CrearEmpleadoDto,
+    @UsuarioActual() usuario: Usuario,
+  ): Promise<EmpleadoRespuestaDto> {
     const empleado = await this.crearEmpleado.ejecutar({
       codigo: dto.codigo,
       nombre: dto.nombre,
@@ -84,6 +94,13 @@ export class EmpleadosController {
         montoMensual: new Decimal(dto.salarioInicial.montoMensual),
         vigenteDesde: new Date(dto.salarioInicial.vigenteDesde),
       },
+    });
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.CREAR,
+      entidad: EntidadAuditoria.EMPLEADO,
+      entidadId: empleado.id,
+      descripcion: `Creó al empleado ${empleado.nombre} (código ${empleado.codigo}, posición ${empleado.posicion}).`,
     });
     return aEmpleadoRespuestaDto(empleado);
   }
@@ -96,8 +113,16 @@ export class EmpleadosController {
   async actualizar(
     @Param('id') id: string,
     @Body() dto: ActualizarEmpleadoDto,
+    @UsuarioActual() usuario: Usuario,
   ): Promise<EmpleadoRespuestaDto> {
     const empleado = await this.actualizarEmpleado.ejecutar(id, dto);
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.ACTUALIZAR,
+      entidad: EntidadAuditoria.EMPLEADO,
+      entidadId: empleado.id,
+      descripcion: `Actualizó al empleado ${empleado.nombre} (código ${empleado.codigo}).`,
+    });
     return aEmpleadoRespuestaDto(empleado);
   }
 
@@ -121,10 +146,19 @@ export class EmpleadosController {
   async crearSalarioDelEmpleado(
     @Param('id') id: string,
     @Body() dto: CrearSalarioDto,
+    @UsuarioActual() usuario: Usuario,
   ): Promise<SalarioRespuestaDto> {
+    const empleado = await this.obtenerEmpleado.ejecutar(id);
     const salario = await this.crearSalario.ejecutar(id, {
       montoMensual: new Decimal(dto.montoMensual),
       vigenteDesde: new Date(dto.vigenteDesde),
+    });
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.CREAR,
+      entidad: EntidadAuditoria.SALARIO,
+      entidadId: salario.id,
+      descripcion: `Registró un nuevo salario de RD$${dto.montoMensual} para el empleado ${empleado.nombre} (código ${empleado.codigo}), vigente desde ${dto.vigenteDesde}.`,
     });
     return aSalarioRespuestaDto(salario);
   }

@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '../components/PageHeader';
 import { Spinner } from '../components/Spinner';
+import { EmpleadoNuevoModal } from '../components/EmpleadoNuevoModal';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { confirmarImportacion, subirImportacion } from '../api/importaciones';
 import { mensajeError } from '../api/client';
-import type { Importacion, ParsearImportacionRespuesta } from '../types/api';
+import type { FilaImportacion, Importacion, ParsearImportacionRespuesta } from '../types/api';
 
 const PASOS = [
   { n: 1, label: 'Subir archivo', sub: 'Arrastra el .xlsx' },
@@ -15,10 +16,29 @@ const PASOS = [
   { n: 3, label: 'Confirmar', sub: 'Resumen final' },
 ];
 
+const MENSAJE_EMPLEADO_INEXISTENTE = 'No existe un empleado con código';
+
+interface EmpleadoNuevoPendiente {
+  codigo: number;
+  nombreSugerido: string;
+}
+
 function estiloBadgeFila(estado: string): { clase: string; texto: string } {
   if (estado === 'OK') return { clase: 'hx-badge-success', texto: '✓ Válida' };
   if (estado === 'ADVERTENCIA') return { clase: 'hx-badge-warning', texto: '⚠ Advertencia' };
   return { clase: 'hx-badge-danger', texto: '✗ Error' };
+}
+
+function empleadosFaltantes(filas: FilaImportacion[]): EmpleadoNuevoPendiente[] {
+  const vistos = new Map<number, EmpleadoNuevoPendiente>();
+  for (const f of filas) {
+    if (f.codigo === null) continue;
+    if (!f.mensajes.some((m) => m.includes(MENSAJE_EMPLEADO_INEXISTENTE))) continue;
+    if (!vistos.has(f.codigo)) {
+      vistos.set(f.codigo, { codigo: f.codigo, nombreSugerido: f.nombre ?? '' });
+    }
+  }
+  return [...vistos.values()];
 }
 
 export function ImportarPage() {
@@ -27,10 +47,14 @@ export function ImportarPage() {
   const { periodoActivo, periodoActivoId } = usePeriodoActivo();
 
   const [paso, setPaso] = useState(1);
+  const [archivoActual, setArchivoActual] = useState<File | null>(null);
   const [resultado, setResultado] = useState<ParsearImportacionRespuesta | null>(null);
   const [incluirAdvertencias, setIncluirAdvertencias] = useState(false);
   const [confirmacion, setConfirmacion] = useState<Importacion | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [colaEmpleadosNuevos, setColaEmpleadosNuevos] = useState<EmpleadoNuevoPendiente[]>([]);
+  const [totalEmpleadosNuevos, setTotalEmpleadosNuevos] = useState(0);
+  const [seCreoAlgunoEnEstaRonda, setSeCreoAlgunoEnEstaRonda] = useState(false);
 
   const subir = useMutation({
     mutationFn: (archivo: File) => subirImportacion(periodoActivoId as string, archivo),
@@ -38,9 +62,40 @@ export function ImportarPage() {
       setResultado(data);
       setError(null);
       setPaso(2);
+      const faltantes = empleadosFaltantes(data.filas);
+      setColaEmpleadosNuevos(faltantes);
+      setTotalEmpleadosNuevos(faltantes.length);
+      setSeCreoAlgunoEnEstaRonda(false);
     },
     onError: (err) => setError(mensajeError(err, 'No se pudo leer el archivo.')),
   });
+
+  function cerrarRondaEmpleadosNuevos(creadoAlguno: boolean) {
+    setColaEmpleadosNuevos([]);
+    setTotalEmpleadosNuevos(0);
+    if (creadoAlguno && archivoActual) {
+      void queryClient.invalidateQueries({ queryKey: ['empleados'] });
+      void queryClient.invalidateQueries({ queryKey: ['empleados-todos'] });
+      subir.mutate(archivoActual);
+    }
+  }
+
+  function onEmpleadoNuevoGuardado() {
+    setSeCreoAlgunoEnEstaRonda(true);
+    if (colaEmpleadosNuevos.length <= 1) {
+      cerrarRondaEmpleadosNuevos(true);
+    } else {
+      setColaEmpleadosNuevos((cola) => cola.slice(1));
+    }
+  }
+
+  function onEmpleadoNuevoOmitido() {
+    if (colaEmpleadosNuevos.length <= 1) {
+      cerrarRondaEmpleadosNuevos(seCreoAlgunoEnEstaRonda);
+    } else {
+      setColaEmpleadosNuevos((cola) => cola.slice(1));
+    }
+  }
 
   const confirmar = useMutation({
     mutationFn: () =>
@@ -59,6 +114,7 @@ export function ImportarPage() {
     (files: File[]) => {
       if (files[0]) {
         setError(null);
+        setArchivoActual(files[0]);
         subir.mutate(files[0]);
       }
     },
@@ -68,6 +124,7 @@ export function ImportarPage() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: false,
+    disabled: subir.isPending,
     accept: {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
     },
@@ -75,10 +132,14 @@ export function ImportarPage() {
 
   function reiniciar() {
     setPaso(1);
+    setArchivoActual(null);
     setResultado(null);
     setConfirmacion(null);
     setError(null);
     setIncluirAdvertencias(false);
+    setColaEmpleadosNuevos([]);
+    setTotalEmpleadosNuevos(0);
+    setSeCreoAlgunoEnEstaRonda(false);
   }
 
   if (!periodoActivo) {
@@ -145,7 +206,7 @@ export function ImportarPage() {
       )}
 
       {paso === 1 && (
-        <div {...getRootProps()} className={`hx-dropzone${isDragActive ? ' active' : ''}`}>
+        <div {...getRootProps()} className={`hx-dropzone${isDragActive ? ' active' : ''}${subir.isPending ? ' disabled' : ''}`}>
           <input {...getInputProps()} />
           <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--c-sea-50)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
             {subir.isPending ? (
@@ -168,6 +229,12 @@ export function ImportarPage() {
           <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 18, fontFamily: 'var(--font-mono)' }}>
             Formato esperado: fecha · código · nombre · hora entrada · hora salida — periodo {periodoActivo.fechaInicio} a {periodoActivo.fechaFin}
           </div>
+        </div>
+      )}
+
+      {subir.isPending && paso === 2 && (
+        <div style={{ maxWidth: 720, display: 'flex', alignItems: 'center', gap: 10, background: 'var(--c-sea-50)', color: 'var(--brand-strong)', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 500, marginBottom: 16 }}>
+          <Spinner /> Actualizando previsualización con los empleados nuevos…
         </div>
       )}
 
@@ -228,7 +295,7 @@ export function ImportarPage() {
             <button
               type="button"
               className="hx-btn hx-btn-primary"
-              disabled={aConfirmar === 0 || confirmar.isPending}
+              disabled={aConfirmar === 0 || confirmar.isPending || colaEmpleadosNuevos.length > 0}
               onClick={() => confirmar.mutate()}
             >
               {confirmar.isPending && <Spinner />}
@@ -271,6 +338,20 @@ export function ImportarPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {colaEmpleadosNuevos.length > 0 && (
+        <EmpleadoNuevoModal
+          key={colaEmpleadosNuevos[0].codigo}
+          codigo={colaEmpleadosNuevos[0].codigo}
+          nombreSugerido={colaEmpleadosNuevos[0].nombreSugerido}
+          vigenteDesdePorDefecto={periodoActivo.fechaInicio}
+          posicionActual={totalEmpleadosNuevos - colaEmpleadosNuevos.length + 1}
+          total={totalEmpleadosNuevos}
+          onGuardado={onEmpleadoNuevoGuardado}
+          onOmitir={onEmpleadoNuevoOmitido}
+          onCerrar={() => cerrarRondaEmpleadosNuevos(seCreoAlgunoEnEstaRonda)}
+        />
       )}
     </div>
   );

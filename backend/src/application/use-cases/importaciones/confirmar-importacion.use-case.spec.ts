@@ -265,6 +265,15 @@ class PeriodoRepositoryFake implements PeriodoRepository {
   cerrar(): Promise<Periodo> {
     return Promise.reject(new Error('no usado en este test'));
   }
+  listarEliminados(): Promise<Periodo[]> {
+    return Promise.resolve([]);
+  }
+  eliminar(): Promise<Periodo> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
+  restaurar(): Promise<Periodo> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
 }
 
 class ImportacionRepositoryFake implements ImportacionRepository {
@@ -340,6 +349,8 @@ const PERIODO_ABIERTO = new Periodo(
   EstadoPeriodo.ABIERTO,
   null,
   null,
+  null,
+  null,
 );
 
 const PERIODO_CERRADO = new Periodo(
@@ -349,6 +360,8 @@ const PERIODO_CERRADO = new Periodo(
   EstadoPeriodo.CERRADO,
   new Date(),
   'usuario-1',
+  null,
+  null,
 );
 
 function filaCruda(overrides: Partial<FilaExcelCruda> = {}): FilaExcelCruda {

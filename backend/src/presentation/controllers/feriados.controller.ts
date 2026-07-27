@@ -16,11 +16,16 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { RegistrarAuditoriaUseCase } from '../../application/use-cases/auditoria/registrar-auditoria.use-case';
 import { CrearFeriadoUseCase } from '../../application/use-cases/feriados/crear-feriado.use-case';
 import { EliminarFeriadoUseCase } from '../../application/use-cases/feriados/eliminar-feriado.use-case';
 import { ListarFeriadosUseCase } from '../../application/use-cases/feriados/listar-feriados.use-case';
+import { Usuario } from '../../domain/entities/usuario.entity';
+import { AccionAuditoria } from '../../domain/enums/accion-auditoria.enum';
+import { EntidadAuditoria } from '../../domain/enums/entidad-auditoria.enum';
 import { RolUsuario } from '../../domain/enums/rol-usuario.enum';
 import { Roles } from '../decorators/roles.decorator';
+import { UsuarioActual } from '../decorators/usuario-actual.decorator';
 import { CrearFeriadoDto } from '../dtos/feriados/crear-feriado.dto';
 import { FeriadoRespuestaDto } from '../dtos/feriados/feriado-respuesta.dto';
 import { ListarFeriadosQueryDto } from '../dtos/feriados/listar-feriados-query.dto';
@@ -37,6 +42,8 @@ export class FeriadosController {
     private readonly crearFeriado: CrearFeriadoUseCase,
     @Inject(EliminarFeriadoUseCase)
     private readonly eliminarFeriado: EliminarFeriadoUseCase,
+    @Inject(RegistrarAuditoriaUseCase)
+    private readonly registrarAuditoria: RegistrarAuditoriaUseCase,
   ) {}
 
   @Get()
@@ -57,10 +64,20 @@ export class FeriadosController {
     status: 409,
     description: 'Ya existe un feriado en esa fecha',
   })
-  async crear(@Body() dto: CrearFeriadoDto): Promise<FeriadoRespuestaDto> {
+  async crear(
+    @Body() dto: CrearFeriadoDto,
+    @UsuarioActual() usuario: Usuario,
+  ): Promise<FeriadoRespuestaDto> {
     const feriado = await this.crearFeriado.ejecutar({
       fecha: new Date(dto.fecha),
       descripcion: dto.descripcion,
+    });
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.CREAR,
+      entidad: EntidadAuditoria.FERIADO,
+      entidadId: feriado.id,
+      descripcion: `Creó el feriado "${feriado.descripcion}" (${dto.fecha}).`,
     });
     return aFeriadoRespuestaDto(feriado);
   }
@@ -71,7 +88,17 @@ export class FeriadosController {
   @ApiOperation({ summary: 'Elimina un feriado (solo ADMIN)' })
   @ApiResponse({ status: 204, description: 'Eliminado' })
   @ApiResponse({ status: 404, description: 'Feriado no encontrado' })
-  async eliminar(@Param('id') id: string): Promise<void> {
-    await this.eliminarFeriado.ejecutar(id);
+  async eliminar(
+    @Param('id') id: string,
+    @UsuarioActual() usuario: Usuario,
+  ): Promise<void> {
+    const feriado = await this.eliminarFeriado.ejecutar(id);
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.ELIMINAR,
+      entidad: EntidadAuditoria.FERIADO,
+      entidadId: feriado.id,
+      descripcion: `Eliminó el feriado "${feriado.descripcion}" (${feriado.fecha.toISOString().slice(0, 10)}).`,
+    });
   }
 }

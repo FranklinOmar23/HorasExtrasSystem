@@ -18,4 +18,10 @@ export class PeriodoRespuestaDto {
 
   @ApiPropertyOptional({ nullable: true, example: null })
   cerradoPorId!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: null })
+  eliminadoEn!: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: null })
+  eliminadoPorId!: string | null;
 }

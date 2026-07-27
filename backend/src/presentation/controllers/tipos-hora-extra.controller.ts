@@ -6,10 +6,15 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import Decimal from 'decimal.js';
+import { RegistrarAuditoriaUseCase } from '../../application/use-cases/auditoria/registrar-auditoria.use-case';
 import { ActualizarTipoHoraExtraUseCase } from '../../application/use-cases/tipos-hora-extra/actualizar-tipo-hora-extra.use-case';
 import { ListarTiposHoraExtraUseCase } from '../../application/use-cases/tipos-hora-extra/listar-tipos-hora-extra.use-case';
+import { Usuario } from '../../domain/entities/usuario.entity';
+import { AccionAuditoria } from '../../domain/enums/accion-auditoria.enum';
+import { EntidadAuditoria } from '../../domain/enums/entidad-auditoria.enum';
 import { RolUsuario } from '../../domain/enums/rol-usuario.enum';
 import { Roles } from '../decorators/roles.decorator';
+import { UsuarioActual } from '../decorators/usuario-actual.decorator';
 import { ActualizarTipoHoraExtraDto } from '../dtos/tipos-hora-extra/actualizar-tipo-hora-extra.dto';
 import { TipoHoraExtraRespuestaDto } from '../dtos/tipos-hora-extra/tipo-hora-extra-respuesta.dto';
 import { aTipoHoraExtraRespuestaDto } from '../mappers/tipo-hora-extra.mapper';
@@ -23,6 +28,8 @@ export class TiposHoraExtraController {
     private readonly listarTipos: ListarTiposHoraExtraUseCase,
     @Inject(ActualizarTipoHoraExtraUseCase)
     private readonly actualizarTipo: ActualizarTipoHoraExtraUseCase,
+    @Inject(RegistrarAuditoriaUseCase)
+    private readonly registrarAuditoria: RegistrarAuditoriaUseCase,
   ) {}
 
   @Get()
@@ -41,12 +48,20 @@ export class TiposHoraExtraController {
   async actualizar(
     @Param('id') id: string,
     @Body() dto: ActualizarTipoHoraExtraDto,
+    @UsuarioActual() usuario: Usuario,
   ): Promise<TipoHoraExtraRespuestaDto> {
     const tipo = await this.actualizarTipo.ejecutar(id, {
       nombre: dto.nombre,
       porcentaje:
         dto.porcentaje !== undefined ? new Decimal(dto.porcentaje) : undefined,
       activo: dto.activo,
+    });
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.ACTUALIZAR,
+      entidad: EntidadAuditoria.TIPO_HORA_EXTRA,
+      entidadId: tipo.id,
+      descripcion: `Actualizó el tipo de hora extra ${tipo.codigo}: porcentaje ${tipo.porcentaje.toString()}%, activo=${tipo.activo}.`,
     });
     return aTipoHoraExtraRespuestaDto(tipo);
   }

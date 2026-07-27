@@ -136,6 +136,8 @@ const PERIODO = new Periodo(
   EstadoPeriodo.ABIERTO,
   null,
   null,
+  null,
+  null,
 );
 
 const EMPLEADO_40 = new Empleado(

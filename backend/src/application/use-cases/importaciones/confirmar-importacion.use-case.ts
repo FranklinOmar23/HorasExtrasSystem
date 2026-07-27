@@ -4,6 +4,7 @@ import { OrigenRegistro } from '../../../domain/enums/origen-registro.enum';
 import { ImportacionNoEncontradaError } from '../../../domain/errors/importacion-no-encontrada.error';
 import { ImportacionYaConfirmadaError } from '../../../domain/errors/importacion-ya-confirmada.error';
 import { PeriodoCerradoError } from '../../../domain/errors/periodo-cerrado.error';
+import { PeriodoEliminadoError } from '../../../domain/errors/periodo-eliminado.error';
 import { PeriodoNoEncontradoError } from '../../../domain/errors/periodo-no-encontrado.error';
 import { CalcularDesgloseService } from '../../services/calcular-desglose.service';
 import {
@@ -64,6 +65,9 @@ export class ConfirmarImportacionUseCase {
     );
     if (!periodo) {
       throw new PeriodoNoEncontradoError(importacion.periodoId);
+    }
+    if (periodo.estaEliminado()) {
+      throw new PeriodoEliminadoError(importacion.periodoId);
     }
     if (periodo.estaCerrado()) {
       throw new PeriodoCerradoError(importacion.periodoId);

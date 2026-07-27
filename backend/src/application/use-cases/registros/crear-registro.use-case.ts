@@ -1,5 +1,6 @@
 import { EmpleadoNoEncontradoError } from '../../../domain/errors/empleado-no-encontrado.error';
 import { PeriodoCerradoError } from '../../../domain/errors/periodo-cerrado.error';
+import { PeriodoEliminadoError } from '../../../domain/errors/periodo-eliminado.error';
 import { PeriodoNoEncontradoError } from '../../../domain/errors/periodo-no-encontrado.error';
 import { OrigenRegistro } from '../../../domain/enums/origen-registro.enum';
 import { CalcularDesgloseService } from '../../services/calcular-desglose.service';
@@ -31,6 +32,9 @@ export class CrearRegistroUseCase {
     const periodo = await this.periodoRepository.buscarPorId(comando.periodoId);
     if (!periodo) {
       throw new PeriodoNoEncontradoError(comando.periodoId);
+    }
+    if (periodo.estaEliminado()) {
+      throw new PeriodoEliminadoError(comando.periodoId);
     }
     if (periodo.estaCerrado()) {
       throw new PeriodoCerradoError(comando.periodoId);

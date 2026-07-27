@@ -17,10 +17,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { RegistrarAuditoriaUseCase } from '../../application/use-cases/auditoria/registrar-auditoria.use-case';
 import { ConfirmarImportacionUseCase } from '../../application/use-cases/importaciones/confirmar-importacion.use-case';
 import { ListarImportacionesUseCase } from '../../application/use-cases/importaciones/listar-importaciones.use-case';
 import { ParsearImportacionUseCase } from '../../application/use-cases/importaciones/parsear-importacion.use-case';
 import { Usuario } from '../../domain/entities/usuario.entity';
+import { AccionAuditoria } from '../../domain/enums/accion-auditoria.enum';
+import { EntidadAuditoria } from '../../domain/enums/entidad-auditoria.enum';
 import { ImportacionFormatoInvalidoError } from '../../domain/errors/importacion-formato-invalido.error';
 import { UsuarioActual } from '../decorators/usuario-actual.decorator';
 import { ConfirmarImportacionDto } from '../dtos/importaciones/confirmar-importacion.dto';
@@ -44,6 +47,8 @@ export class ImportacionesController {
     private readonly confirmarImportacion: ConfirmarImportacionUseCase,
     @Inject(ListarImportacionesUseCase)
     private readonly listarImportaciones: ListarImportacionesUseCase,
+    @Inject(RegistrarAuditoriaUseCase)
+    private readonly registrarAuditoria: RegistrarAuditoriaUseCase,
   ) {}
 
   @Post('periodos/:periodoId/importaciones')
@@ -117,10 +122,18 @@ export class ImportacionesController {
   async confirmar(
     @Param('id') id: string,
     @Body() dto: ConfirmarImportacionDto,
+    @UsuarioActual() usuario: Usuario,
   ): Promise<ImportacionRespuestaDto> {
     const importacion = await this.confirmarImportacion.ejecutar({
       importacionId: id,
       incluirAdvertencias: dto.incluirAdvertencias,
+    });
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.CONFIRMAR,
+      entidad: EntidadAuditoria.IMPORTACION,
+      entidadId: importacion.id,
+      descripcion: `Confirmó la importación de ${importacion.archivo} (${importacion.filasOk} filas válidas, ${importacion.filasAdvertencia} advertencias) para el periodo ${importacion.periodoId}.`,
     });
     return aImportacionRespuestaDto(importacion);
   }

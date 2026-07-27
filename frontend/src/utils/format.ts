@@ -39,6 +39,23 @@ export function formatFechaDia(iso: string): string {
   return `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${anio}`;
 }
 
+export function formatFechaHora(iso: string): string {
+  const fecha = new Date(iso);
+  return fecha.toLocaleString('es-DO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+const MS_POR_DIA = 1000 * 60 * 60 * 24;
+
+export function diasDesde(iso: string): number {
+  return Math.floor((Date.now() - new Date(iso).getTime()) / MS_POR_DIA);
+}
+
 export function formatRangoPeriodo(fechaInicio: string, fechaFin: string): string {
   const inicio = partesFecha(fechaInicio);
   const fin = partesFecha(fechaFin);

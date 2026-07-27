@@ -7,9 +7,11 @@ import {
   CrearPeriodoDatos,
   PeriodoRepository,
 } from '../../ports/periodo.repository.port';
-import { CerrarPeriodoUseCase } from './cerrar-periodo.use-case';
+import { EliminarPeriodoUseCase } from './eliminar-periodo.use-case';
 
 class PeriodoRepositoryFake implements PeriodoRepository {
+  eliminados: string[] = [];
+
   constructor(private periodos: Periodo[] = []) {}
 
   listar(): Promise<Periodo[]> {
@@ -32,27 +34,29 @@ class PeriodoRepositoryFake implements PeriodoRepository {
     return Promise.reject(new Error('no usado en este test'));
   }
 
-  cerrar(id: string, cerradoPorId: string, cerradoEn: Date): Promise<Periodo> {
-    const actual = this.periodos.find((p) => p.id === id);
-    if (!actual) {
-      return Promise.reject(new Error('no encontrado'));
-    }
-    const cerrado = new Periodo(
+  cerrar(): Promise<Periodo> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
+
+  eliminar(
+    id: string,
+    eliminadoPorId: string,
+    eliminadoEn: Date,
+  ): Promise<Periodo> {
+    this.eliminados.push(id);
+    const actual = this.periodos.find((p) => p.id === id) as Periodo;
+    const eliminado = new Periodo(
       actual.id,
       actual.fechaInicio,
       actual.fechaFin,
-      EstadoPeriodo.CERRADO,
-      cerradoEn,
-      cerradoPorId,
-      actual.eliminadoEn,
-      actual.eliminadoPorId,
+      actual.estado,
+      actual.cerradoEn,
+      actual.cerradoPorId,
+      eliminadoEn,
+      eliminadoPorId,
     );
-    this.periodos = this.periodos.map((p) => (p.id === id ? cerrado : p));
-    return Promise.resolve(cerrado);
-  }
-
-  eliminar(): Promise<Periodo> {
-    return Promise.reject(new Error('no usado en este test'));
+    this.periodos = this.periodos.map((p) => (p.id === id ? eliminado : p));
+    return Promise.resolve(eliminado);
   }
 
   restaurar(): Promise<Periodo> {
@@ -71,28 +75,28 @@ const PERIODO_ABIERTO = new Periodo(
   null,
 );
 
-describe('CerrarPeriodoUseCase', () => {
-  it('cierra un periodo abierto y registra quién lo cerró', async () => {
-    const useCase = new CerrarPeriodoUseCase(
-      new PeriodoRepositoryFake([PERIODO_ABIERTO]),
-    );
+describe('EliminarPeriodoUseCase', () => {
+  it('elimina (soft-delete) un periodo abierto', async () => {
+    const repo = new PeriodoRepositoryFake([PERIODO_ABIERTO]);
+    const useCase = new EliminarPeriodoUseCase(repo);
 
-    const cerrado = await useCase.ejecutar(PERIODO_ABIERTO.id, 'usuario-1');
+    const eliminado = await useCase.ejecutar(PERIODO_ABIERTO.id, 'usuario-1');
 
-    expect(cerrado.estaCerrado()).toBe(true);
-    expect(cerrado.cerradoPorId).toBe('usuario-1');
+    expect(repo.eliminados).toEqual([PERIODO_ABIERTO.id]);
+    expect(eliminado.estaEliminado()).toBe(true);
+    expect(eliminado.eliminadoPorId).toBe('usuario-1');
   });
 
   it('lanza PeriodoNoEncontradoError si el periodo no existe', async () => {
-    const useCase = new CerrarPeriodoUseCase(new PeriodoRepositoryFake([]));
+    const useCase = new EliminarPeriodoUseCase(new PeriodoRepositoryFake([]));
 
-    await expect(
-      useCase.ejecutar('inexistente', 'usuario-1'),
-    ).rejects.toBeInstanceOf(PeriodoNoEncontradoError);
+    await expect(useCase.ejecutar('inexistente', 'usuario-1')).rejects.toBeInstanceOf(
+      PeriodoNoEncontradoError,
+    );
   });
 
-  it('lanza PeriodoCerradoError si el periodo ya está cerrado', async () => {
-    const yaCerrado = new Periodo(
+  it('lanza PeriodoCerradoError si el periodo está cerrado', async () => {
+    const cerrado = new Periodo(
       'periodo-2',
       new Date('2026-08-01'),
       new Date('2026-08-15'),
@@ -102,17 +106,17 @@ describe('CerrarPeriodoUseCase', () => {
       null,
       null,
     );
-    const useCase = new CerrarPeriodoUseCase(
-      new PeriodoRepositoryFake([yaCerrado]),
+    const useCase = new EliminarPeriodoUseCase(
+      new PeriodoRepositoryFake([cerrado]),
     );
 
-    await expect(
-      useCase.ejecutar(yaCerrado.id, 'usuario-1'),
-    ).rejects.toBeInstanceOf(PeriodoCerradoError);
+    await expect(useCase.ejecutar(cerrado.id, 'usuario-1')).rejects.toBeInstanceOf(
+      PeriodoCerradoError,
+    );
   });
 
-  it('lanza PeriodoEliminadoError si el periodo está eliminado', async () => {
-    const eliminado = new Periodo(
+  it('lanza PeriodoEliminadoError si el periodo ya estaba eliminado', async () => {
+    const yaEliminado = new Periodo(
       'periodo-3',
       new Date('2026-08-01'),
       new Date('2026-08-15'),
@@ -122,12 +126,12 @@ describe('CerrarPeriodoUseCase', () => {
       new Date('2026-08-16'),
       'usuario-0',
     );
-    const useCase = new CerrarPeriodoUseCase(
-      new PeriodoRepositoryFake([eliminado]),
+    const useCase = new EliminarPeriodoUseCase(
+      new PeriodoRepositoryFake([yaEliminado]),
     );
 
-    await expect(
-      useCase.ejecutar(eliminado.id, 'usuario-1'),
-    ).rejects.toBeInstanceOf(PeriodoEliminadoError);
+    await expect(useCase.ejecutar(yaEliminado.id, 'usuario-1')).rejects.toBeInstanceOf(
+      PeriodoEliminadoError,
+    );
   });
 });

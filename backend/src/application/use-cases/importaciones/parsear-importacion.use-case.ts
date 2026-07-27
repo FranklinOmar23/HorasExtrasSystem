@@ -1,6 +1,7 @@
 import { Importacion } from '../../../domain/entities/importacion.entity';
 import { EstadoFilaImportacion } from '../../../domain/enums/estado-fila-importacion.enum';
 import { PeriodoCerradoError } from '../../../domain/errors/periodo-cerrado.error';
+import { PeriodoEliminadoError } from '../../../domain/errors/periodo-eliminado.error';
 import { PeriodoNoEncontradoError } from '../../../domain/errors/periodo-no-encontrado.error';
 import { ExcelParserPort } from '../../ports/excel-parser.port';
 import { ImportacionRepository } from '../../ports/importacion.repository.port';
@@ -47,6 +48,9 @@ export class ParsearImportacionUseCase {
     const periodo = await this.periodoRepository.buscarPorId(comando.periodoId);
     if (!periodo) {
       throw new PeriodoNoEncontradoError(comando.periodoId);
+    }
+    if (periodo.estaEliminado()) {
+      throw new PeriodoEliminadoError(comando.periodoId);
     }
     if (periodo.estaCerrado()) {
       throw new PeriodoCerradoError(comando.periodoId);

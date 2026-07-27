@@ -1,4 +1,5 @@
 import { PeriodoCerradoError } from '../../../domain/errors/periodo-cerrado.error';
+import { PeriodoEliminadoError } from '../../../domain/errors/periodo-eliminado.error';
 import { RegistroHorasNoEncontradoError } from '../../../domain/errors/registro-horas-no-encontrado.error';
 import { CalcularDesgloseService } from '../../services/calcular-desglose.service';
 import { PeriodoRepository } from '../../ports/periodo.repository.port';
@@ -33,6 +34,9 @@ export class ActualizarRegistroUseCase {
     const periodo = await this.periodoRepository.buscarPorId(
       existente.registro.periodoId,
     );
+    if (periodo?.estaEliminado()) {
+      throw new PeriodoEliminadoError(existente.registro.periodoId);
+    }
     if (periodo?.estaCerrado()) {
       throw new PeriodoCerradoError(existente.registro.periodoId);
     }

@@ -17,11 +17,16 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { RegistrarAuditoriaUseCase } from '../../application/use-cases/auditoria/registrar-auditoria.use-case';
 import { ActualizarRegistroUseCase } from '../../application/use-cases/registros/actualizar-registro.use-case';
 import { CrearRegistroUseCase } from '../../application/use-cases/registros/crear-registro.use-case';
 import { EliminarRegistroUseCase } from '../../application/use-cases/registros/eliminar-registro.use-case';
 import { ListarRegistrosUseCase } from '../../application/use-cases/registros/listar-registros.use-case';
 import { PreviewCalculoUseCase } from '../../application/use-cases/registros/preview-calculo.use-case';
+import { Usuario } from '../../domain/entities/usuario.entity';
+import { AccionAuditoria } from '../../domain/enums/accion-auditoria.enum';
+import { EntidadAuditoria } from '../../domain/enums/entidad-auditoria.enum';
+import { UsuarioActual } from '../decorators/usuario-actual.decorator';
 import { ActualizarRegistroDto } from '../dtos/registros/actualizar-registro.dto';
 import { CalculoRespuestaDto } from '../dtos/registros/calculo-respuesta.dto';
 import { CrearRegistroDto } from '../dtos/registros/crear-registro.dto';
@@ -31,6 +36,10 @@ import {
   aFilaCalculoRespuestaDto,
   aRegistroRespuestaDto,
 } from '../mappers/registro-horas.mapper';
+
+function aFechaISO(fecha: Date): string {
+  return fecha.toISOString().slice(0, 10);
+}
 
 @ApiTags('registros')
 @ApiBearerAuth()
@@ -47,6 +56,8 @@ export class RegistrosController {
     private readonly eliminarRegistro: EliminarRegistroUseCase,
     @Inject(PreviewCalculoUseCase)
     private readonly previewCalculo: PreviewCalculoUseCase,
+    @Inject(RegistrarAuditoriaUseCase)
+    private readonly registrarAuditoria: RegistrarAuditoriaUseCase,
   ) {}
 
   @Get('periodos/:periodoId/registros')
@@ -69,7 +80,10 @@ export class RegistrosController {
   @ApiResponse({ status: 201, type: RegistroRespuestaDto })
   @ApiResponse({ status: 404, description: 'Periodo o empleado no encontrado' })
   @ApiResponse({ status: 409, description: 'El periodo está cerrado' })
-  async crear(@Body() dto: CrearRegistroDto): Promise<RegistroRespuestaDto> {
+  async crear(
+    @Body() dto: CrearRegistroDto,
+    @UsuarioActual() usuario: Usuario,
+  ): Promise<RegistroRespuestaDto> {
     const registro = await this.crearRegistro.ejecutar({
       periodoId: dto.periodoId,
       empleadoId: dto.empleadoId,
@@ -77,6 +91,13 @@ export class RegistrosController {
       horaEntrada: dto.horaEntrada,
       horaSalida: dto.horaSalida,
       comentario: dto.comentario ?? null,
+    });
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.CREAR,
+      entidad: EntidadAuditoria.REGISTRO_HORAS,
+      entidadId: registro.registro.id,
+      descripcion: `Registró manualmente horas del ${aFechaISO(registro.registro.fecha)} (${registro.registro.horaEntrada}-${registro.registro.horaSalida}) para el empleado ${registro.registro.empleadoId}.`,
     });
     return aRegistroRespuestaDto(registro);
   }
@@ -91,12 +112,20 @@ export class RegistrosController {
   async actualizar(
     @Param('id') id: string,
     @Body() dto: ActualizarRegistroDto,
+    @UsuarioActual() usuario: Usuario,
   ): Promise<RegistroRespuestaDto> {
     const registro = await this.actualizarRegistro.ejecutar(id, {
       fecha: dto.fecha ? new Date(dto.fecha) : undefined,
       horaEntrada: dto.horaEntrada,
       horaSalida: dto.horaSalida,
       comentario: dto.comentario,
+    });
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.ACTUALIZAR,
+      entidad: EntidadAuditoria.REGISTRO_HORAS,
+      entidadId: registro.registro.id,
+      descripcion: `Actualizó el registro de horas del ${aFechaISO(registro.registro.fecha)} (${registro.registro.horaEntrada}-${registro.registro.horaSalida}) del empleado ${registro.registro.empleadoId}.`,
     });
     return aRegistroRespuestaDto(registro);
   }
@@ -107,8 +136,18 @@ export class RegistrosController {
   @ApiResponse({ status: 204, description: 'Eliminado' })
   @ApiResponse({ status: 404, description: 'Registro no encontrado' })
   @ApiResponse({ status: 409, description: 'El periodo está cerrado' })
-  async eliminar(@Param('id') id: string): Promise<void> {
-    await this.eliminarRegistro.ejecutar(id);
+  async eliminar(
+    @Param('id') id: string,
+    @UsuarioActual() usuario: Usuario,
+  ): Promise<void> {
+    const registro = await this.eliminarRegistro.ejecutar(id);
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.ELIMINAR,
+      entidad: EntidadAuditoria.REGISTRO_HORAS,
+      entidadId: registro.registro.id,
+      descripcion: `Eliminó el registro de horas del ${aFechaISO(registro.registro.fecha)} del empleado ${registro.registro.empleadoId}.`,
+    });
   }
 
   @Post('registros/preview')

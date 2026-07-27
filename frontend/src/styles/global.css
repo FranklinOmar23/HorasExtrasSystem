@@ -181,6 +181,8 @@ table.hx-table { width: 100%; border-collapse: collapse; }
 /* ---------- Import dropzone ---------- */
 .hx-dropzone { border: 2px dashed var(--border-strong); border-radius: 16px; background: var(--surface); padding: 56px 24px; text-align: center; cursor: pointer; max-width: 720px; transition: border-color .2s, background .2s; }
 .hx-dropzone:hover, .hx-dropzone.active { border-color: var(--c-sea-400); background: var(--c-sea-50); }
+.hx-dropzone.disabled { cursor: default; border-color: var(--c-sea-400); background: var(--c-sea-50); }
+.hx-dropzone.disabled:hover { border-color: var(--c-sea-400); background: var(--c-sea-50); }
 
 /* ---------- Misc ---------- */
 .hx-pill-tabs { display: flex; gap: 4px; background: var(--c-paper-2); padding: 4px; border-radius: 999px; }
