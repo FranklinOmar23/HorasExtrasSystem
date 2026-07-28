@@ -93,6 +93,16 @@ const navItems = [
         ),
       },
       {
+        to: '/asignaciones-turno',
+        label: 'Asignaciones de turno',
+        icon: (
+          <svg {...iconProps}>
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        ),
+      },
+      {
         to: '/configuracion',
         label: 'Configuración',
         icon: (
@@ -109,6 +119,17 @@ const navItems = [
           <svg {...iconProps}>
             <path d="M9 11l3 3L22 4" />
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+        ),
+      },
+      {
+        to: '/usuarios',
+        label: 'Usuarios',
+        soloAdmin: true,
+        icon: (
+          <svg {...iconProps}>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
         ),
       },
@@ -168,6 +189,7 @@ function iniciales(nombre: string): string {
 
 export function Sidebar() {
   const { usuario, salir } = useAuth();
+  const esAdmin = usuario?.rol === 'ADMIN';
 
   return (
     <aside className="hx-aside">
@@ -187,7 +209,7 @@ export function Sidebar() {
         {navItems.map((grupo) => (
           <div key={grupo.grupo}>
             <div className="hx-nav-group">{grupo.grupo}</div>
-            {grupo.items.map((item) => (
+            {grupo.items.filter((item) => !item.soloAdmin || esAdmin).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

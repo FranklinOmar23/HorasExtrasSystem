@@ -54,10 +54,12 @@ export function aReporteEmpleadoRespuestaDto(
   const dias: DiaReporteEmpleadoDto[] = reporte.registros
     .slice()
     .sort((a, b) => a.registro.fecha.getTime() - b.registro.fecha.getTime())
-    .map(({ registro, calculos }) => ({
+    .map(({ registro, calculos, turno }) => ({
       fecha: aFechaISO(registro.fecha),
       horaEntrada: registro.horaEntrada,
       horaSalida: registro.horaSalida,
+      turnoCodigo: turno.codigo,
+      turnoNombre: turno.nombre,
       calculos: calculos.map(aCalculoRespuestaDto),
       total: calculos
         .reduce((acumulado, c) => acumulado.plus(c.monto), new Decimal(0))

@@ -31,6 +31,18 @@
 $ npm install
 ```
 
+Copia `.env.example` a `.env` y ajusta `DATABASE_URL` según cómo corras SQL Server:
+
+- **Desarrollo local sin Docker (por defecto)**: SQL Server accesible en `localhost:1433`, con un usuario SQL dedicado (no `sa`) — ver la variante A en `.env.example`.
+- **Docker**: si SQL Server corre en un contenedor (ej. servicio `sqlserver` en un `docker-compose.yml`), usa la variante B comentada en `.env.example` (host `sqlserver` en vez de `localhost`).
+
+Con el `.env` listo:
+
+```bash
+$ npm run db:generate   # genera el cliente de Prisma
+$ npm run db:seed       # crea el usuario ADMIN inicial + catálogos (turnos, tipos de hora extra, configuración)
+```
+
 ## Compile and run the project
 
 ```bash

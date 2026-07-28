@@ -2,25 +2,48 @@ import Decimal from 'decimal.js';
 import { TipoHoraExtra } from '../entities/tipo-hora-extra.entity';
 import { TipoHoraExtraCodigo } from '../enums/tipo-hora-extra-codigo.enum';
 import {
-  duracionMinutos,
+  MINUTOS_POR_DIA,
   entradaSalidaAjustadas,
-  minutosDesdeReferencia,
+  parsearHora,
+  solapeMinutos,
 } from './hora.util';
 
+const DIA_DOMINGO = 0;
+const DIA_SABADO = 6;
+
 export interface ParametrosCalculo {
-  horasJornada: Decimal;
+  /** Solo se usa en el modo "sin asignación explícita" (turno por defecto). */
   horasAlmuerzo: Decimal;
-  entradaSabado: string;
-  salidaSabado: string;
   inicioNocturna: string;
+  finNocturna: string;
   toleranciaMinutos: number;
 }
 
+/** Ventana de jornada del turno resuelto para el empleado en la fecha del registro. */
+export interface VentanaTurno {
+  horaInicio: string;
+  horaFin: string;
+  cruzaMedianoche: boolean;
+  horasJornada: Decimal;
+  descuentaAlmuerzo: boolean;
+}
+
 export interface EntradaMotorCalculo {
+  /** Día de la entrada — el registro "pertenece" a este día (regla de negocio). */
   fecha: Date;
   horaEntrada: string;
   horaSalida: string;
-  esFeriado: boolean;
+  turno: VentanaTurno;
+  /**
+   * true si el turno viene de una AsignacionTurno vigente puesta por RRHH;
+   * false si es el turno por defecto (DIURNO/SABADO) por no haber ninguna
+   * asignación cubriendo la fecha. Cambia el mecanismo de exceso: ver
+   * ResolucionTurno en resolver-turno-del-empleado.use-case.ts.
+   */
+  turnoAsignadoExplicitamente: boolean;
+  esFeriadoDiaEntrada: boolean;
+  /** Solo relevante si el trabajo cruza medianoche. */
+  esFeriadoDiaSiguiente: boolean;
   salarioHoraUsado: Decimal;
 }
 
@@ -33,22 +56,46 @@ export interface FilaCalculo {
   monto: Decimal;
 }
 
+interface SegmentoDia {
+  inicio: number;
+  fin: number;
+  diaSemana: number;
+  esFeriado: boolean;
+}
+
 /**
  * Motor de cálculo de horas extra: clase pura y sin estado. Recibe un
- * registro (entrada/salida/fecha/si es feriado), los parámetros de cálculo
- * vigentes y el catálogo de tipos de hora extra, y devuelve el desglose a
- * persistir en `calculos`. No consulta ninguna base de datos.
+ * registro, la ventana del turno vigente del empleado ese día y los
+ * parámetros de cálculo, y devuelve el desglose a persistir en `calculos`.
+ * No consulta ninguna base de datos.
  *
- * Reglas de clasificación (confirmadas explícitamente, no inferidas):
- * - Feriado: todas las horas trabajadas ese día → FERIADO.
- * - Domingo (sin feriado): todas las horas trabajadas → HE_100.
- * - Sábado: horas dentro de [entradaSabado, salidaSabado] no generan fila
- *   (las cubre el salario base); el exceso → HE_100.
- * - Lunes a viernes: horas dentro de horasJornada (tras descontar
- *   horasAlmuerzo) no generan fila; el exceso → HE_35.
- * - Nocturno (desde inicioNocturna): recargo adicional NOCTURNA_15 que se
- *   suma —como fila aparte— sobre las horas que ya se clasificaron arriba,
- *   sin volver a pagar la base (ver `ModoValorizacion.SOLO_RECARGO`).
+ * Dos mecanismos de exceso, según si el turno viene de una asignación
+ * explícita o es el turno por defecto (ver `turnoAsignadoExplicitamente`):
+ *
+ * - SIN asignación explícita (DIURNO/SABADO por defecto): se preserva el
+ *   cálculo histórico — total de horas NETAS trabajadas (descontado el
+ *   almuerzo si aplica) contra el presupuesto del turno (`horasJornada`).
+ *   El exceso no depende de EN QUÉ MOMENTO del día se trabajó, solo de
+ *   cuánto en total. Domingo/feriado: todas las horas trabajadas ese día
+ *   son HE_100/FERIADO (sin presupuesto).
+ *
+ * - CON asignación explícita (ej. NOCTURNO puesto por RRHH): el exceso se
+ *   mide por POSICIÓN DE RELOJ contra el inicio/fin exacto de la ventana
+ *   [horaInicio, horaFin] (si `cruzaMedianoche`, horaFin es del día
+ *   siguiente). Horas dentro de la ventana = jornada normal, sin importar
+ *   si caen en domingo/feriado (el cambio de turno ya es la compensación).
+ *   Horas fuera de la ventana (antes del inicio o después del fin) = HE_35
+ *   (laboral) o HE_100 (sábado), salvo que ese día calendario específico
+ *   sea domingo o feriado, en cuyo caso TODAS las horas de ese día
+ *   (dentro o fuera de la ventana) son HE_100/FERIADO — el domingo/feriado
+ *   siempre lleva su recargo, incluso dentro de un turno asignado.
+ *   Si el trabajo cruza medianoche, cada día calendario se clasifica por
+ *   separado (regla 6): el día de la entrada y, si aplica, el siguiente.
+ *
+ * En ambos casos, el recargo nocturno (NOCTURNA_15) se calcula aparte y de
+ * forma aditiva: toda hora trabajada dentro de la banda
+ * [inicioNocturna, finNocturna) —que cruza medianoche— genera el recargo,
+ * sea jornada normal o extra.
  *
  * Horas negativas se truncan a 0.
  */
@@ -69,57 +116,188 @@ export class MotorCalculo {
       return filas;
     }
 
+    if (entrada.turnoAsignadoExplicitamente) {
+      this.clasificarConVentanaDeReloj(
+        filas,
+        entrada,
+        parametros,
+        entradaMin,
+        salidaMin,
+      );
+    } else {
+      this.clasificarConPresupuestoTotal(
+        filas,
+        entrada,
+        parametros,
+        minutosBrutos,
+      );
+    }
+
+    this.agregarRecargoNocturno(filas, entrada, parametros, entradaMin, salidaMin);
+
+    return filas;
+  }
+
+  /** Turno por defecto: total de horas netas contra presupuesto (cálculo histórico). */
+  private clasificarConPresupuestoTotal(
+    filas: FilaCalculo[],
+    entrada: EntradaMotorCalculo,
+    parametros: ParametrosCalculo,
+    minutosBrutos: number,
+  ): void {
     const diaSemana = entrada.fecha.getUTCDay();
 
-    if (entrada.esFeriado) {
+    if (entrada.esFeriadoDiaEntrada) {
       this.agregarFila(
         filas,
         TipoHoraExtraCodigo.FERIADO,
         minutosBrutos,
         entrada.salarioHoraUsado,
       );
-    } else if (diaSemana === 0) {
+      return;
+    }
+    if (diaSemana === DIA_DOMINGO) {
       this.agregarFila(
         filas,
         TipoHoraExtraCodigo.HE_100,
         minutosBrutos,
         entrada.salarioHoraUsado,
       );
-    } else if (diaSemana === 6) {
-      const presupuesto =
-        duracionMinutos(parametros.entradaSabado, parametros.salidaSabado) +
-        parametros.toleranciaMinutos;
-      const minutosExtra = Math.max(0, minutosBrutos - presupuesto);
-      if (minutosExtra > 0) {
+      return;
+    }
+
+    const minutosAlmuerzo = entrada.turno.descuentaAlmuerzo
+      ? parametros.horasAlmuerzo.times(60).toNumber()
+      : 0;
+    const minutosNetos = Math.max(0, minutosBrutos - minutosAlmuerzo);
+    const presupuesto =
+      entrada.turno.horasJornada.times(60).toNumber() +
+      parametros.toleranciaMinutos;
+    const minutosExtra = Math.max(0, minutosNetos - presupuesto);
+    if (minutosExtra > 0) {
+      const codigo =
+        diaSemana === DIA_SABADO
+          ? TipoHoraExtraCodigo.HE_100
+          : TipoHoraExtraCodigo.HE_35;
+      this.agregarFila(filas, codigo, minutosExtra, entrada.salarioHoraUsado);
+    }
+  }
+
+  /** Turno asignado explícitamente: exceso por posición de reloj contra la ventana. */
+  private clasificarConVentanaDeReloj(
+    filas: FilaCalculo[],
+    entrada: EntradaMotorCalculo,
+    parametros: ParametrosCalculo,
+    entradaMin: number,
+    salidaMin: number,
+  ): void {
+    const diaSemanaEntrada = entrada.fecha.getUTCDay();
+    const ventanaInicio = parsearHora(entrada.turno.horaInicio);
+    let ventanaFin = parsearHora(entrada.turno.horaFin);
+    if (entrada.turno.cruzaMedianoche) {
+      ventanaFin += MINUTOS_POR_DIA;
+    }
+
+    const segmentos: SegmentoDia[] = [
+      {
+        inicio: entradaMin,
+        fin: Math.min(salidaMin, MINUTOS_POR_DIA),
+        diaSemana: diaSemanaEntrada,
+        esFeriado: entrada.esFeriadoDiaEntrada,
+      },
+    ];
+    if (salidaMin > MINUTOS_POR_DIA) {
+      segmentos.push({
+        inicio: MINUTOS_POR_DIA,
+        fin: salidaMin,
+        diaSemana: (diaSemanaEntrada + 1) % 7,
+        esFeriado: entrada.esFeriadoDiaSiguiente,
+      });
+    }
+
+    let excesoLaboralMinutos = 0;
+    let tipoExcesoLaboral: TipoHoraExtraCodigo | null = null;
+
+    for (const segmento of segmentos) {
+      if (segmento.fin <= segmento.inicio) continue;
+
+      if (segmento.esFeriado) {
+        this.agregarFila(
+          filas,
+          TipoHoraExtraCodigo.FERIADO,
+          segmento.fin - segmento.inicio,
+          entrada.salarioHoraUsado,
+        );
+        continue;
+      }
+      if (segmento.diaSemana === DIA_DOMINGO) {
         this.agregarFila(
           filas,
           TipoHoraExtraCodigo.HE_100,
-          minutosExtra,
+          segmento.fin - segmento.inicio,
           entrada.salarioHoraUsado,
         );
+        continue;
       }
-    } else {
-      const minutosAlmuerzo = parametros.horasAlmuerzo.times(60).toNumber();
-      const minutosNetos = Math.max(0, minutosBrutos - minutosAlmuerzo);
-      const presupuesto =
-        parametros.horasJornada.times(60).toNumber() +
-        parametros.toleranciaMinutos;
-      const minutosExtra = Math.max(0, minutosNetos - presupuesto);
-      if (minutosExtra > 0) {
+
+      const excesoAntes = Math.max(
+        0,
+        Math.min(segmento.fin, ventanaInicio) - segmento.inicio,
+      );
+      const excesoDespues = Math.max(
+        0,
+        segmento.fin - Math.max(segmento.inicio, ventanaFin),
+      );
+      const excesoSegmento = excesoAntes + excesoDespues;
+      if (excesoSegmento > 0) {
+        excesoLaboralMinutos += excesoSegmento;
+        tipoExcesoLaboral ??=
+          segmento.diaSemana === DIA_SABADO
+            ? TipoHoraExtraCodigo.HE_100
+            : TipoHoraExtraCodigo.HE_35;
+      }
+    }
+
+    if (excesoLaboralMinutos > 0 && tipoExcesoLaboral) {
+      const minutosConTolerancia = Math.max(
+        0,
+        excesoLaboralMinutos - parametros.toleranciaMinutos,
+      );
+      if (minutosConTolerancia > 0) {
         this.agregarFila(
           filas,
-          TipoHoraExtraCodigo.HE_35,
-          minutosExtra,
+          tipoExcesoLaboral,
+          minutosConTolerancia,
           entrada.salarioHoraUsado,
         );
       }
     }
+  }
 
-    const minutosNocturnos = minutosDesdeReferencia(
-      entradaMin,
-      salidaMin,
-      parametros.inicioNocturna,
-    );
+  /**
+   * Banda nocturna [inicioNocturna, finNocturna) cruzando medianoche.
+   * Se comprueba tanto la banda "de esta noche" (día de la entrada → día
+   * siguiente) como la "de anoche" (día anterior → día de la entrada), para
+   * cubrir turnos que empiezan de madrugada dentro de la cola de la banda
+   * de la noche anterior (ej. entrar 03:00 sigue siendo nocturno).
+   */
+  private agregarRecargoNocturno(
+    filas: FilaCalculo[],
+    entrada: EntradaMotorCalculo,
+    parametros: ParametrosCalculo,
+    entradaMin: number,
+    salidaMin: number,
+  ): void {
+    const bandaInicio = parsearHora(parametros.inicioNocturna);
+    const bandaFin = parsearHora(parametros.finNocturna) + MINUTOS_POR_DIA;
+    const minutosNocturnos =
+      solapeMinutos(entradaMin, salidaMin, bandaInicio, bandaFin) +
+      solapeMinutos(
+        entradaMin,
+        salidaMin,
+        bandaInicio - MINUTOS_POR_DIA,
+        bandaFin - MINUTOS_POR_DIA,
+      );
     if (minutosNocturnos > 0) {
       this.agregarFila(
         filas,
@@ -128,8 +306,6 @@ export class MotorCalculo {
         entrada.salarioHoraUsado,
       );
     }
-
-    return filas;
   }
 
   private buscarTipo(codigo: TipoHoraExtraCodigo): TipoHoraExtra {

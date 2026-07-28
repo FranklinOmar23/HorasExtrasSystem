@@ -23,10 +23,11 @@ model Usuario {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  periodosCerrados   Periodo[]     @relation("PeriodoCerradoPor")
-  periodosEliminados Periodo[]     @relation("PeriodoEliminadoPor")
-  importaciones      Importacion[]
-  auditorias         Auditoria[]
+  periodosCerrados         Periodo[]         @relation("PeriodoCerradoPor")
+  periodosEliminados       Periodo[]         @relation("PeriodoEliminadoPor")
+  importaciones            Importacion[]
+  auditorias               Auditoria[]
+  asignacionesTurnoCreadas AsignacionTurno[]
 
   @@map("usuarios")
 }
@@ -48,8 +49,9 @@ model Empleado {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  salarios       Salario[]
-  registrosHoras RegistroHoras[]
+  salarios          Salario[]
+  registrosHoras    RegistroHoras[]
+  asignacionesTurno AsignacionTurno[]
 
   @@map("empleados")
 }
@@ -239,4 +241,52 @@ model Auditoria {
   @@index([entidad, entidadId])
   @@index([creadoEn])
   @@map("auditorias")
+}
+
+/// Catálogo de turnos de trabajo. horaInicio/horaFin en formato "HH:mm"
+/// (mismo criterio que horaEntrada/horaSalida en registros_horas, para no
+/// lidiar con zonas horarias del tipo TIME nativo de SQL Server).
+/// El horario del NOCTURNO es provisional hasta que RRHH confirme el
+/// definitivo: por eso es 100% editable desde la pantalla de Configuración,
+/// igual que el resto del catálogo.
+model Turno {
+  id                String  @id @default(uuid())
+  codigo            String  @unique @db.VarChar(20)
+  nombre            String
+  horaInicio        String  @db.VarChar(5)
+  horaFin           String  @db.VarChar(5)
+  horasJornada      Decimal @db.Decimal(4, 2)
+  cruzaMedianoche   Boolean @default(false)
+  descuentaAlmuerzo Boolean @default(true)
+  activo            Boolean @default(true)
+
+  asignaciones AsignacionTurno[]
+
+  @@map("turnos")
+}
+
+/// Asigna un turno a un empleado durante un rango de fechas (fechaHasta nulo
+/// = indefinida). El turno vigente de un empleado en una fecha es la
+/// asignación cuyo rango la cubre; si no hay ninguna, aplica DIURNO (o
+/// SABADO si la fecha cae en sábado) por defecto — ver
+/// ResolverTurnoDelEmpleadoUseCase. Los rangos de un mismo empleado nunca
+/// deben solaparse: se valida en el use case (AsignacionSolapadaError), no
+/// hay constraint de BD para esto porque SQL Server no expresa unicidad
+/// sobre rangos de fecha de forma nativa.
+model AsignacionTurno {
+  id          String    @id @default(uuid())
+  empleadoId  String
+  turnoId     String
+  fechaDesde  DateTime  @db.Date
+  fechaHasta  DateTime? @db.Date
+  comentario  String?
+  createdAt   DateTime  @default(now())
+  creadoPorId String
+
+  empleado  Empleado @relation(fields: [empleadoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  turno     Turno    @relation(fields: [turnoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creadoPor Usuario  @relation(fields: [creadoPorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([empleadoId, fechaDesde, fechaHasta])
+  @@map("asignaciones_turno")
 }

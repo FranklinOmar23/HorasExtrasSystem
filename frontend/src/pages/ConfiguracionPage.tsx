@@ -13,9 +13,17 @@ import {
   listarTiposHoraExtra,
   obtenerConfiguracion,
 } from '../api/configuracion';
-import type { Configuracion, TipoHoraExtra } from '../types/api';
+import {
+  actualizarTurno,
+  crearTurno,
+  eliminarTurno,
+  listarTurnos,
+} from '../api/turnos';
+import type { Configuracion, TipoHoraExtra, Turno } from '../types/api';
 
-type Tab = 'tipos' | 'jornada' | 'reglas' | 'feriados';
+type Tab = 'tipos' | 'jornada' | 'reglas' | 'feriados' | 'turnos';
+
+const CODIGOS_TURNO_POR_DEFECTO = new Set(['DIURNO', 'SABADO']);
 
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -30,12 +38,14 @@ export function ConfiguracionPage() {
         <button type="button" className={`hx-tab${tab === 'jornada' ? ' active' : ''}`} onClick={() => setTab('jornada')}>Jornada laboral</button>
         <button type="button" className={`hx-tab${tab === 'reglas' ? ' active' : ''}`} onClick={() => setTab('reglas')}>Reglas de cálculo</button>
         <button type="button" className={`hx-tab${tab === 'feriados' ? ' active' : ''}`} onClick={() => setTab('feriados')}>Feriados</button>
+        <button type="button" className={`hx-tab${tab === 'turnos' ? ' active' : ''}`} onClick={() => setTab('turnos')}>Turnos</button>
       </div>
       <div key={tab} className="hx-fade-in">
         {tab === 'tipos' && <TabTipos />}
         {tab === 'jornada' && <TabJornada />}
         {tab === 'reglas' && <TabReglas />}
         {tab === 'feriados' && <TabFeriados />}
+        {tab === 'turnos' && <TabTurnos />}
       </div>
     </div>
   );
@@ -376,6 +386,192 @@ function TabFeriados() {
           );
         })}
         {!isLoading && feriados.length === 0 && <div className="hx-empty">Sin feriados registrados para {anioActual}.</div>}
+      </div>
+    </div>
+  );
+}
+
+function filaTurnoVacia() {
+  return {
+    codigo: '',
+    nombre: '',
+    horaInicio: '',
+    horaFin: '',
+    horasJornada: '',
+    cruzaMedianoche: false,
+    descuentaAlmuerzo: true,
+  };
+}
+
+function TabTurnos() {
+  const queryClient = useQueryClient();
+  const { data: turnos = [], isLoading } = useQuery({ queryKey: ['turnos'], queryFn: listarTurnos });
+  const [error, setError] = useState<string | null>(null);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [form, setForm] = useState(filaTurnoVacia());
+  const [mostrarNuevo, setMostrarNuevo] = useState(false);
+  const [nuevo, setNuevo] = useState(filaTurnoVacia());
+
+  function iniciarEdicion(t: Turno) {
+    setError(null);
+    setEditandoId(t.id);
+    setForm({
+      codigo: t.codigo,
+      nombre: t.nombre,
+      horaInicio: t.horaInicio,
+      horaFin: t.horaFin,
+      horasJornada: t.horasJornada,
+      cruzaMedianoche: t.cruzaMedianoche,
+      descuentaAlmuerzo: t.descuentaAlmuerzo,
+    });
+  }
+
+  const guardar = useMutation({
+    mutationFn: () =>
+      actualizarTurno(editandoId!, {
+        nombre: form.nombre,
+        horaInicio: form.horaInicio,
+        horaFin: form.horaFin,
+        horasJornada: form.horasJornada,
+        cruzaMedianoche: form.cruzaMedianoche,
+        descuentaAlmuerzo: form.descuentaAlmuerzo,
+      }),
+    onSuccess: () => {
+      setEditandoId(null);
+      void queryClient.invalidateQueries({ queryKey: ['turnos'] });
+    },
+    onError: (err) => setError(mensajeError(err, 'No se pudo guardar el turno.')),
+  });
+
+  const crear = useMutation({
+    mutationFn: () => crearTurno(nuevo),
+    onSuccess: () => {
+      setMostrarNuevo(false);
+      setNuevo(filaTurnoVacia());
+      void queryClient.invalidateQueries({ queryKey: ['turnos'] });
+    },
+    onError: (err) => setError(mensajeError(err, 'No se pudo crear el turno.')),
+  });
+
+  const eliminar = useMutation({
+    mutationFn: (id: string) => eliminarTurno(id),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['turnos'] }),
+    onError: (err) => setError(mensajeError(err, 'No se pudo eliminar el turno.')),
+  });
+
+  function confirmarEliminar(t: Turno) {
+    if (confirm(`¿Eliminar el turno ${t.nombre}? Solo se puede si no tiene asignaciones registradas.`)) {
+      eliminar.mutate(t.id);
+    }
+  }
+
+  return (
+    <div style={{ maxWidth: 900 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-tertiary)', maxWidth: 560 }}>
+          Catálogo de turnos asignables a un empleado por rango de fechas. El horario del NOCTURNO es provisional — edítalo aquí cuando RRHH confirme el horario definitivo.
+        </p>
+        <button type="button" className="hx-btn hx-btn-secondary hx-btn-sm" onClick={() => setMostrarNuevo((v) => !v)}>
+          + Nuevo turno
+        </button>
+      </div>
+
+      {error && (
+        <div style={{ background: 'var(--c-danger-bg)', color: 'var(--c-danger)', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 500, marginBottom: 14 }}>
+          {error}
+        </div>
+      )}
+
+      {mostrarNuevo && (
+        <div className="hx-card" style={{ padding: 18, marginBottom: 16, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10, alignItems: 'end' }}>
+          <label className="hx-label">Código<input className="hx-in" value={nuevo.codigo} onChange={(e) => setNuevo((f) => ({ ...f, codigo: e.target.value.toUpperCase() }))} placeholder="MADRUGADA" /></label>
+          <label className="hx-label">Nombre<input className="hx-in" value={nuevo.nombre} onChange={(e) => setNuevo((f) => ({ ...f, nombre: e.target.value }))} /></label>
+          <label className="hx-label">Entra<input className="hx-in" type="time" value={nuevo.horaInicio} onChange={(e) => setNuevo((f) => ({ ...f, horaInicio: e.target.value }))} /></label>
+          <label className="hx-label">Sale<input className="hx-in" type="time" value={nuevo.horaFin} onChange={(e) => setNuevo((f) => ({ ...f, horaFin: e.target.value }))} /></label>
+          <label className="hx-label">Horas jornada<input className="hx-in tnum" value={nuevo.horasJornada} onChange={(e) => setNuevo((f) => ({ ...f, horasJornada: e.target.value }))} placeholder="8" /></label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5 }}>
+              <input type="checkbox" checked={nuevo.cruzaMedianoche} onChange={(e) => setNuevo((f) => ({ ...f, cruzaMedianoche: e.target.checked }))} />
+              Cruza medianoche
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5 }}>
+              <input type="checkbox" checked={nuevo.descuentaAlmuerzo} onChange={(e) => setNuevo((f) => ({ ...f, descuentaAlmuerzo: e.target.checked }))} />
+              Descuenta almuerzo
+            </label>
+          </div>
+          <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <button type="button" className="hx-btn hx-btn-secondary hx-btn-sm" onClick={() => setMostrarNuevo(false)}>Cancelar</button>
+            <button type="button" className="hx-btn hx-btn-primary hx-btn-sm" disabled={crear.isPending} onClick={() => crear.mutate()}>
+              {crear.isPending && <Spinner size={12} />} Crear turno
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="hx-table-wrap">
+        <table className="hx-table">
+          <thead>
+            <tr>
+              <th className="hx-th">Código</th>
+              <th className="hx-th">Nombre</th>
+              <th className="hx-th">Entra</th>
+              <th className="hx-th">Sale</th>
+              <th className="hx-th" style={{ textAlign: 'right' }}>Horas jornada</th>
+              <th className="hx-th">Cruza medianoche</th>
+              <th className="hx-th">Almuerzo</th>
+              <th className="hx-th" style={{ textAlign: 'right' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading && (
+              <SkeletonTableRows columns={8} rows={3} align={['left', 'left', 'left', 'left', 'right', 'left', 'left', 'right']} />
+            )}
+            {!isLoading && turnos.map((t) => {
+              const editando = editandoId === t.id;
+              const esPorDefecto = CODIGOS_TURNO_POR_DEFECTO.has(t.codigo);
+              return (
+                <tr key={t.id} className="hx-row hx-row-in">
+                  {editando ? (
+                    <>
+                      <td className="hx-td" style={{ color: 'var(--text-secondary)', fontSize: 12.5 }}>{t.codigo}</td>
+                      <td className="hx-td"><input className="hx-in" value={form.nombre} onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))} /></td>
+                      <td className="hx-td"><input className="hx-in" type="time" value={form.horaInicio} onChange={(e) => setForm((f) => ({ ...f, horaInicio: e.target.value }))} /></td>
+                      <td className="hx-td"><input className="hx-in" type="time" value={form.horaFin} onChange={(e) => setForm((f) => ({ ...f, horaFin: e.target.value }))} /></td>
+                      <td className="hx-td"><input className="hx-in tnum" style={{ textAlign: 'right' }} value={form.horasJornada} onChange={(e) => setForm((f) => ({ ...f, horasJornada: e.target.value }))} /></td>
+                      <td className="hx-td"><input type="checkbox" checked={form.cruzaMedianoche} onChange={(e) => setForm((f) => ({ ...f, cruzaMedianoche: e.target.checked }))} /></td>
+                      <td className="hx-td"><input type="checkbox" checked={form.descuentaAlmuerzo} onChange={(e) => setForm((f) => ({ ...f, descuentaAlmuerzo: e.target.checked }))} /></td>
+                      <td className="hx-td" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <span style={{ color: 'var(--brand-strong)', cursor: guardar.isPending ? 'default' : 'pointer', marginRight: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => !guardar.isPending && guardar.mutate()}>
+                          {guardar.isPending && <Spinner size={12} />} Guardar
+                        </span>
+                        <span style={{ color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setEditandoId(null)}>Cancelar</span>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="hx-td tnum" style={{ fontWeight: 600 }}>{t.codigo}</td>
+                      <td className="hx-td">{t.nombre}{!t.activo && <span className="hx-badge hx-badge-neutral" style={{ marginLeft: 8 }}>Inactivo</span>}</td>
+                      <td className="hx-td tnum">{t.horaInicio}</td>
+                      <td className="hx-td tnum">{t.horaFin}</td>
+                      <td className="hx-td tnum" style={{ textAlign: 'right' }}>{t.horasJornada}h</td>
+                      <td className="hx-td">{t.cruzaMedianoche ? 'Sí' : '—'}</td>
+                      <td className="hx-td">{t.descuentaAlmuerzo ? 'Sí' : '—'}</td>
+                      <td className="hx-td" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <span style={{ color: 'var(--brand-strong)', cursor: 'pointer', fontWeight: 600, marginRight: esPorDefecto ? 0 : 12 }} onClick={() => iniciarEdicion(t)}>Editar</span>
+                        {!esPorDefecto && (
+                          <span style={{ color: 'var(--c-danger)', cursor: 'pointer', fontWeight: 600 }} onClick={() => confirmarEliminar(t)}>Eliminar</span>
+                        )}
+                      </td>
+                    </>
+                  )}
+                </tr>
+              );
+            })}
+            {!isLoading && turnos.length === 0 && (
+              <tr><td className="hx-td" colSpan={8}><div className="hx-empty">Sin turnos registrados.</div></td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -90,6 +90,9 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
   ): Promise<RegistroConCalculos[]> {
     return Promise.resolve(this.existentes);
   }
+  listarPorEmpleadoYRango(): Promise<RegistroConCalculos[]> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
 
   buscarPorId(_id: string): Promise<RegistroConCalculos | null> {
     return Promise.reject(new Error('no usado en este test'));

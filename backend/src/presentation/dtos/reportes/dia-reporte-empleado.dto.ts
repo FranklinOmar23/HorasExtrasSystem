@@ -11,6 +11,12 @@ export class DiaReporteEmpleadoDto {
   @ApiProperty({ example: '19:00' })
   horaSalida!: string;
 
+  @ApiProperty({ example: 'NOCTURNO' })
+  turnoCodigo!: string;
+
+  @ApiProperty({ example: 'Nocturno' })
+  turnoNombre!: string;
+
   @ApiProperty({ type: [CalculoRespuestaDto] })
   calculos!: CalculoRespuestaDto[];
 

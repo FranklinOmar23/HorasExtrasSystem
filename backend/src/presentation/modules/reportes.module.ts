@@ -10,6 +10,7 @@ import type { RegistroHorasRepository } from '../../application/ports/registro-h
 import { SALARIO_REPOSITORY } from '../../application/ports/salario.repository.port';
 import type { SalarioRepository } from '../../application/ports/salario.repository.port';
 import { ReportePeriodoService } from '../../application/services/reporte-periodo.service';
+import { ResolverTurnoDelEmpleadoUseCase } from '../../application/use-cases/asignaciones-turno/resolver-turno-del-empleado.use-case';
 import { ObtenerReporteEmpleadoUseCase } from '../../application/use-cases/reportes/obtener-reporte-empleado.use-case';
 import { ObtenerReporteHistoricoUseCase } from '../../application/use-cases/reportes/obtener-reporte-historico.use-case';
 import { ObtenerReportePeriodoUseCase } from '../../application/use-cases/reportes/obtener-reporte-periodo.use-case';
@@ -63,13 +64,20 @@ import { RegistrosModule } from './registros.module';
         periodoRepo: PeriodoRepository,
         empleadoRepo: EmpleadoRepository,
         reporteService: ReportePeriodoService,
+        resolverTurno: ResolverTurnoDelEmpleadoUseCase,
       ) =>
         new ObtenerReporteEmpleadoUseCase(
           periodoRepo,
           empleadoRepo,
           reporteService,
+          resolverTurno,
         ),
-      inject: [PERIODO_REPOSITORY, EMPLEADO_REPOSITORY, ReportePeriodoService],
+      inject: [
+        PERIODO_REPOSITORY,
+        EMPLEADO_REPOSITORY,
+        ReportePeriodoService,
+        ResolverTurnoDelEmpleadoUseCase,
+      ],
     },
     {
       provide: ObtenerReporteHistoricoUseCase,

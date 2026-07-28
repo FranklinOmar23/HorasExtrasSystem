@@ -10,6 +10,16 @@ import { cerrarPeriodo } from '../api/periodos';
 import { descargarReporteExcel, obtenerReporteEmpleado, obtenerReportePeriodo } from '../api/reportes';
 import { etiquetaTipoHora, formatFechaCorta, formatMonto, formatNumero, formatRangoPeriodo } from '../utils/format';
 
+const TONO_TURNO: Record<string, 'neutral' | 'sun' | 'sea' | 'coral'> = {
+  DIURNO: 'neutral',
+  SABADO: 'sea',
+  NOCTURNO: 'sun',
+};
+
+function tonoTurno(codigo: string): 'neutral' | 'sun' | 'sea' | 'coral' {
+  return TONO_TURNO[codigo] ?? 'coral';
+}
+
 function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId: string }) {
   const { data, isLoading } = useQuery({
     queryKey: ['reporte-empleado', periodoId, empleadoId],
@@ -38,6 +48,7 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
                   <th className="hx-th" style={{ background: 'var(--surface)' }}>Fecha</th>
                   <th className="hx-th" style={{ background: 'var(--surface)' }}>Entrada</th>
                   <th className="hx-th" style={{ background: 'var(--surface)' }}>Salida</th>
+                  <th className="hx-th" style={{ background: 'var(--surface)' }}>Turno</th>
                   <th className="hx-th" style={{ background: 'var(--surface)' }}>Tipo</th>
                   <th className="hx-th" style={{ background: 'var(--surface)', textAlign: 'right' }}>Horas</th>
                   <th className="hx-th" style={{ background: 'var(--surface)', textAlign: 'right' }}>Valor RD$</th>
@@ -50,6 +61,7 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
                       <td className="hx-td tnum">{formatFechaCorta(d.fecha)}</td>
                       <td className="hx-td tnum">{d.horaEntrada}</td>
                       <td className="hx-td tnum">{d.horaSalida}</td>
+                      <td className="hx-td"><span className={`hx-badge hx-badge-${tonoTurno(d.turnoCodigo)}`}>{d.turnoNombre}</span></td>
                       <td className="hx-td"><span className="hx-badge hx-badge-neutral">Normal</span></td>
                       <td className="hx-td tnum" style={{ textAlign: 'right' }}>—</td>
                       <td className="hx-td tnum" style={{ textAlign: 'right', fontWeight: 600 }}>—</td>
@@ -63,6 +75,9 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
                             <td className="hx-td tnum" rowSpan={d.calculos.length}>{formatFechaCorta(d.fecha)}</td>
                             <td className="hx-td tnum" rowSpan={d.calculos.length}>{d.horaEntrada}</td>
                             <td className="hx-td tnum" rowSpan={d.calculos.length}>{d.horaSalida}</td>
+                            <td className="hx-td" rowSpan={d.calculos.length}>
+                              <span className={`hx-badge hx-badge-${tonoTurno(d.turnoCodigo)}`}>{d.turnoNombre}</span>
+                            </td>
                           </>
                         )}
                         <td className="hx-td"><span className={`hx-badge hx-badge-${et.tono}`}>{et.texto}</span></td>

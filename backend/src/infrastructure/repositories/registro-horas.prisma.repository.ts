@@ -104,6 +104,28 @@ export class RegistroHorasPrismaRepository implements RegistroHorasRepository {
     return registros.map((r) => aDominio(r, codigosPorTipoId));
   }
 
+  async listarPorEmpleadoYRango(
+    empleadoId: string,
+    desde: Date,
+    hasta: Date | null,
+  ): Promise<RegistroConCalculos[]> {
+    const where: Prisma.RegistroHorasWhereInput = {
+      empleadoId,
+      fecha: hasta ? { gte: desde, lte: hasta } : { gte: desde },
+    };
+
+    const [registros, codigosPorTipoId] = await Promise.all([
+      this.prisma.registroHoras.findMany({
+        where,
+        include: { calculos: true },
+        orderBy: { fecha: 'asc' },
+      }),
+      this.mapaCodigosPorTipoId(),
+    ]);
+
+    return registros.map((r) => aDominio(r, codigosPorTipoId));
+  }
+
   async buscarPorId(id: string): Promise<RegistroConCalculos | null> {
     const [registro, codigosPorTipoId] = await Promise.all([
       this.prisma.registroHoras.findUnique({

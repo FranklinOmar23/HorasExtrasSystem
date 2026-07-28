@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '../components/PageHeader';
 import { SkeletonTableRows } from '../components/Skeleton';
@@ -27,6 +27,8 @@ const FORM_VACIO = {
   comentario: '',
 };
 
+const TAMANO_PAGINA = 10;
+
 export function RegistroManualPage() {
   const queryClient = useQueryClient();
   const { periodoActivo, periodoActivoId, cargando: cargandoPeriodos } = usePeriodoActivo();
@@ -38,6 +40,8 @@ export function RegistroManualPage() {
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
+  const [pagina, setPagina] = useState(1);
 
   const { data: candidatos = [] } = useQuery({
     queryKey: ['empleados-buscar', regQuery],
@@ -56,10 +60,23 @@ export function RegistroManualPage() {
     queryFn: () => listarRegistros(periodoActivoId as string),
     enabled: !!periodoActivoId,
   });
-  const recientes = useMemo(
-    () => [...registros].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 8),
+  const ordenados = useMemo(
+    () => [...registros].sort((a, b) => b.fecha.localeCompare(a.fecha)),
     [registros],
   );
+  const totalPaginas = Math.max(1, Math.ceil(ordenados.length / TAMANO_PAGINA));
+  const recientes = useMemo(
+    () => ordenados.slice((pagina - 1) * TAMANO_PAGINA, pagina * TAMANO_PAGINA),
+    [ordenados, pagina],
+  );
+
+  useEffect(() => {
+    setPagina(1);
+  }, [periodoActivoId]);
+
+  useEffect(() => {
+    setPagina((p) => Math.min(p, totalPaginas));
+  }, [totalPaginas]);
 
   const previewHabilitado = !!empleado && !!form.fecha && !!form.horaEntrada && !!form.horaSalida;
   const { data: preview, isFetching: cargandoPreview } = useQuery({
@@ -115,6 +132,50 @@ export function RegistroManualPage() {
     },
     onError: (err) => setError(mensajeError(err, 'No se pudo eliminar el registro.')),
   });
+
+  const eliminarVarios = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const resultados = await Promise.allSettled(ids.map((id) => eliminarRegistro(id)));
+      const fallidos = resultados.filter((r) => r.status === 'rejected');
+      if (fallidos.length > 0) {
+        throw new Error(
+          fallidos.length === ids.length
+            ? 'No se pudo eliminar ninguno de los registros seleccionados.'
+            : `Se eliminaron ${ids.length - fallidos.length} de ${ids.length}; ${fallidos.length} no se pudieron eliminar (¿periodo cerrado?).`,
+        );
+      }
+    },
+    onSuccess: () => {
+      setAviso('Registros eliminados.');
+      setError(null);
+      setSeleccionados(new Set());
+      void queryClient.invalidateQueries({ queryKey: ['registros', periodoActivoId] });
+      void queryClient.invalidateQueries({ queryKey: ['reporte-periodo'] });
+    },
+    onError: (err) => {
+      setError(mensajeError(err, 'No se pudieron eliminar los registros seleccionados.'));
+      setSeleccionados(new Set());
+      void queryClient.invalidateQueries({ queryKey: ['registros', periodoActivoId] });
+      void queryClient.invalidateQueries({ queryKey: ['reporte-periodo'] });
+    },
+  });
+
+  function alternarSeleccion(id: string) {
+    setSeleccionados((actual) => {
+      const nuevo = new Set(actual);
+      if (nuevo.has(id)) nuevo.delete(id);
+      else nuevo.add(id);
+      return nuevo;
+    });
+  }
+
+  function confirmarEliminarVarios() {
+    const ids = [...seleccionados];
+    if (ids.length === 0) return;
+    if (confirm(`¿Eliminar ${ids.length} registro${ids.length === 1 ? '' : 's'} seleccionado${ids.length === 1 ? '' : 's'}?`)) {
+      eliminarVarios.mutate(ids);
+    }
+  }
 
   function editar(r: RegistroHoras) {
     const emp = empleadosPorId.get(r.empleadoId);
@@ -283,11 +344,38 @@ export function RegistroManualPage() {
         </div>
       </div>
 
-      <h3 style={{ margin: '32px 0 14px', fontSize: 18 }}>Registros recientes</h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '32px 0 14px' }}>
+        <h3 style={{ margin: 0, fontSize: 18 }}>Registros del periodo</h3>
+        {seleccionados.size > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{seleccionados.size} seleccionado{seleccionados.size === 1 ? '' : 's'}</span>
+            <button type="button" className="hx-btn hx-btn-secondary hx-btn-sm" onClick={() => setSeleccionados(new Set())}>
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="hx-btn hx-btn-sm"
+              style={{ background: 'var(--c-danger)', color: 'var(--text-on-brand)' }}
+              disabled={eliminarVarios.isPending}
+              onClick={confirmarEliminarVarios}
+            >
+              {eliminarVarios.isPending && <Spinner size={12} />}
+              {eliminarVarios.isPending ? 'Eliminando…' : `Eliminar seleccionados (${seleccionados.size})`}
+            </button>
+          </div>
+        )}
+      </div>
       <div className="hx-table-wrap">
         <table className="hx-table">
           <thead>
             <tr>
+              <th className="hx-th" style={{ width: 36 }}>
+                <input
+                  type="checkbox"
+                  checked={recientes.length > 0 && recientes.every((r) => seleccionados.has(r.id))}
+                  onChange={(e) => setSeleccionados(e.target.checked ? new Set(recientes.map((r) => r.id)) : new Set())}
+                />
+              </th>
               <th className="hx-th">Fecha</th>
               <th className="hx-th">Código</th>
               <th className="hx-th">Empleado</th>
@@ -300,13 +388,17 @@ export function RegistroManualPage() {
           </thead>
           <tbody>
             {cargandoRegistros && (
-              <SkeletonTableRows columns={8} rows={5} align={['left', 'left', 'left', 'left', 'left', 'left', 'right', 'right']} />
+              <SkeletonTableRows columns={9} rows={5} align={['left', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'right']} />
             )}
             {!cargandoRegistros && recientes.map((r) => {
               const emp = empleadosPorId.get(r.empleadoId);
               const total = r.calculos.reduce((acc, c) => acc + Number(c.monto), 0);
+              const marcado = seleccionados.has(r.id);
               return (
-                <tr key={r.id} className="hx-row hx-row-in">
+                <tr key={r.id} className="hx-row hx-row-in" style={marcado ? { background: 'var(--c-sea-50)' } : undefined}>
+                  <td className="hx-td">
+                    <input type="checkbox" checked={marcado} onChange={() => alternarSeleccion(r.id)} />
+                  </td>
                   <td className="hx-td tnum">{formatFechaDia(r.fecha)}</td>
                   <td className="hx-td tnum">{emp?.codigo ?? '—'}</td>
                   <td className="hx-td" style={{ fontWeight: 600 }}>{emp?.nombre ?? '—'}</td>
@@ -331,11 +423,37 @@ export function RegistroManualPage() {
               );
             })}
             {!cargandoRegistros && recientes.length === 0 && (
-              <tr><td className="hx-td" colSpan={8}><div className="hx-empty">Sin registros todavía en este periodo.</div></td></tr>
+              <tr><td className="hx-td" colSpan={9}><div className="hx-empty">Sin registros todavía en este periodo.</div></td></tr>
             )}
           </tbody>
         </table>
       </div>
+      {!cargandoRegistros && ordenados.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Mostrando {(pagina - 1) * TAMANO_PAGINA + 1}–{Math.min(pagina * TAMANO_PAGINA, ordenados.length)} de {ordenados.length}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              type="button"
+              className="hx-btn hx-btn-secondary hx-btn-sm"
+              disabled={pagina <= 1}
+              onClick={() => setPagina((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </button>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Página {pagina} de {totalPaginas}</span>
+            <button
+              type="button"
+              className="hx-btn hx-btn-secondary hx-btn-sm"
+              disabled={pagina >= totalPaginas}
+              onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

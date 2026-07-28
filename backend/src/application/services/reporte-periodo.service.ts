@@ -131,9 +131,9 @@ export class ReportePeriodoService {
     horasJornada: Decimal;
   }> {
     const configuracion = await this.configuracionRepository.obtenerTodos();
-    const { divisorSalario, parametrosMotor } =
+    const { divisorSalario, horasJornadaGlobal } =
       parsearConfiguracionCalculo(configuracion);
-    return { divisorSalario, horasJornada: parametrosMotor.horasJornada };
+    return { divisorSalario, horasJornada: horasJornadaGlobal };
   }
 
   private async agregarFilaEmpleado(

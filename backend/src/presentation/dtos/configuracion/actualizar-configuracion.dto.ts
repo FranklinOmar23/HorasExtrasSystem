@@ -42,6 +42,11 @@ export class ActualizarConfiguracionDto {
   @IsString()
   inicio_nocturna?: string;
 
+  @ApiPropertyOptional({ example: '07:00' })
+  @IsOptional()
+  @IsString()
+  fin_nocturna?: string;
+
   @ApiPropertyOptional({ example: '0' })
   @IsOptional()
   @IsString()

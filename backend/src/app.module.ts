@@ -13,6 +13,7 @@ import { ImportacionesModule } from './presentation/modules/importaciones.module
 import { PeriodosModule } from './presentation/modules/periodos.module';
 import { RegistrosModule } from './presentation/modules/registros.module';
 import { ReportesModule } from './presentation/modules/reportes.module';
+import { TurnosModule } from './presentation/modules/turnos.module';
 import { UsuariosModule } from './presentation/modules/usuarios.module';
 
 @Module({
@@ -28,6 +29,7 @@ import { UsuariosModule } from './presentation/modules/usuarios.module';
     RegistrosModule,
     ImportacionesModule,
     ReportesModule,
+    TurnosModule,
     UsuariosModule,
   ],
   providers: [

@@ -13,13 +13,23 @@ export type EntidadAuditoria =
   | 'TIPO_HORA_EXTRA'
   | 'REGISTRO_HORAS'
   | 'IMPORTACION'
-  | 'USUARIO';
+  | 'USUARIO'
+  | 'TURNO'
+  | 'ASIGNACION_TURNO';
 
 export interface UsuarioActual {
   id: string;
   nombre: string;
   email: string;
   rol: RolUsuario;
+}
+
+export interface Usuario {
+  id: string;
+  nombre: string;
+  email: string;
+  rol: RolUsuario;
+  activo: boolean;
 }
 
 export interface LoginRespuesta {
@@ -69,6 +79,29 @@ export interface Periodo {
   cerradoPorId: string | null;
   eliminadoEn: string | null;
   eliminadoPorId: string | null;
+}
+
+export interface Turno {
+  id: string;
+  codigo: string;
+  nombre: string;
+  horaInicio: string;
+  horaFin: string;
+  horasJornada: string;
+  cruzaMedianoche: boolean;
+  descuentaAlmuerzo: boolean;
+  activo: boolean;
+}
+
+export interface AsignacionTurno {
+  id: string;
+  empleadoId: string;
+  turnoId: string;
+  fechaDesde: string;
+  fechaHasta: string | null;
+  comentario: string | null;
+  creadoPorId: string;
+  createdAt: string;
 }
 
 export interface Auditoria {
@@ -162,6 +195,8 @@ export interface DiaReporteEmpleado {
   fecha: string;
   horaEntrada: string;
   horaSalida: string;
+  turnoCodigo: string;
+  turnoNombre: string;
   calculos: Calculo[];
   total: string;
 }

@@ -3,6 +3,8 @@ import { ParametrosCalculo } from '../../domain/services/motor-calculo';
 
 export interface ConfiguracionCalculoParseada {
   divisorSalario: Decimal;
+  /** Para el salario/hora (montoMensual / divisorSalario / horasJornadaGlobal); no es la ventana de ningún turno. */
+  horasJornadaGlobal: Decimal;
   parametrosMotor: ParametrosCalculo;
 }
 
@@ -12,12 +14,11 @@ export function parsearConfiguracionCalculo(
 ): ConfiguracionCalculoParseada {
   return {
     divisorSalario: new Decimal(configuracion.divisor_salario),
+    horasJornadaGlobal: new Decimal(configuracion.horas_jornada),
     parametrosMotor: {
-      horasJornada: new Decimal(configuracion.horas_jornada),
       horasAlmuerzo: new Decimal(configuracion.horas_almuerzo),
-      entradaSabado: configuracion.entrada_sabado,
-      salidaSabado: configuracion.salida_sabado,
       inicioNocturna: configuracion.inicio_nocturna,
+      finNocturna: configuracion.fin_nocturna,
       toleranciaMinutos: Number(configuracion.tolerancia_minutos),
     },
   };

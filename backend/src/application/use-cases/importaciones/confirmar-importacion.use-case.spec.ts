@@ -6,6 +6,7 @@ import { Periodo } from '../../../domain/entities/periodo.entity';
 import { RegistroHoras } from '../../../domain/entities/registro-horas.entity';
 import { Salario } from '../../../domain/entities/salario.entity';
 import { TipoHoraExtra } from '../../../domain/entities/tipo-hora-extra.entity';
+import { Turno } from '../../../domain/entities/turno.entity';
 import { EstadoPeriodo } from '../../../domain/enums/estado-periodo.enum';
 import { ImportacionNoEncontradaError } from '../../../domain/errors/importacion-no-encontrada.error';
 import { ImportacionYaConfirmadaError } from '../../../domain/errors/importacion-ya-confirmada.error';
@@ -14,6 +15,7 @@ import { OrigenRegistro } from '../../../domain/enums/origen-registro.enum';
 import { PeriodoCerradoError } from '../../../domain/errors/periodo-cerrado.error';
 import { TipoHoraExtraCodigo } from '../../../domain/enums/tipo-hora-extra-codigo.enum';
 import { CalcularDesgloseService } from '../../services/calcular-desglose.service';
+import { ResolverTurnoDelEmpleadoUseCase } from '../asignaciones-turno/resolver-turno-del-empleado.use-case';
 import {
   ActualizarEmpleadoDatos,
   CrearEmpleadoDatos,
@@ -123,6 +125,7 @@ const CONFIGURACION_FIJA: Record<string, string> = {
   entrada_sabado: '09:00',
   salida_sabado: '13:00',
   inicio_nocturna: '21:00',
+  fin_nocturna: '07:00',
   tolerancia_minutos: '0',
 };
 
@@ -136,6 +139,23 @@ class ConfiguracionRepositoryFake implements ConfiguracionRepository {
     return Promise.reject(new Error('no usado en este test'));
   }
 }
+
+const TURNO_DIURNO = new Turno(
+  'turno-diurno',
+  'DIURNO',
+  'Diurno',
+  '08:30',
+  '17:30',
+  new Decimal('8'),
+  false,
+  true,
+  true,
+);
+
+/** Todos los empleados de este test usan el turno DIURNO por defecto (sin asignación). */
+const resolverTurnoFake = {
+  ejecutar: () => Promise.resolve({ turno: TURNO_DIURNO, explicita: false }),
+};
 
 const TIPOS_HORA_EXTRA = [
   new TipoHoraExtra(
@@ -200,6 +220,9 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
     _empleadoId?: string,
   ): Promise<RegistroConCalculos[]> {
     return Promise.resolve(this.existentes);
+  }
+  listarPorEmpleadoYRango(): Promise<RegistroConCalculos[]> {
+    return Promise.reject(new Error('no usado en este test'));
   }
   buscarPorId(_id: string): Promise<RegistroConCalculos | null> {
     return Promise.reject(new Error('no usado en este test'));
@@ -402,6 +425,7 @@ function construirUseCase(opciones: {
     new FeriadoRepositoryFake(),
     new ConfiguracionRepositoryFake(),
     new TipoHoraExtraRepositoryFake(),
+    resolverTurnoFake as unknown as ResolverTurnoDelEmpleadoUseCase,
   );
 
   const useCase = new ConfirmarImportacionUseCase(

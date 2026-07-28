@@ -14,10 +14,11 @@ Moneda: RD$ (peso dominicano). Toda la UI en español.
 - `docs/06-plan-de-trabajo.md` — fases y orden de construcción
 - `docs/design/` — diseño de pantallas generado con Claude Design (referencia visual)
 
-> Estos documentos todavía no existen en el repositorio. Mientras no estén,
-> el backend usa como referencia el resumen de reglas de negocio de este
-> archivo; el `schema.prisma` actual es un punto de partida inferido y debe
-> revisarse contra `docs/02` y `docs/03` en cuanto existan.
+> `docs/02` y `docs/03` ya existen y son la fuente de verdad vigente (reglas
+> de cálculo, incluyendo turnos de trabajo, y esquema de datos completo).
+> `docs/01`, `docs/04`, `docs/05` y `docs/design/` todavía no existen — mientras
+> no estén, el resumen de este archivo y el propio código siguen siendo la
+> referencia para arquitectura, API y visión general.
 
 ## Stack
 
@@ -64,10 +65,20 @@ infrastructure implementa los puertos de application
 
 - Prisma 7 no permite `url` dentro de `schema.prisma`: la cadena de conexión
   vive en `.env` (`DATABASE_URL`) y se referencia desde `prisma.config.ts`
-  (usado por la CLI/Migrate).
-- `PrismaClient` en runtime requiere un *driver adapter* (`@prisma/adapter-mssql`
-  + `mssql`), instanciado en `src/infrastructure/prisma/prisma.service.ts` a
-  partir de `DATABASE_URL` (ver `src/shared/config/sqlserver-connection.ts`).
+  (usado por la CLI/Migrate). Ver `backend/.env.example` para las dos
+  variantes documentadas (copiar a `.env` y ajustar):
+  - **Desarrollo local sin Docker (caso por defecto)**: `DATABASE_URL` apunta
+    a `localhost`, con un usuario SQL dedicado (no `sa`).
+  - **Docker**: `DATABASE_URL` apunta al nombre del servicio (ej. `sqlserver`)
+    en vez de `localhost`.
+- Toda la persistencia pasa por Prisma — no hay queries directos a la
+  librería `mssql`. `PrismaClient` en runtime requiere un *driver adapter*
+  (`@prisma/adapter-mssql`), instanciado en
+  `src/infrastructure/prisma/prisma.service.ts` a partir de `DATABASE_URL`
+  (ver `src/shared/config/sqlserver-connection.ts`). `mssql` solo aparece en
+  el backend como `devDependency`, para tipar ese objeto de conexión — en
+  runtime lo trae transitivamente `@prisma/adapter-mssql`, que sí lo usa
+  internamente para hablar con SQL Server.
 - SQL Server no soporta enums nativos en Prisma: `Usuario.rol` y
   `PeriodoQuincenal.estado` se modelan como `String` y se tipan con los enums
   de dominio (`src/domain/enums/`) en la capa de aplicación.

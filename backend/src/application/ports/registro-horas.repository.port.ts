@@ -33,6 +33,15 @@ export interface RegistroHorasRepository {
     periodoId: string,
     empleadoId?: string,
   ): Promise<RegistroConCalculos[]>;
+  /** Registros de un empleado en un rango de fechas, sin importar el periodo
+   *  al que pertenezcan. `hasta` null = sin límite superior. Usado para
+   *  recalcular los `calculos` afectados al crear/editar/borrar una
+   *  asignación de turno. */
+  listarPorEmpleadoYRango(
+    empleadoId: string,
+    desde: Date,
+    hasta: Date | null,
+  ): Promise<RegistroConCalculos[]>;
   buscarPorId(id: string): Promise<RegistroConCalculos | null>;
   crear(
     datos: CrearRegistroDatos,

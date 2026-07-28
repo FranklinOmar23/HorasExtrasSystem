@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigate, Route, BrowserRouter, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { ProtectedLayout } from './components/ProtectedLayout';
+import { AsignacionesTurnoPage } from './pages/AsignacionesTurnoPage';
 import { AuditoriaPage } from './pages/AuditoriaPage';
 import { ConfiguracionPage } from './pages/ConfiguracionPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -11,6 +12,7 @@ import { LoginPage } from './pages/LoginPage';
 import { PeriodosPage } from './pages/PeriodosPage';
 import { RegistroManualPage } from './pages/RegistroManualPage';
 import { ReportePage } from './pages/ReportePage';
+import { UsuariosPage } from './pages/UsuariosPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,8 +34,10 @@ function App() {
               <Route path="/reporte" element={<ReportePage />} />
               <Route path="/empleados" element={<EmpleadosPage />} />
               <Route path="/periodos" element={<PeriodosPage />} />
+              <Route path="/asignaciones-turno" element={<AsignacionesTurnoPage />} />
               <Route path="/configuracion" element={<ConfiguracionPage />} />
               <Route path="/auditoria" element={<AuditoriaPage />} />
+              <Route path="/usuarios" element={<UsuariosPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

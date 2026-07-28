@@ -25,6 +25,9 @@ export class ConfiguracionRespuestaDto {
   @ApiProperty({ example: '21:00' })
   inicio_nocturna!: string;
 
+  @ApiProperty({ example: '07:00' })
+  fin_nocturna!: string;
+
   @ApiProperty({ example: '0' })
   tolerancia_minutos!: string;
 

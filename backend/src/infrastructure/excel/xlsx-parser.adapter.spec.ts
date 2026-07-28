@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as XLSX from 'xlsx';
 import { ImportacionFormatoInvalidoError } from '../../domain/errors/importacion-formato-invalido.error';
 import { XlsxParserAdapter } from './xlsx-parser.adapter';
@@ -162,5 +164,126 @@ describe('XlsxParserAdapter', () => {
     expect(() => parser.parsear(buffer)).toThrow(
       ImportacionFormatoInvalidoError,
     );
+  });
+
+  describe('formato "Time Card" (reporte de reloj biométrico)', () => {
+    /** Reproduce la estructura real de docs/fixtures/total-time-card-ejemplo.xlsx:
+     *  3 filas de metadata del reporte antes del encabezado real. */
+    function libroTimeCard(filas: unknown[][]): Buffer {
+      const hoja = XLSX.utils.aoa_to_sheet([
+        ['Hartemania', null, null, null, null],
+        ['Total Time Card', null, null, null, null],
+        ['Export Time: 2026-07-17 10:05', null, null, null, null],
+        ['Full Name', 'ID', 'Date', 'Clock-In Time', 'Clock-Out Time'],
+        ...filas,
+      ]);
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, 'Sheet0');
+      return XLSX.write(libro, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+    }
+
+    it('salta las filas de metadata y reconoce el encabezado real', () => {
+      const buffer = libroTimeCard([
+        ['JOSE ALFREDO FERNANDEZ BORROME', '10', '2026-06-16', '08:30', '18:03'],
+      ]);
+
+      const filas = parser.parsear(buffer);
+
+      expect(filas).toHaveLength(1);
+      expect(filas[0]).toMatchObject({
+        codigo: 10,
+        nombreCrudo: 'JOSE ALFREDO FERNANDEZ BORROME',
+        horaEntrada: '08:30',
+        horaSalida: '18:03',
+      });
+      expect(filas[0].fecha?.toISOString().slice(0, 10)).toBe('2026-06-16');
+    });
+
+    it('numera las líneas según la posición real en el Excel, contando las filas de metadata', () => {
+      const buffer = libroTimeCard([
+        ['JOSE ALFREDO FERNANDEZ BORROME', '10', '2026-06-16', '08:30', '18:03'],
+        ['JOSE ALFREDO FERNANDEZ BORROME', '10', '2026-06-17', '08:42', '19:09'],
+      ]);
+
+      const filas = parser.parsear(buffer);
+
+      // Fila 1-3: metadata, fila 4: encabezado, fila 5: primer dato.
+      expect(filas[0].linea).toBe(5);
+      expect(filas[1].linea).toBe(6);
+    });
+
+    it('trata "--" (sin marcaje) como hora ausente, igual que una celda vacía', () => {
+      const buffer = libroTimeCard([
+        ['BILLY RODRIGUEZ DISHMEY', '116', '2026-06-16', '--', '--'],
+      ]);
+
+      const filas = parser.parsear(buffer);
+
+      expect(filas[0].horaEntrada).toBeNull();
+      expect(filas[0].horaSalida).toBeNull();
+    });
+
+    it('parsea un turno nocturno (entra de noche, sale al día siguiente) como una sola fila con sus horas tal cual', () => {
+      // Caso real: RAHIAN SANCHEZ GOMEZ entra 21:16 y sale 08:45 del día
+      // siguiente. El reloj no parte esto en dos filas — llega completo en
+      // una, y `entradaSalidaAjustadas` (motor de cálculo) ya sabe sumar
+      // 24h cuando la salida es menor que la entrada.
+      const buffer = libroTimeCard([
+        ['RAHIAN SANCHEZ GOMEZ', '49', '2026-06-16', '21:16', '08:45'],
+      ]);
+
+      const filas = parser.parsear(buffer);
+
+      expect(filas[0]).toMatchObject({
+        codigo: 49,
+        horaEntrada: '21:16',
+        horaSalida: '08:45',
+      });
+      expect(filas[0].fecha?.toISOString().slice(0, 10)).toBe('2026-06-16');
+    });
+  });
+
+  describe('fixture real docs/fixtures/total-time-card-ejemplo.xlsx', () => {
+    const rutaFixture = path.join(
+      __dirname,
+      '../../../../docs/fixtures/total-time-card-ejemplo.xlsx',
+    );
+    const existeFixture = fs.existsSync(rutaFixture);
+    const it_si_existe = existeFixture ? it : it.skip;
+
+    it_si_existe('parsea las 750 filas de datos de los 50 empleados', () => {
+      const buffer = fs.readFileSync(rutaFixture);
+
+      const filas = parser.parsear(buffer);
+
+      expect(filas).toHaveLength(750);
+      const codigos = new Set(filas.map((f) => f.codigo));
+      expect(codigos.size).toBe(50);
+    });
+
+    it_si_existe('parsea correctamente las 15 noches consecutivas del empleado nocturno (código 49)', () => {
+      const buffer = fs.readFileSync(rutaFixture);
+
+      const filasRahian = parser
+        .parsear(buffer)
+        .filter((f) => f.codigo === 49);
+
+      expect(filasRahian).toHaveLength(15);
+      // 16 de junio: entra 21:16, sale 08:45 del día siguiente — una sola
+      // fila, sin necesidad de "coser" nada (el reloj nunca la parte).
+      expect(filasRahian[0]).toMatchObject({
+        horaEntrada: '21:16',
+        horaSalida: '08:45',
+      });
+      expect(filasRahian[0].fecha?.toISOString().slice(0, 10)).toBe(
+        '2026-06-16',
+      );
+      // 20 y 21 de junio: "--","--" en el archivo real → sin marcaje.
+      const dia20 = filasRahian.find(
+        (f) => f.fecha?.toISOString().slice(0, 10) === '2026-06-20',
+      );
+      expect(dia20?.horaEntrada).toBeNull();
+      expect(dia20?.horaSalida).toBeNull();
+    });
   });
 });

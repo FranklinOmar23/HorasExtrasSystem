@@ -86,6 +86,7 @@ async function main(): Promise<void> {
     entrada_sabado: '09:00',
     salida_sabado: '13:00',
     inicio_nocturna: '21:00',
+    fin_nocturna: '07:00',
     tolerancia_minutos: '0',
     redondeo: 'ninguno',
   };
@@ -99,6 +100,54 @@ async function main(): Promise<void> {
   console.log(
     `Parámetros de configuración listos: ${Object.keys(configuracion).length}`,
   );
+
+  const turnos: {
+    codigo: string;
+    nombre: string;
+    horaInicio: string;
+    horaFin: string;
+    horasJornada: string;
+    cruzaMedianoche: boolean;
+    descuentaAlmuerzo: boolean;
+  }[] = [
+    {
+      codigo: 'DIURNO',
+      nombre: 'Diurno',
+      horaInicio: '08:30',
+      horaFin: '17:30',
+      horasJornada: '8',
+      cruzaMedianoche: false,
+      descuentaAlmuerzo: true,
+    },
+    {
+      codigo: 'SABADO',
+      nombre: 'Sábado',
+      horaInicio: '09:00',
+      horaFin: '13:00',
+      horasJornada: '4',
+      cruzaMedianoche: false,
+      descuentaAlmuerzo: false,
+    },
+    {
+      // Horario provisional hasta que RRHH confirme el definitivo — editable
+      // desde Configuración sin necesidad de tocar código (ver Turno en schema.prisma).
+      codigo: 'NOCTURNO',
+      nombre: 'Nocturno',
+      horaInicio: '22:00',
+      horaFin: '08:00',
+      horasJornada: '8',
+      cruzaMedianoche: true,
+      descuentaAlmuerzo: true,
+    },
+  ];
+  for (const turno of turnos) {
+    await prisma.turno.upsert({
+      where: { codigo: turno.codigo },
+      update: {},
+      create: turno,
+    });
+  }
+  console.log(`Turnos listos: ${turnos.length}`);
 
   await prisma.$disconnect();
 }
