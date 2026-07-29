@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsOptional } from 'class-validator';
 
 export class ConfirmarImportacionDto {
   @ApiProperty({
@@ -8,4 +8,13 @@ export class ConfirmarImportacionDto {
   })
   @IsBoolean()
   incluirAdvertencias!: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'Si es true (default), también persiste las filas retroactivas (fecha fuera del periodo).',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  incluirRetroactivas?: boolean;
 }

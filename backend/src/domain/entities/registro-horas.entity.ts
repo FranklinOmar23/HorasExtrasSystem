@@ -11,5 +11,6 @@ export class RegistroHoras {
     public readonly origen: OrigenRegistro,
     public readonly importacionId: string | null,
     public readonly comentario: string | null,
+    public readonly esRetroactivo: boolean,
   ) {}
 }

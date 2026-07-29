@@ -2,8 +2,8 @@ export type RolUsuario = 'ADMIN' | 'RRHH';
 export type EstadoPeriodo = 'ABIERTO' | 'CERRADO';
 export type OrigenRegistro = 'EXCEL' | 'MANUAL';
 export type TipoHoraExtraCodigo = 'HE_35' | 'HE_100' | 'NOCTURNA_15' | 'FERIADO';
-export type EstadoFilaImportacion = 'OK' | 'ADVERTENCIA' | 'ERROR';
-export type AccionAuditoria = 'CREAR' | 'ACTUALIZAR' | 'ELIMINAR' | 'CERRAR' | 'RESTAURAR' | 'CONFIRMAR';
+export type EstadoFilaImportacion = 'OK' | 'RETROACTIVO' | 'ADVERTENCIA' | 'ERROR';
+export type AccionAuditoria = 'CREAR' | 'ACTUALIZAR' | 'ELIMINAR' | 'ELIMINAR_PERMANENTE' | 'CERRAR' | 'RESTAURAR' | 'CONFIRMAR';
 export type EntidadAuditoria =
   | 'PERIODO'
   | 'EMPLEADO'
@@ -133,6 +133,7 @@ export interface RegistroHoras {
   origen: OrigenRegistro;
   comentario: string | null;
   calculos: Calculo[];
+  esRetroactivo: boolean;
 }
 
 export interface Importacion {
@@ -143,6 +144,7 @@ export interface Importacion {
   filasOk: number;
   filasAdvertencia: number;
   filasError: number;
+  filasRetroactivas: number;
   importadoEn: string;
   confirmadaEn: string | null;
 }
@@ -161,7 +163,7 @@ export interface FilaImportacion {
 export interface ParsearImportacionRespuesta {
   importacionId: string;
   filas: FilaImportacion[];
-  resumen: { ok: number; advertencias: number; errores: number };
+  resumen: { ok: number; retroactivas: number; advertencias: number; errores: number };
 }
 
 export interface DesgloseTipoHora {
@@ -177,12 +179,18 @@ export interface EmpleadoReporte {
   nombre: string;
 }
 
+export interface RetroactivoResumen {
+  dias: number;
+  monto: string;
+}
+
 export interface FilaReportePeriodo {
   empleado: EmpleadoReporte;
   salarioHora: string;
   horas: DesgloseTipoHora;
   montos: DesgloseTipoHora;
   total: string;
+  retroactivo: RetroactivoResumen;
 }
 
 export interface ReportePeriodo {
@@ -199,6 +207,7 @@ export interface DiaReporteEmpleado {
   turnoNombre: string;
   calculos: Calculo[];
   total: string;
+  esRetroactivo: boolean;
 }
 
 export interface ReporteEmpleado {

@@ -44,6 +44,9 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
   buscarPorId(): Promise<RegistroConCalculos | null> {
     return Promise.reject(new Error('no usado en este test'));
   }
+  buscarPorEmpleadoYFecha(): Promise<RegistroConCalculos | null> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
   crear(_datos: CrearRegistroDatos): Promise<RegistroConCalculos> {
     return Promise.reject(new Error('no usado en este test'));
   }
@@ -87,6 +90,9 @@ class PeriodoRepositoryFake implements PeriodoRepository {
   restaurar(): Promise<Periodo> {
     return Promise.reject(new Error('no usado en este test'));
   }
+  eliminarPermanentemente(): Promise<void> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
 }
 
 function registro(
@@ -105,6 +111,7 @@ function registro(
       OrigenRegistro.MANUAL,
       null,
       null,
+      false,
     ),
     calculos: [],
   };

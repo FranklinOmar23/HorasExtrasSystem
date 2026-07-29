@@ -10,6 +10,7 @@ export interface CrearImportacionDatos {
   filasOk: number;
   filasAdvertencia: number;
   filasError: number;
+  filasRetroactivas: number;
 }
 
 export interface ImportacionRepository {

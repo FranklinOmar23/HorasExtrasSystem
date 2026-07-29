@@ -62,6 +62,10 @@ class PeriodoRepositoryFake implements PeriodoRepository {
   restaurar(): Promise<Periodo> {
     return Promise.reject(new Error('no usado en este test'));
   }
+
+  eliminarPermanentemente(): Promise<void> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
 }
 
 const PERIODO_ABIERTO = new Periodo(

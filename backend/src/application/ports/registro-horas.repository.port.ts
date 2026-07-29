@@ -19,6 +19,7 @@ export interface CrearRegistroDatos {
   origen: OrigenRegistro;
   importacionId: string | null;
   comentario: string | null;
+  esRetroactivo: boolean;
 }
 
 export interface ActualizarRegistroDatos {
@@ -26,6 +27,7 @@ export interface ActualizarRegistroDatos {
   horaEntrada: string;
   horaSalida: string;
   comentario: string | null;
+  esRetroactivo: boolean;
 }
 
 export interface RegistroHorasRepository {
@@ -43,6 +45,14 @@ export interface RegistroHorasRepository {
     hasta: Date | null,
   ): Promise<RegistroConCalculos[]>;
   buscarPorId(id: string): Promise<RegistroConCalculos | null>;
+  /** Busca un registro de un empleado en una fecha exacta sin importar el
+   *  periodo al que pertenezca (incluidos periodos cerrados o eliminados).
+   *  Usado para evitar pagar dos veces la misma jornada al registrar un
+   *  retroactivo. Null si no existe ninguno. */
+  buscarPorEmpleadoYFecha(
+    empleadoId: string,
+    fecha: Date,
+  ): Promise<RegistroConCalculos | null>;
   crear(
     datos: CrearRegistroDatos,
     filas: FilaCalculo[],

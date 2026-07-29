@@ -58,6 +58,10 @@ class PeriodoRepositoryFake implements PeriodoRepository {
     this.periodos = this.periodos.map((p) => (p.id === id ? restaurado : p));
     return Promise.resolve(restaurado);
   }
+
+  eliminarPermanentemente(): Promise<void> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
 }
 
 function diasAntes(dias: number): Date {

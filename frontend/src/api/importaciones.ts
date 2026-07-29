@@ -18,10 +18,11 @@ export async function subirImportacion(
 export async function confirmarImportacion(
   importacionId: string,
   incluirAdvertencias: boolean,
+  incluirRetroactivas: boolean,
 ): Promise<Importacion> {
   const { data } = await apiClient.post<Importacion>(
     `/importaciones/${importacionId}/confirmar`,
-    { incluirAdvertencias },
+    { incluirAdvertencias, incluirRetroactivas },
   );
   return data;
 }

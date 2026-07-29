@@ -28,9 +28,9 @@ import { AccionAuditoria } from '../../domain/enums/accion-auditoria.enum';
 import { EntidadAuditoria } from '../../domain/enums/entidad-auditoria.enum';
 import { UsuarioActual } from '../decorators/usuario-actual.decorator';
 import { ActualizarRegistroDto } from '../dtos/registros/actualizar-registro.dto';
-import { CalculoRespuestaDto } from '../dtos/registros/calculo-respuesta.dto';
 import { CrearRegistroDto } from '../dtos/registros/crear-registro.dto';
 import { PreviewCalculoDto } from '../dtos/registros/preview-calculo.dto';
+import { PreviewCalculoRespuestaDto } from '../dtos/registros/preview-calculo-respuesta.dto';
 import { RegistroRespuestaDto } from '../dtos/registros/registro-respuesta.dto';
 import {
   aFilaCalculoRespuestaDto,
@@ -97,7 +97,7 @@ export class RegistrosController {
       accion: AccionAuditoria.CREAR,
       entidad: EntidadAuditoria.REGISTRO_HORAS,
       entidadId: registro.registro.id,
-      descripcion: `Registró manualmente horas del ${aFechaISO(registro.registro.fecha)} (${registro.registro.horaEntrada}-${registro.registro.horaSalida}) para el empleado ${registro.registro.empleadoId}.`,
+      descripcion: `Registró manualmente horas del ${aFechaISO(registro.registro.fecha)} (${registro.registro.horaEntrada}-${registro.registro.horaSalida}) para el empleado ${registro.registro.empleadoId}.${registro.registro.esRetroactivo ? ' Retroactivo: se paga en este periodo con el cálculo de su fecha real.' : ''}`,
     });
     return aRegistroRespuestaDto(registro);
   }
@@ -125,7 +125,7 @@ export class RegistrosController {
       accion: AccionAuditoria.ACTUALIZAR,
       entidad: EntidadAuditoria.REGISTRO_HORAS,
       entidadId: registro.registro.id,
-      descripcion: `Actualizó el registro de horas del ${aFechaISO(registro.registro.fecha)} (${registro.registro.horaEntrada}-${registro.registro.horaSalida}) del empleado ${registro.registro.empleadoId}.`,
+      descripcion: `Actualizó el registro de horas del ${aFechaISO(registro.registro.fecha)} (${registro.registro.horaEntrada}-${registro.registro.horaSalida}) del empleado ${registro.registro.empleadoId}.${registro.registro.esRetroactivo ? ' Retroactivo: se paga en este periodo con el cálculo de su fecha real.' : ''}`,
     });
     return aRegistroRespuestaDto(registro);
   }
@@ -154,21 +154,25 @@ export class RegistrosController {
   @ApiOperation({
     summary: 'Calcula el desglose de horas extra sin persistir nada',
   })
-  @ApiResponse({ status: 200, type: [CalculoRespuestaDto] })
-  @ApiResponse({ status: 404, description: 'Empleado no encontrado' })
+  @ApiResponse({ status: 200, type: PreviewCalculoRespuestaDto })
+  @ApiResponse({ status: 404, description: 'Empleado o periodo no encontrado' })
   @ApiResponse({
     status: 422,
     description: 'El empleado no tiene salario vigente en esa fecha',
   })
   async preview(
     @Body() dto: PreviewCalculoDto,
-  ): Promise<CalculoRespuestaDto[]> {
-    const filas = await this.previewCalculo.ejecutar({
+  ): Promise<PreviewCalculoRespuestaDto> {
+    const resultado = await this.previewCalculo.ejecutar({
       empleadoId: dto.empleadoId,
+      periodoId: dto.periodoId,
       fecha: new Date(dto.fecha),
       horaEntrada: dto.horaEntrada,
       horaSalida: dto.horaSalida,
     });
-    return filas.map(aFilaCalculoRespuestaDto);
+    return {
+      calculos: resultado.filas.map(aFilaCalculoRespuestaDto),
+      esRetroactivo: resultado.esRetroactivo,
+    };
   }
 }

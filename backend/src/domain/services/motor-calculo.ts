@@ -17,6 +17,17 @@ export interface ParametrosCalculo {
   inicioNocturna: string;
   finNocturna: string;
   toleranciaMinutos: number;
+  /**
+   * Redondeo "al más cercano" aplicado a la cantidad final de horas de CADA
+   * tipo (HE_35, HE_100, FERIADO, NOCTURNA_15), en minutos: 0 = sin redondeo
+   * (default), 15 o 30. Reproduce el hábito de la hoja de RRHH de anotar
+   * horas en valores "limpios" (16:03→16h, 1:55→2h) — pero SIEMPRE sobre
+   * minutos reales convertidos a horas decimales después de redondear, nunca
+   * al revés: la hoja manual anota horas.minutos (3.48 = 3h48m) y los
+   * multiplica como si fueran decimales (3.48h), pagando de menos. Ese bug
+   * no se replica aquí (ver docs/02 §7).
+   */
+  redondeoMinutos: number;
 }
 
 /** Ventana de jornada del turno resuelto para el empleado en la fecha del registro. */
@@ -98,6 +109,11 @@ interface SegmentoDia {
  * sea jornada normal o extra.
  *
  * Horas negativas se truncan a 0.
+ *
+ * Redondeo (`parametros.redondeoMinutos`, ver `ParametrosCalculo`): la
+ * cantidad final de minutos de CADA fila (HE_35, HE_100, FERIADO,
+ * NOCTURNA_15) se redondea "al más cercano" antes de convertir a horas
+ * decimales y valorizar. Por defecto es 0 (sin redondeo, minutos exactos).
  */
 export class MotorCalculo {
   constructor(private readonly tiposHoraExtra: TipoHoraExtra[]) {}
@@ -153,6 +169,7 @@ export class MotorCalculo {
         TipoHoraExtraCodigo.FERIADO,
         minutosBrutos,
         entrada.salarioHoraUsado,
+        parametros,
       );
       return;
     }
@@ -162,6 +179,7 @@ export class MotorCalculo {
         TipoHoraExtraCodigo.HE_100,
         minutosBrutos,
         entrada.salarioHoraUsado,
+        parametros,
       );
       return;
     }
@@ -179,7 +197,13 @@ export class MotorCalculo {
         diaSemana === DIA_SABADO
           ? TipoHoraExtraCodigo.HE_100
           : TipoHoraExtraCodigo.HE_35;
-      this.agregarFila(filas, codigo, minutosExtra, entrada.salarioHoraUsado);
+      this.agregarFila(
+        filas,
+        codigo,
+        minutosExtra,
+        entrada.salarioHoraUsado,
+        parametros,
+      );
     }
   }
 
@@ -227,6 +251,7 @@ export class MotorCalculo {
           TipoHoraExtraCodigo.FERIADO,
           segmento.fin - segmento.inicio,
           entrada.salarioHoraUsado,
+          parametros,
         );
         continue;
       }
@@ -236,6 +261,7 @@ export class MotorCalculo {
           TipoHoraExtraCodigo.HE_100,
           segmento.fin - segmento.inicio,
           entrada.salarioHoraUsado,
+          parametros,
         );
         continue;
       }
@@ -269,6 +295,7 @@ export class MotorCalculo {
           tipoExcesoLaboral,
           minutosConTolerancia,
           entrada.salarioHoraUsado,
+          parametros,
         );
       }
     }
@@ -304,6 +331,7 @@ export class MotorCalculo {
         TipoHoraExtraCodigo.NOCTURNA_15,
         minutosNocturnos,
         entrada.salarioHoraUsado,
+        parametros,
       );
     }
   }
@@ -320,12 +348,34 @@ export class MotorCalculo {
     return tipo;
   }
 
+  /**
+   * Redondea minutos "al más cercano" a un múltiplo de `redondeoMinutos"
+   * (0 = sin redondeo). Se aplica siempre a MINUTOS, antes de convertir a
+   * horas decimales — nunca sobre una cifra ya mezclada horas.minutos como
+   * hace la hoja de RRHH (ver docs/02 §7).
+   */
+  private redondearMinutos(minutos: number, redondeoMinutos: number): number {
+    if (redondeoMinutos <= 0) {
+      return minutos;
+    }
+    return Math.round(minutos / redondeoMinutos) * redondeoMinutos;
+  }
+
   private agregarFila(
     filas: FilaCalculo[],
     codigo: TipoHoraExtraCodigo,
-    minutos: number,
+    minutosCrudos: number,
     salarioHoraUsado: Decimal,
+    parametros: ParametrosCalculo,
   ): void {
+    const minutos = this.redondearMinutos(
+      minutosCrudos,
+      parametros.redondeoMinutos,
+    );
+    if (minutos <= 0) {
+      return;
+    }
+
     const tipo = this.buscarTipo(codigo);
     const cantidadHoras = new Decimal(minutos).dividedBy(60);
     const monto = salarioHoraUsado

@@ -34,6 +34,10 @@ import {
   aImportacionRespuestaDto,
 } from '../mappers/importacion.mapper';
 
+function aFechaISO(fecha: Date): string {
+  return fecha.toISOString().slice(0, 10);
+}
+
 const LIMITE_TAMANO_ARCHIVO_BYTES = 10 * 1024 * 1024;
 
 @ApiTags('importaciones')
@@ -99,6 +103,7 @@ export class ImportacionesController {
       filas: filas.map(aFilaImportacionRespuestaDto),
       resumen: {
         ok: importacion.filasOk,
+        retroactivas: importacion.filasRetroactivas,
         advertencias: importacion.filasAdvertencia,
         errores: importacion.filasError,
       },
@@ -124,16 +129,22 @@ export class ImportacionesController {
     @Body() dto: ConfirmarImportacionDto,
     @UsuarioActual() usuario: Usuario,
   ): Promise<ImportacionRespuestaDto> {
-    const importacion = await this.confirmarImportacion.ejecutar({
-      importacionId: id,
-      incluirAdvertencias: dto.incluirAdvertencias,
-    });
+    const { importacion, fechasRetroactivasIncluidas } =
+      await this.confirmarImportacion.ejecutar({
+        importacionId: id,
+        incluirAdvertencias: dto.incluirAdvertencias,
+        incluirRetroactivas: dto.incluirRetroactivas ?? true,
+      });
+    const notaRetroactivos =
+      fechasRetroactivasIncluidas.length > 0
+        ? ` Incluyó ${fechasRetroactivasIncluidas.length} registro${fechasRetroactivasIncluidas.length === 1 ? '' : 's'} retroactivo${fechasRetroactivasIncluidas.length === 1 ? '' : 's'} (${fechasRetroactivasIncluidas.map(aFechaISO).join(', ')}).`
+        : '';
     await this.registrarAuditoria.ejecutar({
       usuarioId: usuario.id,
       accion: AccionAuditoria.CONFIRMAR,
       entidad: EntidadAuditoria.IMPORTACION,
       entidadId: importacion.id,
-      descripcion: `Confirmó la importación de ${importacion.archivo} (${importacion.filasOk} filas válidas, ${importacion.filasAdvertencia} advertencias) para el periodo ${importacion.periodoId}.`,
+      descripcion: `Confirmó la importación de ${importacion.archivo} (${importacion.filasOk} filas válidas, ${importacion.filasAdvertencia} advertencias) para el periodo ${importacion.periodoId}.${notaRetroactivos}`,
     });
     return aImportacionRespuestaDto(importacion);
   }

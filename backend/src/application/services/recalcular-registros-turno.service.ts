@@ -67,6 +67,7 @@ export class RecalcularRegistrosPorCambioDeTurnoService {
           horaEntrada: registro.horaEntrada,
           horaSalida: registro.horaSalida,
           comentario: registro.comentario,
+          esRetroactivo: registro.esRetroactivo,
         },
         filas,
       );

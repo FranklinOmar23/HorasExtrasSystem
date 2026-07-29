@@ -8,6 +8,17 @@ export interface ConfiguracionCalculoParseada {
   parametrosMotor: ParametrosCalculo;
 }
 
+const MINUTOS_POR_CLAVE_REDONDEO: Record<string, number> = {
+  ninguno: 0,
+  quince_minutos: 15,
+  treinta_minutos: 30,
+};
+
+/** 0 (sin redondeo) para cualquier clave desconocida o no configurada. */
+function redondeoMinutosDesdeConfig(clave: string | undefined): number {
+  return clave !== undefined ? (MINUTOS_POR_CLAVE_REDONDEO[clave] ?? 0) : 0;
+}
+
 /** Convierte el mapa clave-valor de `configuracion` a los tipos que espera el motor de cálculo. */
 export function parsearConfiguracionCalculo(
   configuracion: Record<string, string>,
@@ -20,6 +31,7 @@ export function parsearConfiguracionCalculo(
       inicioNocturna: configuracion.inicio_nocturna,
       finNocturna: configuracion.fin_nocturna,
       toleranciaMinutos: Number(configuracion.tolerancia_minutos),
+      redondeoMinutos: redondeoMinutosDesdeConfig(configuracion.redondeo),
     },
   };
 }

@@ -10,6 +10,7 @@ import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import {
   crearPeriodo,
   eliminarPeriodo,
+  eliminarPeriodoPermanentemente,
   listarPeriodosEliminados,
   restaurarPeriodo,
 } from '../api/periodos';
@@ -33,11 +34,15 @@ function TotalPeriodo({ periodo }: { periodo: Periodo }) {
   return <>{data ? formatMonto(data.granTotal) : '—'}</>;
 }
 
+const TEXTO_CONFIRMACION_BORRADO = 'ELIMINAR';
+
 function PapeleraPeriodos({ onCerrar }: { onCerrar: () => void }) {
   const queryClient = useQueryClient();
   const { usuario } = useAuth();
   const esAdmin = usuario?.rol === 'ADMIN';
   const [error, setError] = useState<string | null>(null);
+  const [periodoABorrar, setPeriodoABorrar] = useState<Periodo | null>(null);
+  const [textoConfirmacion, setTextoConfirmacion] = useState('');
 
   const { data: eliminados = [], isLoading } = useQuery({
     queryKey: ['periodos-eliminados'],
@@ -52,6 +57,18 @@ function PapeleraPeriodos({ onCerrar }: { onCerrar: () => void }) {
       void queryClient.invalidateQueries({ queryKey: ['periodos'] });
     },
     onError: (err) => setError(mensajeError(err, 'No se pudo restaurar el periodo.')),
+  });
+
+  const eliminarPermanente = useMutation({
+    mutationFn: (id: string) => eliminarPeriodoPermanentemente(id),
+    onSuccess: () => {
+      setError(null);
+      setPeriodoABorrar(null);
+      setTextoConfirmacion('');
+      void queryClient.invalidateQueries({ queryKey: ['periodos-eliminados'] });
+      void queryClient.invalidateQueries({ queryKey: ['periodos'] });
+    },
+    onError: (err) => setError(mensajeError(err, 'No se pudo eliminar permanentemente el periodo.')),
   });
 
   const ordenados = [...eliminados].sort((a, b) => (b.eliminadoEn ?? '').localeCompare(a.eliminadoEn ?? ''));
@@ -83,18 +100,74 @@ function PapeleraPeriodos({ onCerrar }: { onCerrar: () => void }) {
                 {expirado ? 'Plazo de restauración vencido' : `${diasRestantes} día${diasRestantes === 1 ? '' : 's'} restantes para restaurar`}
               </div>
             </div>
-            {esAdmin && !expirado && (
-              restaurar.isPending && restaurar.variables === p.id ? (
-                <Spinner />
-              ) : (
-                <button type="button" className="hx-btn hx-btn-secondary hx-btn-sm" onClick={() => restaurar.mutate(p.id)}>
-                  Restaurar
-                </button>
-              )
+            {esAdmin && (
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                {!expirado && (
+                  restaurar.isPending && restaurar.variables === p.id ? (
+                    <Spinner />
+                  ) : (
+                    <button type="button" className="hx-btn hx-btn-secondary hx-btn-sm" onClick={() => restaurar.mutate(p.id)}>
+                      Restaurar
+                    </button>
+                  )
+                )}
+                {eliminarPermanente.isPending && eliminarPermanente.variables === p.id ? (
+                  <Spinner />
+                ) : (
+                  <span
+                    onClick={() => { setPeriodoABorrar(p); setTextoConfirmacion(''); setError(null); }}
+                    style={{ color: 'var(--c-danger)', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}
+                  >
+                    Eliminar permanentemente
+                  </span>
+                )}
+              </div>
             )}
           </div>
         );
       })}
+
+      {periodoABorrar && (
+        <div className="hx-overlay" onClick={() => setPeriodoABorrar(null)}>
+          <div className="hx-modal" onClick={(e) => e.stopPropagation()}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'var(--c-danger-bg)', color: 'var(--c-danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <h2 style={{ margin: '0 0 10px', fontSize: 22 }}>
+              ¿Eliminar permanentemente {formatRangoPeriodo(periodoABorrar.fechaInicio, periodoABorrar.fechaFin)}?
+            </h2>
+            <div style={{ background: 'var(--c-danger-bg)', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--c-danger)', marginBottom: 18, fontWeight: 500 }}>
+              ⚠ Esto borra para siempre el periodo y todos sus registros, cálculos e importaciones. No se puede deshacer — no hay papelera después de esto.
+            </div>
+            <label className="hx-label" style={{ marginBottom: 18 }}>
+              Escribe <strong className="tnum">{TEXTO_CONFIRMACION_BORRADO}</strong> para confirmar
+              <input
+                className="hx-in"
+                value={textoConfirmacion}
+                onChange={(e) => setTextoConfirmacion(e.target.value)}
+                autoFocus
+              />
+            </label>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button type="button" className="hx-btn hx-btn-secondary" onClick={() => setPeriodoABorrar(null)}>Cancelar</button>
+              <button
+                type="button"
+                className="hx-btn"
+                style={{ background: 'var(--c-danger)', color: 'var(--text-on-brand)' }}
+                disabled={textoConfirmacion !== TEXTO_CONFIRMACION_BORRADO || eliminarPermanente.isPending}
+                onClick={() => eliminarPermanente.mutate(periodoABorrar.id)}
+              >
+                {eliminarPermanente.isPending && <Spinner />}
+                {eliminarPermanente.isPending ? 'Eliminando…' : 'Sí, eliminar para siempre'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

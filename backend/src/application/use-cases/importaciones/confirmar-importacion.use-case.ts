@@ -19,14 +19,25 @@ import { RegistroHorasRepository } from '../../ports/registro-horas.repository.p
 export interface ConfirmarImportacionComando {
   importacionId: string;
   incluirAdvertencias: boolean;
+  incluirRetroactivas: boolean;
+}
+
+export interface ResultadoConfirmarImportacion {
+  importacion: Importacion;
+  /** Fechas reales de los registros retroactivos que se incluyeron, para auditoría. */
+  fechasRetroactivasIncluidas: Date[];
 }
 
 function filaEsPersistible(
   fila: FilaImportacionValidada,
   incluirAdvertencias: boolean,
+  incluirRetroactivas: boolean,
 ): boolean {
   if (fila.estado === EstadoFilaImportacion.OK) {
     return true;
+  }
+  if (fila.estado === EstadoFilaImportacion.RETROACTIVO) {
+    return incluirRetroactivas;
   }
   return (
     fila.estado === EstadoFilaImportacion.ADVERTENCIA && incluirAdvertencias
@@ -49,7 +60,9 @@ export class ConfirmarImportacionUseCase {
     private readonly calcularDesglose: CalcularDesgloseService,
   ) {}
 
-  async ejecutar(comando: ConfirmarImportacionComando): Promise<Importacion> {
+  async ejecutar(
+    comando: ConfirmarImportacionComando,
+  ): Promise<ResultadoConfirmarImportacion> {
     const importacion = await this.importacionRepository.buscarPorId(
       comando.importacionId,
     );
@@ -83,7 +96,11 @@ export class ConfirmarImportacionUseCase {
     const filasCrudas = this.excelParser.parsear(contenido);
     const filas = await this.validarFilas.validar(filasCrudas, periodo);
     const filasAPersistir = filas.filter((fila) =>
-      filaEsPersistible(fila, comando.incluirAdvertencias),
+      filaEsPersistible(
+        fila,
+        comando.incluirAdvertencias,
+        comando.incluirRetroactivas,
+      ),
     );
 
     // Se calcula el desglose de todas las filas antes de persistir ninguna:
@@ -112,14 +129,24 @@ export class ConfirmarImportacionUseCase {
           origen: OrigenRegistro.EXCEL,
           importacionId: importacion.id,
           comentario: null,
+          esRetroactivo: fila.estado === EstadoFilaImportacion.RETROACTIVO,
         },
         calculo,
       );
     }
 
-    return this.importacionRepository.marcarConfirmada(
+    const fechasRetroactivasIncluidas = filasAPersistir
+      .filter((fila) => fila.estado === EstadoFilaImportacion.RETROACTIVO)
+      .map((fila) => fila.fecha as Date);
+
+    const importacionConfirmada = await this.importacionRepository.marcarConfirmada(
       comando.importacionId,
       new Date(),
     );
+
+    return {
+      importacion: importacionConfirmada,
+      fechasRetroactivasIncluidas,
+    };
   }
 }

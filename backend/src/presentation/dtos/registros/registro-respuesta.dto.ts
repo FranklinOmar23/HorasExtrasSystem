@@ -28,4 +28,9 @@ export class RegistroRespuestaDto {
 
   @ApiProperty({ type: [CalculoRespuestaDto] })
   calculos!: CalculoRespuestaDto[];
+
+  @ApiProperty({
+    description: 'true si la fecha cae fuera del rango del periodo al que está adjunto (horas pendientes pagadas retroactivamente).',
+  })
+  esRetroactivo!: boolean;
 }

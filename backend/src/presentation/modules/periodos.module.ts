@@ -4,6 +4,7 @@ import type { PeriodoRepository } from '../../application/ports/periodo.reposito
 import { CerrarPeriodoUseCase } from '../../application/use-cases/periodos/cerrar-periodo.use-case';
 import { CrearPeriodoUseCase } from '../../application/use-cases/periodos/crear-periodo.use-case';
 import { EliminarPeriodoUseCase } from '../../application/use-cases/periodos/eliminar-periodo.use-case';
+import { EliminarPeriodoPermanentementeUseCase } from '../../application/use-cases/periodos/eliminar-periodo-permanentemente.use-case';
 import { ListarPeriodosEliminadosUseCase } from '../../application/use-cases/periodos/listar-periodos-eliminados.use-case';
 import { ListarPeriodosUseCase } from '../../application/use-cases/periodos/listar-periodos.use-case';
 import { ObtenerPeriodoUseCase } from '../../application/use-cases/periodos/obtener-periodo.use-case';
@@ -51,6 +52,12 @@ import { PeriodosController } from '../controllers/periodos.controller';
       provide: RestaurarPeriodoUseCase,
       useFactory: (repo: PeriodoRepository) =>
         new RestaurarPeriodoUseCase(repo),
+      inject: [PERIODO_REPOSITORY],
+    },
+    {
+      provide: EliminarPeriodoPermanentementeUseCase,
+      useFactory: (repo: PeriodoRepository) =>
+        new EliminarPeriodoPermanentementeUseCase(repo),
       inject: [PERIODO_REPOSITORY],
     },
   ],

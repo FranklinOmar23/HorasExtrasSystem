@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '../components/PageHeader';
 import { Spinner } from '../components/Spinner';
-import { EmpleadoNuevoModal } from '../components/EmpleadoNuevoModal';
+import { EmpleadosNuevosModal } from '../components/EmpleadosNuevosModal';
+import type { EmpleadoNuevoPendiente } from '../components/EmpleadosNuevosModal';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { confirmarImportacion, subirImportacion } from '../api/importaciones';
 import { mensajeError } from '../api/client';
-import type { FilaImportacion, Importacion, ParsearImportacionRespuesta } from '../types/api';
+import type { Empleado, FilaImportacion, Importacion, ParsearImportacionRespuesta } from '../types/api';
 
 const PASOS = [
   { n: 1, label: 'Subir archivo', sub: 'Arrastra el .xlsx' },
@@ -18,13 +19,9 @@ const PASOS = [
 
 const MENSAJE_EMPLEADO_INEXISTENTE = 'No existe un empleado con código';
 
-interface EmpleadoNuevoPendiente {
-  codigo: number;
-  nombreSugerido: string;
-}
-
 function estiloBadgeFila(estado: string): { clase: string; texto: string } {
   if (estado === 'OK') return { clase: 'hx-badge-success', texto: '✓ Válida' };
+  if (estado === 'RETROACTIVO') return { clase: 'hx-badge-sun', texto: '↺ Retroactivo' };
   if (estado === 'ADVERTENCIA') return { clase: 'hx-badge-warning', texto: '⚠ Advertencia' };
   return { clase: 'hx-badge-danger', texto: '✗ Error' };
 }
@@ -34,8 +31,11 @@ function empleadosFaltantes(filas: FilaImportacion[]): EmpleadoNuevoPendiente[] 
   for (const f of filas) {
     if (f.codigo === null) continue;
     if (!f.mensajes.some((m) => m.includes(MENSAJE_EMPLEADO_INEXISTENTE))) continue;
-    if (!vistos.has(f.codigo)) {
-      vistos.set(f.codigo, { codigo: f.codigo, nombreSugerido: f.nombre ?? '' });
+    const existente = vistos.get(f.codigo);
+    if (!existente) {
+      vistos.set(f.codigo, { codigo: f.codigo, nombreSugerido: f.nombre ?? '', fechaMasTemprana: f.fecha });
+    } else if (f.fecha && (!existente.fechaMasTemprana || f.fecha < existente.fechaMasTemprana)) {
+      existente.fechaMasTemprana = f.fecha;
     }
   }
   return [...vistos.values()];
@@ -50,11 +50,10 @@ export function ImportarPage() {
   const [archivoActual, setArchivoActual] = useState<File | null>(null);
   const [resultado, setResultado] = useState<ParsearImportacionRespuesta | null>(null);
   const [incluirAdvertencias, setIncluirAdvertencias] = useState(false);
+  const [incluirRetroactivas, setIncluirRetroactivas] = useState(true);
   const [confirmacion, setConfirmacion] = useState<Importacion | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [colaEmpleadosNuevos, setColaEmpleadosNuevos] = useState<EmpleadoNuevoPendiente[]>([]);
-  const [totalEmpleadosNuevos, setTotalEmpleadosNuevos] = useState(0);
-  const [seCreoAlgunoEnEstaRonda, setSeCreoAlgunoEnEstaRonda] = useState(false);
+  const [empleadosNuevosPendientes, setEmpleadosNuevosPendientes] = useState<EmpleadoNuevoPendiente[]>([]);
 
   const subir = useMutation({
     mutationFn: (archivo: File) => subirImportacion(periodoActivoId as string, archivo),
@@ -62,44 +61,23 @@ export function ImportarPage() {
       setResultado(data);
       setError(null);
       setPaso(2);
-      const faltantes = empleadosFaltantes(data.filas);
-      setColaEmpleadosNuevos(faltantes);
-      setTotalEmpleadosNuevos(faltantes.length);
-      setSeCreoAlgunoEnEstaRonda(false);
+      setEmpleadosNuevosPendientes(empleadosFaltantes(data.filas));
     },
     onError: (err) => setError(mensajeError(err, 'No se pudo leer el archivo.')),
   });
 
-  function cerrarRondaEmpleadosNuevos(creadoAlguno: boolean) {
-    setColaEmpleadosNuevos([]);
-    setTotalEmpleadosNuevos(0);
-    if (creadoAlguno && archivoActual) {
+  function onEmpleadosNuevosListos(creados: Empleado[]) {
+    setEmpleadosNuevosPendientes([]);
+    if (creados.length > 0 && archivoActual) {
       void queryClient.invalidateQueries({ queryKey: ['empleados'] });
       void queryClient.invalidateQueries({ queryKey: ['empleados-todos'] });
       subir.mutate(archivoActual);
     }
   }
 
-  function onEmpleadoNuevoGuardado() {
-    setSeCreoAlgunoEnEstaRonda(true);
-    if (colaEmpleadosNuevos.length <= 1) {
-      cerrarRondaEmpleadosNuevos(true);
-    } else {
-      setColaEmpleadosNuevos((cola) => cola.slice(1));
-    }
-  }
-
-  function onEmpleadoNuevoOmitido() {
-    if (colaEmpleadosNuevos.length <= 1) {
-      cerrarRondaEmpleadosNuevos(seCreoAlgunoEnEstaRonda);
-    } else {
-      setColaEmpleadosNuevos((cola) => cola.slice(1));
-    }
-  }
-
   const confirmar = useMutation({
     mutationFn: () =>
-      confirmarImportacion(resultado!.importacionId, incluirAdvertencias),
+      confirmarImportacion(resultado!.importacionId, incluirAdvertencias, incluirRetroactivas),
     onSuccess: (data) => {
       setConfirmacion(data);
       setPaso(3);
@@ -137,9 +115,8 @@ export function ImportarPage() {
     setConfirmacion(null);
     setError(null);
     setIncluirAdvertencias(false);
-    setColaEmpleadosNuevos([]);
-    setTotalEmpleadosNuevos(0);
-    setSeCreoAlgunoEnEstaRonda(false);
+    setIncluirRetroactivas(true);
+    setEmpleadosNuevosPendientes([]);
   }
 
   if (!periodoActivo) {
@@ -152,9 +129,11 @@ export function ImportarPage() {
   }
 
   const numOk = resultado?.filas.filter((f) => f.estado === 'OK').length ?? 0;
+  const numRetroactivo = resultado?.filas.filter((f) => f.estado === 'RETROACTIVO').length ?? 0;
   const numAdvertencia = resultado?.filas.filter((f) => f.estado === 'ADVERTENCIA').length ?? 0;
   const numError = resultado?.filas.filter((f) => f.estado === 'ERROR').length ?? 0;
-  const aConfirmar = numOk + (incluirAdvertencias ? numAdvertencia : 0);
+  const aConfirmar =
+    numOk + (incluirRetroactivas ? numRetroactivo : 0) + (incluirAdvertencias ? numAdvertencia : 0);
 
   return (
     <div className="hx-page">
@@ -242,9 +221,19 @@ export function ImportarPage() {
         <div className="hx-fade-in">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
             <span className="hx-badge hx-badge-success">{numOk} válidas</span>
+            <span className="hx-badge hx-badge-sun">{numRetroactivo} retroactivas</span>
             <span className="hx-badge hx-badge-warning">{numAdvertencia} advertencias</span>
             <span className="hx-badge hx-badge-danger">{numError} errores</span>
             <div style={{ flex: 1 }} />
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={incluirRetroactivas}
+                onChange={(e) => setIncluirRetroactivas(e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: 'var(--brand)' }}
+              />
+              Incluir retroactivas
+            </label>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
@@ -295,7 +284,7 @@ export function ImportarPage() {
             <button
               type="button"
               className="hx-btn hx-btn-primary"
-              disabled={aConfirmar === 0 || confirmar.isPending || colaEmpleadosNuevos.length > 0}
+              disabled={aConfirmar === 0 || confirmar.isPending || empleadosNuevosPendientes.length > 0}
               onClick={() => confirmar.mutate()}
             >
               {confirmar.isPending && <Spinner />}
@@ -317,10 +306,14 @@ export function ImportarPage() {
             Se importaron <strong style={{ color: 'var(--text)' }}>{aConfirmar} registros válidos</strong> al periodo{' '}
             <strong style={{ color: 'var(--text)' }}>{periodoActivo.fechaInicio} – {periodoActivo.fechaFin}</strong>.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12, marginBottom: 28 }}>
             <div style={{ background: 'var(--c-paper-2)', borderRadius: 12, padding: 14 }}>
               <div className="tnum" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, color: 'var(--c-success)' }}>{confirmacion.filasOk}</div>
               <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>Válidas</div>
+            </div>
+            <div style={{ background: 'var(--c-paper-2)', borderRadius: 12, padding: 14 }}>
+              <div className="tnum" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, color: 'var(--c-sun-400)' }}>{confirmacion.filasRetroactivas}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>Retroactivas</div>
             </div>
             <div style={{ background: 'var(--c-paper-2)', borderRadius: 12, padding: 14 }}>
               <div className="tnum" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, color: 'var(--c-warning)' }}>{confirmacion.filasAdvertencia}</div>
@@ -340,17 +333,12 @@ export function ImportarPage() {
         </div>
       )}
 
-      {colaEmpleadosNuevos.length > 0 && (
-        <EmpleadoNuevoModal
-          key={colaEmpleadosNuevos[0].codigo}
-          codigo={colaEmpleadosNuevos[0].codigo}
-          nombreSugerido={colaEmpleadosNuevos[0].nombreSugerido}
+      {empleadosNuevosPendientes.length > 0 && (
+        <EmpleadosNuevosModal
+          pendientes={empleadosNuevosPendientes}
           vigenteDesdePorDefecto={periodoActivo.fechaInicio}
-          posicionActual={totalEmpleadosNuevos - colaEmpleadosNuevos.length + 1}
-          total={totalEmpleadosNuevos}
-          onGuardado={onEmpleadoNuevoGuardado}
-          onOmitir={onEmpleadoNuevoOmitido}
-          onCerrar={() => cerrarRondaEmpleadosNuevos(seCreoAlgunoEnEstaRonda)}
+          onListo={onEmpleadosNuevosListos}
+          onCerrar={reiniciar}
         />
       )}
     </div>

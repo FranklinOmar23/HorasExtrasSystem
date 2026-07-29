@@ -23,6 +23,9 @@ export class ImportacionRespuestaDto {
   filasError!: number;
 
   @ApiProperty()
+  filasRetroactivas!: number;
+
+  @ApiProperty()
   importadoEn!: string;
 
   @ApiPropertyOptional({ nullable: true })

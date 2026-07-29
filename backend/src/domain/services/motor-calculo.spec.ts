@@ -44,6 +44,7 @@ const PARAMETROS: ParametrosCalculo = {
   inicioNocturna: '21:00',
   finNocturna: '07:00',
   toleranciaMinutos: 0,
+  redondeoMinutos: 0,
 };
 
 const TURNO_DIURNO: VentanaTurno = {
@@ -90,6 +91,7 @@ interface Opciones {
   turnoAsignadoExplicitamente?: boolean;
   esFeriadoDiaEntrada?: boolean;
   esFeriadoDiaSiguiente?: boolean;
+  redondeoMinutos?: number;
 }
 
 function calcular(
@@ -112,7 +114,10 @@ function calcular(
       esFeriadoDiaSiguiente: opciones.esFeriadoDiaSiguiente ?? false,
       salarioHoraUsado: SALARIO_HORA,
     },
-    PARAMETROS,
+    {
+      ...PARAMETROS,
+      redondeoMinutos: opciones.redondeoMinutos ?? PARAMETROS.redondeoMinutos,
+    },
   );
 }
 
@@ -200,6 +205,49 @@ describe('MotorCalculo — turno por defecto (sin asignación, regresión)', () 
   it('no genera filas si la entrada y la salida son iguales', () => {
     const filas = calcular(LUNES, '08:30', '08:30');
     expect(filas).toHaveLength(0);
+  });
+});
+
+describe('MotorCalculo — redondeo de la cantidad final de horas', () => {
+  it('con redondeo=ninguno (default) no cambia nada respecto al cálculo exacto', () => {
+    const filas = calcular(LUNES, '09:02', '19:57');
+    const he35 = filas.find((f) => f.tipoHoraCodigo === TipoHoraExtraCodigo.HE_35);
+    // 10h55m brutas - 1h almuerzo = 9h55m netas, presupuesto 8h → 1h55m exceso.
+    expect(he35?.cantidadHoras.toString()).toBe('1.9166666666666666667');
+  });
+
+  it('caso Edwin: con redondeo=15, 09:02–19:57 da HE_35 = 2.00h (1h55m redondea a 2h)', () => {
+    const filas = calcular(LUNES, '09:02', '19:57', { redondeoMinutos: 15 });
+    const he35 = filas.find((f) => f.tipoHoraCodigo === TipoHoraExtraCodigo.HE_35);
+    expect(he35?.cantidadHoras.toString()).toBe('2');
+  });
+
+  it('caso Edwin: con redondeo=15, 08:45–00:48 da HE_35 = 7.00h (7h03m redondea a 7h)', () => {
+    const filas = calcular(LUNES, '08:45', '00:48', { redondeoMinutos: 15 });
+    const he35 = filas.find((f) => f.tipoHoraCodigo === TipoHoraExtraCodigo.HE_35);
+    expect(he35?.cantidadHoras.toString()).toBe('7');
+  });
+
+  it('el redondeo también aplica a NOCTURNA_15', () => {
+    // Banda nocturna 21:00–07:00. Entrada 08:30, salida 22:00 -> 1h de nocturna exacta (21:00-22:00).
+    // Forzamos un caso con minutos "sucios" cruzando medianoche para ver el redondeo del recargo.
+    const filas = calcular(LUNES, '08:30', '00:48', { redondeoMinutos: 15 });
+    const nocturna = filas.find((f) => f.tipoHoraCodigo === TipoHoraExtraCodigo.NOCTURNA_15);
+    // Banda nocturna 21:00-00:48 = 3h48m -> redondea a 3h45m = 3.75h.
+    expect(nocturna?.cantidadHoras.toString()).toBe('3.75');
+  });
+
+  it('con redondeo=30, redondea al múltiplo de 30 más cercano', () => {
+    const filas = calcular(LUNES, '09:02', '19:57', { redondeoMinutos: 30 });
+    const he35 = filas.find((f) => f.tipoHoraCodigo === TipoHoraExtraCodigo.HE_35);
+    // 1h55m (115min) -> múltiplo de 30 más cercano es 120min = 2h.
+    expect(he35?.cantidadHoras.toString()).toBe('2');
+  });
+
+  it('si el redondeo deja la cantidad en 0, no genera una fila vacía', () => {
+    // 5 minutos de exceso, redondeo=30 -> redondea a 0.
+    const filas = calcular(LUNES, '08:30', '17:35', { redondeoMinutos: 30 });
+    expect(filas.some((f) => f.tipoHoraCodigo === TipoHoraExtraCodigo.HE_35)).toBe(false);
   });
 });
 

@@ -39,3 +39,7 @@ export async function restaurarPeriodo(id: string): Promise<Periodo> {
   const { data } = await apiClient.post<Periodo>(`/periodos/${id}/restaurar`);
   return data;
 }
+
+export async function eliminarPeriodoPermanentemente(id: string): Promise<void> {
+  await apiClient.delete(`/periodos/${id}/permanente`);
+}

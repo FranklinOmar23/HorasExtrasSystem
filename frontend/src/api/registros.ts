@@ -19,9 +19,15 @@ export interface ActualizarRegistroInput {
 
 export interface PreviewCalculoInput {
   empleadoId: string;
+  periodoId: string;
   fecha: string;
   horaEntrada: string;
   horaSalida: string;
+}
+
+export interface PreviewCalculoRespuesta {
+  calculos: Calculo[];
+  esRetroactivo: boolean;
 }
 
 export async function listarRegistros(periodoId: string, empleadoId?: string): Promise<RegistroHoras[]> {
@@ -45,7 +51,7 @@ export async function eliminarRegistro(id: string): Promise<void> {
   await apiClient.delete(`/registros/${id}`);
 }
 
-export async function previewCalculo(input: PreviewCalculoInput): Promise<Calculo[]> {
-  const { data } = await apiClient.post<Calculo[]>('/registros/preview', input);
+export async function previewCalculo(input: PreviewCalculoInput): Promise<PreviewCalculoRespuesta> {
+  const { data } = await apiClient.post<PreviewCalculoRespuesta>('/registros/preview', input);
   return data;
 }

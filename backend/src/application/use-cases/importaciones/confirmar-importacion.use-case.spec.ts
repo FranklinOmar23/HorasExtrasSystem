@@ -48,6 +48,7 @@ import {
   TipoHoraExtraRepository,
 } from '../../ports/tipo-hora-extra.repository.port';
 import { FilaCalculo } from '../../../domain/services/motor-calculo';
+import { BuscarRegistroDuplicadoService } from '../../services/buscar-registro-duplicado.service';
 import { ValidarFilasImportacionService } from '../../services/validar-filas-importacion.service';
 import { ConfirmarImportacionUseCase } from './confirmar-importacion.use-case';
 
@@ -227,6 +228,18 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
   buscarPorId(_id: string): Promise<RegistroConCalculos | null> {
     return Promise.reject(new Error('no usado en este test'));
   }
+  buscarPorEmpleadoYFecha(
+    empleadoId: string,
+    fecha: Date,
+  ): Promise<RegistroConCalculos | null> {
+    return Promise.resolve(
+      this.existentes.find(
+        (r) =>
+          r.registro.empleadoId === empleadoId &&
+          r.registro.fecha.getTime() === fecha.getTime(),
+      ) ?? null,
+    );
+  }
   crear(
     datos: CrearRegistroDatos,
     filas: FilaCalculo[],
@@ -243,6 +256,7 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
         datos.origen,
         datos.importacionId,
         datos.comentario,
+        datos.esRetroactivo,
       ),
       calculos: filas.map((f, i) => ({
         id: `calc-${i}`,
@@ -297,6 +311,9 @@ class PeriodoRepositoryFake implements PeriodoRepository {
   restaurar(): Promise<Periodo> {
     return Promise.reject(new Error('no usado en este test'));
   }
+  eliminarPermanentemente(): Promise<void> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
 }
 
 class ImportacionRepositoryFake implements ImportacionRepository {
@@ -334,6 +351,7 @@ class ImportacionRepositoryFake implements ImportacionRepository {
       this.importacion.filasOk,
       this.importacion.filasAdvertencia,
       this.importacion.filasError,
+      this.importacion.filasRetroactivas,
       this.importacion.importadoEn,
       confirmadaEn,
     );
@@ -419,6 +437,7 @@ function construirUseCase(opciones: {
     empleadoRepo,
     salarioRepo,
     registroRepo,
+    new BuscarRegistroDuplicadoService(registroRepo, periodoRepo),
   );
   const calcularDesglose = new CalcularDesgloseService(
     salarioRepo,
@@ -449,20 +468,21 @@ function importacionPendiente(periodoId = PERIODO_ABIERTO.id): Importacion {
     0,
     0,
     0,
+    0,
     new Date('2026-08-05T00:00:00.000Z'),
     null,
   );
 }
 
 describe('ConfirmarImportacionUseCase', () => {
-  it('persiste solo las filas OK cuando incluirAdvertencias es false', async () => {
+  it('persiste solo las filas OK cuando incluirRetroactivas es false', async () => {
     const { useCase, registroRepo } = construirUseCase({
       importacion: importacionPendiente(),
       filasExcel: [
         filaCruda(), // OK
         filaCruda({
           linea: 3,
-          fecha: new Date('2026-09-01T00:00:00.000Z'), // fuera del periodo -> ADVERTENCIA
+          fecha: new Date('2026-09-01T00:00:00.000Z'), // fuera del periodo -> RETROACTIVO
         }),
       ],
     });
@@ -470,6 +490,7 @@ describe('ConfirmarImportacionUseCase', () => {
     await useCase.ejecutar({
       importacionId: 'importacion-1',
       incluirAdvertencias: false,
+      incluirRetroactivas: false,
     });
 
     expect(registroRepo.registrosCreados).toHaveLength(1);
@@ -479,7 +500,7 @@ describe('ConfirmarImportacionUseCase', () => {
     );
   });
 
-  it('persiste OK y ADVERTENCIA cuando incluirAdvertencias es true', async () => {
+  it('persiste OK y RETROACTIVO cuando incluirRetroactivas es true', async () => {
     const { useCase, registroRepo } = construirUseCase({
       importacion: importacionPendiente(),
       filasExcel: [
@@ -493,10 +514,13 @@ describe('ConfirmarImportacionUseCase', () => {
 
     await useCase.ejecutar({
       importacionId: 'importacion-1',
-      incluirAdvertencias: true,
+      incluirAdvertencias: false,
+      incluirRetroactivas: true,
     });
 
     expect(registroRepo.registrosCreados).toHaveLength(2);
+    expect(registroRepo.registrosCreados[1].esRetroactivo).toBe(true);
+    expect(registroRepo.registrosCreados[0].esRetroactivo).toBe(false);
   });
 
   it('nunca persiste filas ERROR aunque incluirAdvertencias sea true', async () => {
@@ -511,6 +535,7 @@ describe('ConfirmarImportacionUseCase', () => {
     await useCase.ejecutar({
       importacionId: 'importacion-1',
       incluirAdvertencias: true,
+      incluirRetroactivas: true,
     });
 
     expect(registroRepo.registrosCreados).toHaveLength(1);
@@ -525,9 +550,11 @@ describe('ConfirmarImportacionUseCase', () => {
     const resultado = await useCase.ejecutar({
       importacionId: 'importacion-1',
       incluirAdvertencias: false,
+      incluirRetroactivas: true,
     });
 
-    expect(resultado.confirmadaEn).not.toBeNull();
+    expect(resultado.importacion.confirmadaEn).not.toBeNull();
+    expect(resultado.fechasRetroactivasIncluidas).toHaveLength(0);
     expect(importacionRepo.importacion.confirmadaEn).not.toBeNull();
   });
 
@@ -541,6 +568,7 @@ describe('ConfirmarImportacionUseCase', () => {
       useCase.ejecutar({
         importacionId: 'no-existe',
         incluirAdvertencias: false,
+        incluirRetroactivas: true,
       }),
     ).rejects.toBeInstanceOf(ImportacionNoEncontradaError);
   });
@@ -552,6 +580,7 @@ describe('ConfirmarImportacionUseCase', () => {
       'usuario-1',
       'reporte-abril.xlsx',
       1,
+      0,
       0,
       0,
       new Date(),
@@ -566,6 +595,7 @@ describe('ConfirmarImportacionUseCase', () => {
       useCase.ejecutar({
         importacionId: 'importacion-1',
         incluirAdvertencias: false,
+        incluirRetroactivas: true,
       }),
     ).rejects.toBeInstanceOf(ImportacionYaConfirmadaError);
   });
@@ -581,7 +611,33 @@ describe('ConfirmarImportacionUseCase', () => {
       useCase.ejecutar({
         importacionId: 'importacion-1',
         incluirAdvertencias: false,
+        incluirRetroactivas: true,
       }),
     ).rejects.toBeInstanceOf(PeriodoCerradoError);
+  });
+
+  it('marca esRetroactivo=true en los registros retroactivos y reporta sus fechas', async () => {
+    const { useCase, registroRepo } = construirUseCase({
+      importacion: importacionPendiente(),
+      filasExcel: [
+        filaCruda(),
+        filaCruda({ linea: 3, fecha: new Date('2026-09-01T00:00:00.000Z') }),
+      ],
+    });
+
+    const resultado = await useCase.ejecutar({
+      importacionId: 'importacion-1',
+      incluirAdvertencias: false,
+      incluirRetroactivas: true,
+    });
+
+    expect(resultado.fechasRetroactivasIncluidas).toEqual([
+      new Date('2026-09-01T00:00:00.000Z'),
+    ]);
+    expect(
+      registroRepo.registrosCreados.find(
+        (r) => r.fecha.getTime() === new Date('2026-09-01T00:00:00.000Z').getTime(),
+      )?.esRetroactivo,
+    ).toBe(true);
   });
 });

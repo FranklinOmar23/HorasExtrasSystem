@@ -18,6 +18,8 @@ const ENTIDADES: { valor: EntidadAuditoria | ''; label: string }[] = [
   { valor: 'REGISTRO_HORAS', label: 'Registros de horas' },
   { valor: 'IMPORTACION', label: 'Importaciones' },
   { valor: 'USUARIO', label: 'Usuarios' },
+  { valor: 'TURNO', label: 'Turnos' },
+  { valor: 'ASIGNACION_TURNO', label: 'Asignaciones de turno' },
 ];
 
 const LABEL_ENTIDAD: Record<EntidadAuditoria, string> = {
@@ -30,12 +32,15 @@ const LABEL_ENTIDAD: Record<EntidadAuditoria, string> = {
   REGISTRO_HORAS: 'Registro de horas',
   IMPORTACION: 'Importación',
   USUARIO: 'Usuario',
+  TURNO: 'Turno',
+  ASIGNACION_TURNO: 'Asignación de turno',
 };
 
 const BADGE_ACCION: Record<AccionAuditoria, { tono: 'success' | 'warning' | 'danger' | 'neutral' | 'sea'; texto: string }> = {
   CREAR: { tono: 'success', texto: 'Creó' },
   ACTUALIZAR: { tono: 'sea', texto: 'Actualizó' },
   ELIMINAR: { tono: 'danger', texto: 'Eliminó' },
+  ELIMINAR_PERMANENTE: { tono: 'danger', texto: 'Eliminó permanentemente' },
   CERRAR: { tono: 'neutral', texto: 'Cerró' },
   RESTAURAR: { tono: 'warning', texto: 'Restauró' },
   CONFIRMAR: { tono: 'sea', texto: 'Confirmó' },

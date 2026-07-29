@@ -44,5 +44,6 @@ export function aRegistroRespuestaDto(
     origen: registro.origen,
     comentario: registro.comentario,
     calculos: calculos.map(aCalculoRespuestaDto),
+    esRetroactivo: registro.esRetroactivo,
   };
 }

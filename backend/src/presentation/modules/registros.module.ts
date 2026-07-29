@@ -23,6 +23,7 @@ import { CrearRegistroUseCase } from '../../application/use-cases/registros/crea
 import { EliminarRegistroUseCase } from '../../application/use-cases/registros/eliminar-registro.use-case';
 import { ListarRegistrosUseCase } from '../../application/use-cases/registros/listar-registros.use-case';
 import { PreviewCalculoUseCase } from '../../application/use-cases/registros/preview-calculo.use-case';
+import { BuscarRegistroDuplicadoService } from '../../application/services/buscar-registro-duplicado.service';
 import { CalcularDesgloseService } from '../../application/services/calcular-desglose.service';
 import { AsignacionTurnoPrismaRepository } from '../../infrastructure/repositories/asignacion-turno.prisma.repository';
 import { RegistroHorasPrismaRepository } from '../../infrastructure/repositories/registro-horas.prisma.repository';
@@ -52,6 +53,14 @@ import { PeriodosModule } from './periodos.module';
         asignacionRepo: AsignacionTurnoRepository,
       ) => new ResolverTurnoDelEmpleadoUseCase(turnoRepo, asignacionRepo),
       inject: [TURNO_REPOSITORY, ASIGNACION_TURNO_REPOSITORY],
+    },
+    {
+      provide: BuscarRegistroDuplicadoService,
+      useFactory: (
+        registroRepo: RegistroHorasRepository,
+        periodoRepo: PeriodoRepository,
+      ) => new BuscarRegistroDuplicadoService(registroRepo, periodoRepo),
+      inject: [REGISTRO_HORAS_REPOSITORY, PERIODO_REPOSITORY],
     },
     {
       provide: CalcularDesgloseService,
@@ -92,18 +101,21 @@ import { PeriodosModule } from './periodos.module';
         empleadoRepo: EmpleadoRepository,
         registroRepo: RegistroHorasRepository,
         calcularDesglose: CalcularDesgloseService,
+        buscarDuplicado: BuscarRegistroDuplicadoService,
       ) =>
         new CrearRegistroUseCase(
           periodoRepo,
           empleadoRepo,
           registroRepo,
           calcularDesglose,
+          buscarDuplicado,
         ),
       inject: [
         PERIODO_REPOSITORY,
         EMPLEADO_REPOSITORY,
         REGISTRO_HORAS_REPOSITORY,
         CalcularDesgloseService,
+        BuscarRegistroDuplicadoService,
       ],
     },
     {
@@ -112,16 +124,19 @@ import { PeriodosModule } from './periodos.module';
         periodoRepo: PeriodoRepository,
         registroRepo: RegistroHorasRepository,
         calcularDesglose: CalcularDesgloseService,
+        buscarDuplicado: BuscarRegistroDuplicadoService,
       ) =>
         new ActualizarRegistroUseCase(
           periodoRepo,
           registroRepo,
           calcularDesglose,
+          buscarDuplicado,
         ),
       inject: [
         PERIODO_REPOSITORY,
         REGISTRO_HORAS_REPOSITORY,
         CalcularDesgloseService,
+        BuscarRegistroDuplicadoService,
       ],
     },
     {
@@ -136,15 +151,17 @@ import { PeriodosModule } from './periodos.module';
       provide: PreviewCalculoUseCase,
       useFactory: (
         empleadoRepo: EmpleadoRepository,
+        periodoRepo: PeriodoRepository,
         calcularDesglose: CalcularDesgloseService,
-      ) => new PreviewCalculoUseCase(empleadoRepo, calcularDesglose),
-      inject: [EMPLEADO_REPOSITORY, CalcularDesgloseService],
+      ) => new PreviewCalculoUseCase(empleadoRepo, periodoRepo, calcularDesglose),
+      inject: [EMPLEADO_REPOSITORY, PERIODO_REPOSITORY, CalcularDesgloseService],
     },
   ],
   exports: [
     REGISTRO_HORAS_REPOSITORY,
     CalcularDesgloseService,
     ResolverTurnoDelEmpleadoUseCase,
+    BuscarRegistroDuplicadoService,
   ],
 })
 export class RegistrosModule {}

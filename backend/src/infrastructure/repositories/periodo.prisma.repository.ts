@@ -92,4 +92,15 @@ export class PeriodoPrismaRepository implements PeriodoRepository {
     });
     return aDominio(periodo);
   }
+
+  async eliminarPermanentemente(id: string): Promise<void> {
+    // Orden importa: registros_horas primero (arrastra sus calculos por
+    // cascade), luego importaciones (ya sin registros_horas que las
+    // referencien), y al final el periodo.
+    await this.prisma.$transaction([
+      this.prisma.registroHoras.deleteMany({ where: { periodoId: id } }),
+      this.prisma.importacion.deleteMany({ where: { periodoId: id } }),
+      this.prisma.periodo.delete({ where: { id } }),
+    ]);
+  }
 }

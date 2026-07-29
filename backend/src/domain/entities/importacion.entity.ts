@@ -7,6 +7,7 @@ export class Importacion {
     public readonly filasOk: number,
     public readonly filasAdvertencia: number,
     public readonly filasError: number,
+    public readonly filasRetroactivas: number,
     public readonly importadoEn: Date,
     public readonly confirmadaEn: Date | null,
   ) {}

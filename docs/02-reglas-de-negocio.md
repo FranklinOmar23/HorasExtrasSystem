@@ -184,8 +184,68 @@ válidas, y si se marcó, también las de advertencia).
   `eliminadoEn`; pasado ese plazo, `RestaurarPeriodoUseCase` rechaza la
   restauración (409) pero los datos siguen intactos en la base — no hay
   borrado físico automático. Solo ADMIN puede eliminar/restaurar periodos.
+- **Eliminar permanentemente** (`EliminarPeriodoPermanentementeUseCase`,
+  desde la papelera): a diferencia de lo anterior, esto sí borra físicamente
+  el periodo y todos sus `registros_horas`/`calculos`/`importaciones` —
+  irreversible, sin plazo de restauración después. Solo aplica a un periodo
+  que ya está en la papelera (soft-delete previo obligatorio: no se puede
+  saltar ese paso). Solo ADMIN. Existe principalmente para poder liberar un
+  rango de fechas que quedó "atascado" en la papelera (el índice único de
+  `[fechaInicio, fechaFin]` no distingue soft-deleted de activos, así que un
+  periodo eliminado sigue bloqueando la creación de otro con las mismas
+  fechas hasta que se restaure o se borre para siempre).
 
-## 5. Auditoría
+## 5. Registros retroactivos
+
+RRHH acumula horas extra "pendientes" de quincenas anteriores (ej. días
+sueltos que se les olvidó registrar) y las paga junto con la quincena en
+curso, en vez de reabrir el periodo viejo. El sistema soporta esto sin
+obligar a crear periodos históricos.
+
+**Regla central (no negociable)**: un registro retroactivo se **calcula**
+con su fecha real y se **paga** en el periodo al que está adjunto.
+- La clasificación del día (laboral/sábado/domingo/feriado), el turno
+  vigente del empleado y el salario vigente se resuelven siempre con la
+  fecha real del registro — nunca con las fechas del periodo. Esto ya era
+  cierto para cualquier registro antes de esta función (`CalcularDesgloseService`
+  solo recibe `fecha`, nunca el rango del periodo); lo único nuevo es que
+  ahora `periodoId` y `fecha` pueden pertenecer a rangos distintos a propósito.
+- El monto entra en los totales y en el `granTotal` del periodo donde está
+  adjunto (`periodoId`), no en el periodo al que la fecha "pertenecería".
+
+**Detección**: `esRetroactivo` (columna en `registros_horas`) es `true`
+cuando `fecha` cae fuera de `[periodo.fechaInicio, periodo.fechaFin]`. Se
+calcula automáticamente, nunca lo decide el usuario a mano:
+- **Ingreso manual**: si la fecha está fuera del periodo activo, el registro
+  se crea igual (no se rechaza) con `esRetroactivo=true`; la respuesta y la
+  vista previa lo señalan.
+- **Importación de Excel**: una fila con fecha fuera del periodo pasa de
+  `OK` a estado `RETROACTIVO` (no `ADVERTENCIA`) — es importable por
+  defecto, con su propio checkbox "incluir retroactivas" al confirmar
+  (default: incluidas), independiente del checkbox de advertencias.
+
+**Anti-duplicado (evita pagar la misma jornada dos veces)**: antes de crear
+o confirmar un registro retroactivo, el sistema verifica que no exista ya
+un registro del mismo empleado en esa fecha real en **ningún otro periodo**
+(incluidos cerrados). Si existe, la operación se rechaza:
+- Manual/confirmación: `RegistroDuplicadoEnOtroPeriodoError` (409),
+  indicando en qué periodo ya está.
+- Preview de importación: la fila se marca `ERROR` (no `RETROACTIVO`,
+  nunca importable), con el mismo mensaje.
+
+**Reporte**: los registros retroactivos se incluyen en los totales del
+periodo y del empleado (día por día y en el resumen), identificados con un
+badge "Retroactivo" y, en el resumen del empleado, con
+`retroactivo: { dias, monto }` (cuánto de ese total corresponde a días
+retroactivos). El export a Excel del periodo tiene una columna
+"Retroactivo (RD$)" por empleado.
+
+**Auditoría**: crear/actualizar un registro retroactivo anota la nota
+"Retroactivo: se paga en este periodo con el cálculo de su fecha real" en
+la descripción de auditoría; confirmar una importación anota cuántos
+registros retroactivos se incluyeron y sus fechas.
+
+## 6. Auditoría
 
 Toda mutación relevante (crear/actualizar/eliminar/cerrar/restaurar/
 confirmar en periodos, empleados, salarios, configuración, feriados, tipos
@@ -193,3 +253,31 @@ de hora extra, registros de horas, importaciones, usuarios, turnos y
 asignaciones de turno) queda registrada en `auditorias`: quién, qué acción,
 sobre qué entidad, y una descripción legible. Es de solo lectura desde la
 UI — nunca se edita ni se borra una fila de auditoría.
+
+## 7. Redondeo de horas
+
+La hoja manual de RRHH redondea las cantidades de horas extra a valores
+"limpios" (16:03 de exceso → 16h, 1:55 → 2h) para que sean fáciles de
+anotar y sumar a mano. El sistema puede reproducir ese comportamiento de
+forma configurable, vía `configuracion.redondeo`:
+
+| Valor              | Minutos | Efecto                                  |
+|---------------------|---------|------------------------------------------|
+| `ninguno` (default) | 0       | Sin redondeo — minutos exactos.           |
+| `quince_minutos`    | 15      | Redondea al múltiplo de 15 más cercano.   |
+| `treinta_minutos`   | 30      | Redondea al múltiplo de 30 más cercano.   |
+
+**Qué se redondea**: la cantidad final de minutos de **cada fila** de
+`calculos` (`HE_35`, `HE_100`, `FERIADO` y también `NOCTURNA_15`) —no un
+total agregado del registro—, "al más cercano" (`Math.round`), justo antes
+de convertir a horas decimales y valorizar. Si el redondeo deja la cantidad
+en 0 (ej. 5 min de exceso con redondeo=30), esa fila no se genera.
+
+**Por qué NO se replica el bug de la hoja manual**: la hoja anota horas
+como `horas.minutos` (`3.48` = 3h48m) pero las multiplica en las fórmulas
+como si fueran un decimal (`3.48` horas = 3h28.8m), pagando de menos por la
+diferencia. El motor de este sistema **siempre trabaja en minutos reales**
+internamente y solo convierte a horas decimales verdaderas (3h48m → `3.8`,
+no `3.48`) en el último paso, después de redondear — nunca multiplica una
+cifra "horas.minutos". El redondeo configurable reproduce el resultado
+"limpio" que espera RRHH sin heredar el error de valorización de su hoja.

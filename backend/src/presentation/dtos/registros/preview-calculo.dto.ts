@@ -8,6 +8,10 @@ export class PreviewCalculoDto {
   @IsUUID()
   empleadoId!: string;
 
+  @ApiProperty()
+  @IsUUID()
+  periodoId!: string;
+
   @ApiProperty({ example: '2026-08-05' })
   @IsDateString()
   fecha!: string;

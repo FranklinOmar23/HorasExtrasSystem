@@ -1,6 +1,10 @@
 import { PeriodoCerradoError } from '../../../domain/errors/periodo-cerrado.error';
 import { PeriodoEliminadoError } from '../../../domain/errors/periodo-eliminado.error';
+import { PeriodoNoEncontradoError } from '../../../domain/errors/periodo-no-encontrado.error';
+import { RegistroDuplicadoEnOtroPeriodoError } from '../../../domain/errors/registro-duplicado-en-otro-periodo.error';
 import { RegistroHorasNoEncontradoError } from '../../../domain/errors/registro-horas-no-encontrado.error';
+import { fechaFueraDeRango } from '../../../domain/services/rango-fechas.util';
+import { BuscarRegistroDuplicadoService } from '../../services/buscar-registro-duplicado.service';
 import { CalcularDesgloseService } from '../../services/calcular-desglose.service';
 import { PeriodoRepository } from '../../ports/periodo.repository.port';
 import {
@@ -20,6 +24,7 @@ export class ActualizarRegistroUseCase {
     private readonly periodoRepository: PeriodoRepository,
     private readonly registroHorasRepository: RegistroHorasRepository,
     private readonly calcularDesglose: CalcularDesgloseService,
+    private readonly buscarRegistroDuplicado: BuscarRegistroDuplicadoService,
   ) {}
 
   async ejecutar(
@@ -34,10 +39,13 @@ export class ActualizarRegistroUseCase {
     const periodo = await this.periodoRepository.buscarPorId(
       existente.registro.periodoId,
     );
-    if (periodo?.estaEliminado()) {
+    if (!periodo) {
+      throw new PeriodoNoEncontradoError(existente.registro.periodoId);
+    }
+    if (periodo.estaEliminado()) {
       throw new PeriodoEliminadoError(existente.registro.periodoId);
     }
-    if (periodo?.estaCerrado()) {
+    if (periodo.estaCerrado()) {
       throw new PeriodoCerradoError(existente.registro.periodoId);
     }
 
@@ -49,6 +57,29 @@ export class ActualizarRegistroUseCase {
         ? comando.comentario
         : existente.registro.comentario;
 
+    const esRetroactivo = fechaFueraDeRango(
+      fecha,
+      periodo.fechaInicio,
+      periodo.fechaFin,
+    );
+
+    if (esRetroactivo) {
+      const duplicado = await this.buscarRegistroDuplicado.buscar(
+        existente.registro.empleadoId,
+        fecha,
+        id,
+      );
+      if (duplicado) {
+        throw new RegistroDuplicadoEnOtroPeriodoError(
+          existente.registro.empleadoId,
+          fecha,
+          duplicado.periodoId,
+          duplicado.periodoFechaInicio,
+          duplicado.periodoFechaFin,
+        );
+      }
+    }
+
     const filas = await this.calcularDesglose.calcular(
       existente.registro.empleadoId,
       fecha,
@@ -58,7 +89,7 @@ export class ActualizarRegistroUseCase {
 
     return this.registroHorasRepository.actualizar(
       id,
-      { fecha, horaEntrada, horaSalida, comentario },
+      { fecha, horaEntrada, horaSalida, comentario, esRetroactivo },
       filas,
     );
   }

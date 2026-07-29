@@ -20,9 +20,14 @@ import {
   RegistroHorasRepository,
 } from '../ports/registro-horas.repository.port';
 import {
+  CrearPeriodoDatos,
+  PeriodoRepository,
+} from '../ports/periodo.repository.port';
+import {
   CrearSalarioDatos,
   SalarioRepository,
 } from '../ports/salario.repository.port';
+import { BuscarRegistroDuplicadoService } from './buscar-registro-duplicado.service';
 import { ValidarFilasImportacionService } from './validar-filas-importacion.service';
 
 class EmpleadoRepositoryFake implements EmpleadoRepository {
@@ -98,6 +103,19 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
     return Promise.reject(new Error('no usado en este test'));
   }
 
+  buscarPorEmpleadoYFecha(
+    empleadoId: string,
+    fecha: Date,
+  ): Promise<RegistroConCalculos | null> {
+    return Promise.resolve(
+      this.existentes.find(
+        (r) =>
+          r.registro.empleadoId === empleadoId &&
+          r.registro.fecha.getTime() === fecha.getTime(),
+      ) ?? null,
+    );
+  }
+
   crear(
     _datos: CrearRegistroDatos,
     _filas: never[],
@@ -118,6 +136,37 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
   }
 }
 
+class PeriodoRepositoryFake implements PeriodoRepository {
+  constructor(private readonly periodos: Periodo[]) {}
+  listar(): Promise<Periodo[]> {
+    return Promise.resolve(this.periodos);
+  }
+  listarEliminados(): Promise<Periodo[]> {
+    return Promise.resolve([]);
+  }
+  buscarPorId(id: string): Promise<Periodo | null> {
+    return Promise.resolve(this.periodos.find((p) => p.id === id) ?? null);
+  }
+  buscarPorFechas(): Promise<Periodo | null> {
+    return Promise.resolve(null);
+  }
+  crear(_datos: CrearPeriodoDatos): Promise<Periodo> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
+  cerrar(): Promise<Periodo> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
+  eliminar(): Promise<Periodo> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
+  restaurar(): Promise<Periodo> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
+  eliminarPermanentemente(): Promise<void> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
+}
+
 const PERIODO = new Periodo(
   'periodo-1',
   new Date('2026-08-01T00:00:00.000Z'),
@@ -125,6 +174,17 @@ const PERIODO = new Periodo(
   EstadoPeriodo.ABIERTO,
   null,
   null,
+  null,
+  null,
+);
+
+const PERIODO_ANTERIOR = new Periodo(
+  'periodo-anterior',
+  new Date('2026-06-16T00:00:00.000Z'),
+  new Date('2026-06-30T00:00:00.000Z'),
+  EstadoPeriodo.CERRADO,
+  new Date('2026-07-01T00:00:00.000Z'),
+  'usuario-0',
   null,
   null,
 );
@@ -171,22 +231,29 @@ function crearServicio(
   empleados: Empleado[] = [EMPLEADO_ACTIVO, EMPLEADO_INACTIVO],
   salarios: Salario[] = [SALARIO_VIGENTE],
   registrosExistentes: RegistroConCalculos[] = [],
+  periodos: Periodo[] = [PERIODO, PERIODO_ANTERIOR],
 ): ValidarFilasImportacionService {
+  const registroRepo = new RegistroHorasRepositoryFake(registrosExistentes);
   return new ValidarFilasImportacionService(
     new EmpleadoRepositoryFake(empleados),
     new SalarioRepositoryFake(salarios),
-    new RegistroHorasRepositoryFake(registrosExistentes),
+    registroRepo,
+    new BuscarRegistroDuplicadoService(
+      registroRepo,
+      new PeriodoRepositoryFake(periodos),
+    ),
   );
 }
 
 function registroExistente(
   empleadoId: string,
   fecha: string,
+  periodoId: string = PERIODO.id,
 ): RegistroConCalculos {
   return {
     registro: new RegistroHoras(
       'reg-existente',
-      PERIODO.id,
+      periodoId,
       empleadoId,
       new Date(fecha),
       '08:30',
@@ -194,6 +261,7 @@ function registroExistente(
       OrigenRegistro.MANUAL,
       null,
       null,
+      false,
     ),
     calculos: [],
   };
@@ -250,15 +318,30 @@ describe('ValidarFilasImportacionService', () => {
     expect(resultado.mensajes[0]).toMatch(/ignorada/i);
   });
 
-  it('marca ADVERTENCIA si la fecha está fuera del rango del periodo', async () => {
+  it('marca RETROACTIVO (no ADVERTENCIA) si la fecha está fuera del rango del periodo y no hay duplicado', async () => {
     const servicio = crearServicio();
     const [resultado] = await servicio.validar(
       [filaBase({ fecha: new Date('2026-09-01T00:00:00.000Z') })],
       PERIODO,
     );
 
-    expect(resultado.estado).toBe(EstadoFilaImportacion.ADVERTENCIA);
-    expect(resultado.mensajes[0]).toMatch(/fuera del rango/i);
+    expect(resultado.estado).toBe(EstadoFilaImportacion.RETROACTIVO);
+    expect(resultado.mensajes[0]).toMatch(/retroactivo/i);
+  });
+
+  it('marca ERROR (no RETROACTIVO) si la fecha retroactiva ya tiene un registro en otro periodo', async () => {
+    const servicio = crearServicio(
+      [EMPLEADO_ACTIVO],
+      [SALARIO_VIGENTE],
+      [registroExistente(EMPLEADO_ACTIVO.id, '2026-06-20', PERIODO_ANTERIOR.id)],
+    );
+    const [resultado] = await servicio.validar(
+      [filaBase({ fecha: new Date('2026-06-20T00:00:00.000Z') })],
+      PERIODO,
+    );
+
+    expect(resultado.estado).toBe(EstadoFilaImportacion.ERROR);
+    expect(resultado.mensajes[0]).toMatch(/no se puede pagar la misma jornada dos veces/i);
   });
 
   it('marca ADVERTENCIA si ya existe un registro para ese empleado y fecha', async () => {

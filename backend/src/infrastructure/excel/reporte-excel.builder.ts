@@ -50,6 +50,7 @@ const COLUMNAS: { encabezado: string; ancho: number; formato?: string }[] = [
   { encabezado: 'Nocturna 15% (RD$)', ancho: 16, formato: '#,##0.00' },
   { encabezado: 'Feriado (h)', ancho: 12, formato: '#,##0.00' },
   { encabezado: 'Feriado (RD$)', ancho: 14, formato: '#,##0.00' },
+  { encabezado: 'Retroactivo (RD$)', ancho: 16, formato: '#,##0.00' },
   { encabezado: 'Total (RD$)', ancho: 16, formato: '#,##0.00' },
 ];
 const TOTAL_COLUMNAS = COLUMNAS.length;
@@ -113,6 +114,7 @@ export async function construirReporteExcel(
       fila.montos.nocturna.toNumber(),
       fila.horas.feriado.toNumber(),
       fila.montos.feriado.toNumber(),
+      fila.retroactivo.monto.toNumber(),
       fila.total.toNumber(),
     ];
     const filaExcel = hoja.getRow(numeroFila);

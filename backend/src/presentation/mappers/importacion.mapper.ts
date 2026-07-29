@@ -18,6 +18,7 @@ export function aImportacionRespuestaDto(
     filasOk: importacion.filasOk,
     filasAdvertencia: importacion.filasAdvertencia,
     filasError: importacion.filasError,
+    filasRetroactivas: importacion.filasRetroactivas,
     importadoEn: importacion.importadoEn.toISOString(),
     confirmadaEn: importacion.confirmadaEn
       ? importacion.confirmadaEn.toISOString()

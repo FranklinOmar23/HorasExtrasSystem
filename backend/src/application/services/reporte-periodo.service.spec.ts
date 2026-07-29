@@ -114,6 +114,9 @@ class RegistroHorasRepositoryFake implements RegistroHorasRepository {
   buscarPorId(_id: string): Promise<RegistroConCalculos | null> {
     return Promise.reject(new Error('no usado en este test'));
   }
+  buscarPorEmpleadoYFecha(): Promise<RegistroConCalculos | null> {
+    return Promise.reject(new Error('no usado en este test'));
+  }
   crear(
     _datos: CrearRegistroDatos,
     _filas: FilaCalculo[],
@@ -188,6 +191,7 @@ function registro(
   empleadoId: string,
   fecha: string,
   calculos: Calculo[],
+  esRetroactivo = false,
 ): RegistroConCalculos {
   return {
     registro: new RegistroHoras(
@@ -200,6 +204,7 @@ function registro(
       OrigenRegistro.MANUAL,
       null,
       null,
+      esRetroactivo,
     ),
     calculos,
   };
@@ -290,6 +295,35 @@ describe('ReportePeriodoService', () => {
 
     expect(reporte.filas[0].salarioHora.toString()).toBe('125'); // 24000/24/8
     expect(reporte.filas[0].total.toString()).toBe('0');
+  });
+
+  it('suma por separado los registros retroactivos dentro del total del periodo', async () => {
+    const registros: RegistroConCalculos[] = [
+      registro('reg-1', EMPLEADO_40.id, '2026-08-05', [
+        calculo('reg-1', TipoHoraExtraCodigo.HE_35, '2', '270.00', '100.00'),
+      ]),
+      registro(
+        'reg-2',
+        EMPLEADO_40.id,
+        '2026-06-09',
+        [calculo('reg-2', TipoHoraExtraCodigo.HE_35, '3', '405.00', '100.00')],
+        true,
+      ),
+    ];
+
+    const servicio = new ReportePeriodoService(
+      new RegistroHorasRepositoryFake(registros),
+      new EmpleadoRepositoryFake([EMPLEADO_40]),
+      new SalarioRepositoryFake([]),
+      new ConfiguracionRepositoryFake(),
+    );
+
+    const reporte = await servicio.generar(PERIODO);
+
+    const [fila] = reporte.filas;
+    expect(fila.total.toString()).toBe('675');
+    expect(fila.retroactivo.dias).toBe(1);
+    expect(fila.retroactivo.monto.toString()).toBe('405');
   });
 
   it('generarFilaEmpleado devuelve una fila en ceros si el empleado no tiene registros en el periodo', async () => {

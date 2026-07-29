@@ -39,3 +39,10 @@ export function unionDeRangos(
   const hasta = aHasta === null || bHasta === null ? null : aHasta > bHasta ? aHasta : bHasta;
   return { desde, hasta };
 }
+
+/** true si `fecha` cae fuera de [desde, hasta] (límites inclusivos). Usado
+ *  para detectar registros retroactivos: su fecha real no está dentro del
+ *  rango del periodo al que se adjuntan (ver docs/02 §6). */
+export function fechaFueraDeRango(fecha: Date, desde: Date, hasta: Date): boolean {
+  return fecha < desde || fecha > hasta;
+}

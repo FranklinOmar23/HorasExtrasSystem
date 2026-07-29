@@ -18,12 +18,18 @@ export interface DesgloseTipoHora {
   feriado: Decimal;
 }
 
+export interface RetroactivoResumen {
+  dias: number;
+  monto: Decimal;
+}
+
 export interface FilaReportePeriodo {
   empleado: { id: string; codigo: number; nombre: string };
   salarioHora: Decimal;
   horas: DesgloseTipoHora;
   montos: DesgloseTipoHora;
   total: Decimal;
+  retroactivo: RetroactivoResumen;
 }
 
 export interface ReportePeriodo {
@@ -145,16 +151,24 @@ export class ReportePeriodoService {
     const montos = desgloseCero();
     let salarioHora: Decimal | null = null;
     let ultimaFecha: Date | null = null;
+    let diasRetroactivos = 0;
+    let montoRetroactivo = new Decimal(0);
 
     for (const { registro, calculos } of registros) {
       if (!ultimaFecha || registro.fecha > ultimaFecha) {
         ultimaFecha = registro.fecha;
       }
+      let totalRegistro = new Decimal(0);
       for (const calculo of calculos) {
         const clave = CLAVE_POR_CODIGO[calculo.tipoHoraCodigo];
         horas[clave] = horas[clave].plus(calculo.cantidadHoras);
         montos[clave] = montos[clave].plus(calculo.monto);
         salarioHora = calculo.salarioHoraUsado;
+        totalRegistro = totalRegistro.plus(calculo.monto);
+      }
+      if (registro.esRetroactivo) {
+        diasRetroactivos += 1;
+        montoRetroactivo = montoRetroactivo.plus(totalRegistro);
       }
     }
 
@@ -188,6 +202,7 @@ export class ReportePeriodoService {
       horas,
       montos,
       total,
+      retroactivo: { dias: diasRetroactivos, monto: montoRetroactivo },
     };
   }
 }

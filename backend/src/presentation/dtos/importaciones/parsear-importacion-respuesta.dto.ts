@@ -6,6 +6,9 @@ export class ResumenImportacionDto {
   ok!: number;
 
   @ApiProperty()
+  retroactivas!: number;
+
+  @ApiProperty()
   advertencias!: number;
 
   @ApiProperty()

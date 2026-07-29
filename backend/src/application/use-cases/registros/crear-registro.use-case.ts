@@ -2,7 +2,10 @@ import { EmpleadoNoEncontradoError } from '../../../domain/errors/empleado-no-en
 import { PeriodoCerradoError } from '../../../domain/errors/periodo-cerrado.error';
 import { PeriodoEliminadoError } from '../../../domain/errors/periodo-eliminado.error';
 import { PeriodoNoEncontradoError } from '../../../domain/errors/periodo-no-encontrado.error';
+import { RegistroDuplicadoEnOtroPeriodoError } from '../../../domain/errors/registro-duplicado-en-otro-periodo.error';
 import { OrigenRegistro } from '../../../domain/enums/origen-registro.enum';
+import { fechaFueraDeRango } from '../../../domain/services/rango-fechas.util';
+import { BuscarRegistroDuplicadoService } from '../../services/buscar-registro-duplicado.service';
 import { CalcularDesgloseService } from '../../services/calcular-desglose.service';
 import { EmpleadoRepository } from '../../ports/empleado.repository.port';
 import { PeriodoRepository } from '../../ports/periodo.repository.port';
@@ -26,6 +29,7 @@ export class CrearRegistroUseCase {
     private readonly empleadoRepository: EmpleadoRepository,
     private readonly registroHorasRepository: RegistroHorasRepository,
     private readonly calcularDesglose: CalcularDesgloseService,
+    private readonly buscarRegistroDuplicado: BuscarRegistroDuplicadoService,
   ) {}
 
   async ejecutar(comando: CrearRegistroComando): Promise<RegistroConCalculos> {
@@ -47,6 +51,28 @@ export class CrearRegistroUseCase {
       throw new EmpleadoNoEncontradoError(comando.empleadoId);
     }
 
+    const esRetroactivo = fechaFueraDeRango(
+      comando.fecha,
+      periodo.fechaInicio,
+      periodo.fechaFin,
+    );
+
+    if (esRetroactivo) {
+      const duplicado = await this.buscarRegistroDuplicado.buscar(
+        comando.empleadoId,
+        comando.fecha,
+      );
+      if (duplicado) {
+        throw new RegistroDuplicadoEnOtroPeriodoError(
+          comando.empleadoId,
+          comando.fecha,
+          duplicado.periodoId,
+          duplicado.periodoFechaInicio,
+          duplicado.periodoFechaFin,
+        );
+      }
+    }
+
     const filas = await this.calcularDesglose.calcular(
       comando.empleadoId,
       comando.fecha,
@@ -64,6 +90,7 @@ export class CrearRegistroUseCase {
         origen: OrigenRegistro.MANUAL,
         importacionId: null,
         comentario: comando.comentario,
+        esRetroactivo,
       },
       filas,
     );

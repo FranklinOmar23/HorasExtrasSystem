@@ -11,6 +11,7 @@ import { REGISTRO_HORAS_REPOSITORY } from '../../application/ports/registro-hora
 import type { RegistroHorasRepository } from '../../application/ports/registro-horas.repository.port';
 import { SALARIO_REPOSITORY } from '../../application/ports/salario.repository.port';
 import type { SalarioRepository } from '../../application/ports/salario.repository.port';
+import { BuscarRegistroDuplicadoService } from '../../application/services/buscar-registro-duplicado.service';
 import { CalcularDesgloseService } from '../../application/services/calcular-desglose.service';
 import { ValidarFilasImportacionService } from '../../application/services/validar-filas-importacion.service';
 import { ConfirmarImportacionUseCase } from '../../application/use-cases/importaciones/confirmar-importacion.use-case';
@@ -35,16 +36,19 @@ import { RegistrosModule } from './registros.module';
         empleadoRepo: EmpleadoRepository,
         salarioRepo: SalarioRepository,
         registroRepo: RegistroHorasRepository,
+        buscarDuplicado: BuscarRegistroDuplicadoService,
       ) =>
         new ValidarFilasImportacionService(
           empleadoRepo,
           salarioRepo,
           registroRepo,
+          buscarDuplicado,
         ),
       inject: [
         EMPLEADO_REPOSITORY,
         SALARIO_REPOSITORY,
         REGISTRO_HORAS_REPOSITORY,
+        BuscarRegistroDuplicadoService,
       ],
     },
     {

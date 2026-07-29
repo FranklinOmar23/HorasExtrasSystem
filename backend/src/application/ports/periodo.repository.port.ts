@@ -24,4 +24,7 @@ export interface PeriodoRepository {
   ): Promise<Periodo>;
   /** Revierte un soft-delete (limpia eliminadoEn/eliminadoPorId). */
   restaurar(id: string): Promise<Periodo>;
+  /** Borra físicamente el periodo y su historial asociado (registros, cálculos,
+   *  importaciones). Irreversible — solo para periodos ya en la papelera. */
+  eliminarPermanentemente(id: string): Promise<void>;
 }

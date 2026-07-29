@@ -68,8 +68,9 @@ parsea a `Decimal`/`number`/`"HH:mm"` según la clave). Incluye
 ventana de ningún turno), `horas_almuerzo`, `entrada_semana`/`salida_semana`,
 `entrada_sabado`/`salida_sabado` (ya no las lee el motor generalizado, quedan
 como referencia/edición histórica), `inicio_nocturna`/`fin_nocturna`,
-`tolerancia_minutos`, `redondeo` (declarado, aún no conectado a ninguna
-lógica).
+`tolerancia_minutos`, `redondeo` (`ninguno` | `quince_minutos` |
+`treinta_minutos` — redondea "al más cercano" la cantidad final de horas
+de cada tipo de `calculos`, ver docs/02 §7).
 
 ### `feriados` (modelo `Feriado`)
 Un feriado por fecha (única). Borrado físico (no hay historial que proteger
@@ -93,7 +94,13 @@ Una marcación de entrada/salida de un empleado en un periodo y fecha.
 `horaEntrada`/`horaSalida` se guardan como `"HH:mm"` (`VarChar(5)`), no como
 `TIME` nativo de SQL Server, para no lidiar con zonas horarias. `origen` es
 `MANUAL` | `EXCEL`; si es `EXCEL`, `importacionId` referencia la importación
-que lo generó. `comentario` libre, solo para `MANUAL`.
+que lo generó. `comentario` libre, solo para `MANUAL`. `esRetroactivo`
+(`Boolean`, default `false`) es `true` cuando `fecha` cae fuera de
+`[periodo.fechaInicio, periodo.fechaFin]` de su propio `periodoId` — horas
+pendientes de una quincena anterior que RRHH decide pagar en la actual (ver
+docs/02 §5). Se recalcula cada vez que se crea/edita el registro; el
+cálculo (turno, feriado, salario vigente) siempre usa `fecha`, nunca las
+fechas del periodo.
 
 ### `calculos` (modelo `Calculo`)
 El desglose de horas extra de un `RegistroHoras`: una fila por cada tipo que
@@ -106,8 +113,10 @@ relación con `onDelete: Cascade` del schema (ver arriba).
 ### `importaciones` (modelo `Importacion`)
 Una carga de archivo `.xlsx`, en dos pasos: se crea una fila al **parsear**
 (sin tocar `registros_horas` todavía; `filasOk`/`filasAdvertencia`/
-`filasError` resumen el resultado) y `confirmadaEn` se llena al
-**confirmar**, cuando se generan los `registros_horas` (origen `EXCEL`).
+`filasError`/`filasRetroactivas` resumen el resultado) y `confirmadaEn` se
+llena al **confirmar**, cuando se generan los `registros_horas` (origen
+`EXCEL`). Una fila con fecha fuera del periodo se cuenta en
+`filasRetroactivas` (estado `RETROACTIVO`, no `ADVERTENCIA`) — ver docs/02 §5.
 `contenido` (`Bytes`) guarda el archivo original completo para poder
 re-parsear y re-validar exactamente igual al confirmar, en vez de confiar en
 una vista previa que pudo quedar desactualizada (ej. si otra importación se

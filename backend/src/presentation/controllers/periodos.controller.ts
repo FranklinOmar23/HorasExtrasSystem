@@ -18,6 +18,7 @@ import { RegistrarAuditoriaUseCase } from '../../application/use-cases/auditoria
 import { CerrarPeriodoUseCase } from '../../application/use-cases/periodos/cerrar-periodo.use-case';
 import { CrearPeriodoUseCase } from '../../application/use-cases/periodos/crear-periodo.use-case';
 import { EliminarPeriodoUseCase } from '../../application/use-cases/periodos/eliminar-periodo.use-case';
+import { EliminarPeriodoPermanentementeUseCase } from '../../application/use-cases/periodos/eliminar-periodo-permanentemente.use-case';
 import { ListarPeriodosEliminadosUseCase } from '../../application/use-cases/periodos/listar-periodos-eliminados.use-case';
 import { ListarPeriodosUseCase } from '../../application/use-cases/periodos/listar-periodos.use-case';
 import { ObtenerPeriodoUseCase } from '../../application/use-cases/periodos/obtener-periodo.use-case';
@@ -56,6 +57,8 @@ export class PeriodosController {
     private readonly eliminarPeriodo: EliminarPeriodoUseCase,
     @Inject(RestaurarPeriodoUseCase)
     private readonly restaurarPeriodo: RestaurarPeriodoUseCase,
+    @Inject(EliminarPeriodoPermanentementeUseCase)
+    private readonly eliminarPeriodoPermanentemente: EliminarPeriodoPermanentementeUseCase,
     @Inject(RegistrarAuditoriaUseCase)
     private readonly registrarAuditoria: RegistrarAuditoriaUseCase,
   ) {}
@@ -186,5 +189,32 @@ export class PeriodosController {
       descripcion: `Restauró el periodo ${formatRangoPeriodo(periodo.fechaInicio, periodo.fechaFin)}.`,
     });
     return aPeriodoRespuestaDto(periodo);
+  }
+
+  @Delete(':id/permanente')
+  @Roles(RolUsuario.ADMIN)
+  @HttpCode(204)
+  @ApiOperation({
+    summary:
+      'Borra físicamente un periodo ya eliminado (y su historial asociado); irreversible, solo ADMIN',
+  })
+  @ApiResponse({ status: 204, description: 'Periodo borrado permanentemente' })
+  @ApiResponse({ status: 404, description: 'Periodo no encontrado' })
+  @ApiResponse({
+    status: 409,
+    description: 'El periodo no está en la papelera (no se eliminó primero)',
+  })
+  async eliminarPermanente(
+    @Param('id') id: string,
+    @UsuarioActual() usuario: Usuario,
+  ): Promise<void> {
+    const periodo = await this.eliminarPeriodoPermanentemente.ejecutar(id);
+    await this.registrarAuditoria.ejecutar({
+      usuarioId: usuario.id,
+      accion: AccionAuditoria.ELIMINAR_PERMANENTE,
+      entidad: EntidadAuditoria.PERIODO,
+      entidadId: periodo.id,
+      descripcion: `Eliminó PERMANENTEMENTE el periodo ${formatRangoPeriodo(periodo.fechaInicio, periodo.fechaFin)} (borrado irreversible de todo su historial).`,
+    });
   }
 }

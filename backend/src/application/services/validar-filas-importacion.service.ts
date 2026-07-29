@@ -1,10 +1,12 @@
 import { Periodo } from '../../domain/entities/periodo.entity';
 import { EstadoFilaImportacion } from '../../domain/enums/estado-fila-importacion.enum';
 import { entradaSalidaAjustadas } from '../../domain/services/hora.util';
+import { fechaFueraDeRango } from '../../domain/services/rango-fechas.util';
 import { FilaExcelCruda } from '../ports/excel-parser.port';
 import { EmpleadoRepository } from '../ports/empleado.repository.port';
 import { RegistroHorasRepository } from '../ports/registro-horas.repository.port';
 import { SalarioRepository } from '../ports/salario.repository.port';
+import { BuscarRegistroDuplicadoService } from './buscar-registro-duplicado.service';
 
 /**
  * Turnos que cruzan medianoche con una duración mayor a esto se consideran
@@ -36,8 +38,9 @@ function agravar(
 ): EstadoFilaImportacion {
   const severidad = {
     [EstadoFilaImportacion.OK]: 0,
-    [EstadoFilaImportacion.ADVERTENCIA]: 1,
-    [EstadoFilaImportacion.ERROR]: 2,
+    [EstadoFilaImportacion.RETROACTIVO]: 1,
+    [EstadoFilaImportacion.ADVERTENCIA]: 2,
+    [EstadoFilaImportacion.ERROR]: 3,
   };
   return severidad[nuevo] > severidad[actual] ? nuevo : actual;
 }
@@ -46,15 +49,19 @@ function agravar(
  * Aplica las reglas de validación de una importación (código inexistente o
  * inactivo, sin salario vigente, fecha fuera del periodo, duplicados, cruce
  * de medianoche poco razonable, horas vacías) sobre las filas ya parseadas
- * del Excel. No persiste nada: solo clasifica cada fila como OK/ADVERTENCIA/
- * ERROR con sus mensajes, para la vista previa y para decidir qué persistir
- * al confirmar.
+ * del Excel. No persiste nada: solo clasifica cada fila como
+ * OK/RETROACTIVO/ADVERTENCIA/ERROR con sus mensajes, para la vista previa y
+ * para decidir qué persistir al confirmar. Una fecha fuera del periodo se
+ * marca RETROACTIVO (importable por defecto) salvo que ya exista un registro
+ * del mismo empleado en esa fecha en otro periodo, en cuyo caso es ERROR
+ * (nunca importable, evita pagar la misma jornada dos veces).
  */
 export class ValidarFilasImportacionService {
   constructor(
     private readonly empleadoRepository: EmpleadoRepository,
     private readonly salarioRepository: SalarioRepository,
     private readonly registroHorasRepository: RegistroHorasRepository,
+    private readonly buscarRegistroDuplicado: BuscarRegistroDuplicadoService,
   ) {}
 
   async validar(
@@ -151,13 +158,26 @@ export class ValidarFilasImportacionService {
       }
     }
 
-    if (filaCruda.fecha !== null) {
-      if (
-        filaCruda.fecha < periodo.fechaInicio ||
-        filaCruda.fecha > periodo.fechaFin
-      ) {
-        estado = agravar(estado, EstadoFilaImportacion.ADVERTENCIA);
-        mensajes.push('La fecha está fuera del rango del periodo.');
+    if (
+      filaCruda.fecha !== null &&
+      fechaFueraDeRango(filaCruda.fecha, periodo.fechaInicio, periodo.fechaFin)
+    ) {
+      const duplicado =
+        empleadoId !== null
+          ? await this.buscarRegistroDuplicado.buscar(empleadoId, filaCruda.fecha)
+          : null;
+      if (duplicado) {
+        estado = agravar(estado, EstadoFilaImportacion.ERROR);
+        mensajes.push(
+          'Ya existe un registro de este empleado para esta fecha en el periodo ' +
+            `${aFechaISO(duplicado.periodoFechaInicio)} – ${aFechaISO(duplicado.periodoFechaFin)}. ` +
+            'No se puede pagar la misma jornada dos veces.',
+        );
+      } else {
+        estado = agravar(estado, EstadoFilaImportacion.RETROACTIVO);
+        mensajes.push(
+          'Retroactivo: fecha fuera de este periodo, se pagará aquí con el cálculo de su fecha real.',
+        );
       }
     }
 

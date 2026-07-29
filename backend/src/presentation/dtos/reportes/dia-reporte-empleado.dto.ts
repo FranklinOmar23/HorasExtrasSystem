@@ -22,4 +22,9 @@ export class DiaReporteEmpleadoDto {
 
   @ApiProperty()
   total!: string;
+
+  @ApiProperty({
+    description: 'true si la fecha real cae fuera del rango del periodo (horas pendientes pagadas retroactivamente).',
+  })
+  esRetroactivo!: boolean;
 }

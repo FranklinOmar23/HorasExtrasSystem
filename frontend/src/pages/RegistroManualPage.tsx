@@ -78,12 +78,13 @@ export function RegistroManualPage() {
     setPagina((p) => Math.min(p, totalPaginas));
   }, [totalPaginas]);
 
-  const previewHabilitado = !!empleado && !!form.fecha && !!form.horaEntrada && !!form.horaSalida;
+  const previewHabilitado = !!empleado && !!periodoActivoId && !!form.fecha && !!form.horaEntrada && !!form.horaSalida;
   const { data: preview, isFetching: cargandoPreview } = useQuery({
-    queryKey: ['preview-calculo', empleado?.id, form.fecha, form.horaEntrada, form.horaSalida],
+    queryKey: ['preview-calculo', empleado?.id, periodoActivoId, form.fecha, form.horaEntrada, form.horaSalida],
     queryFn: () =>
       previewCalculo({
         empleadoId: empleado!.id,
+        periodoId: periodoActivoId as string,
         fecha: form.fecha,
         horaEntrada: form.horaEntrada,
         horaSalida: form.horaSalida,
@@ -188,7 +189,7 @@ export function RegistroManualPage() {
   }
 
   const resultados = candidatos.slice(0, 6);
-  const totalPreview = (preview ?? []).reduce((acc, c) => acc + Number(c.monto), 0);
+  const totalPreview = (preview?.calculos ?? []).reduce((acc, c) => acc + Number(c.monto), 0);
 
   if (cargandoPeriodos) {
     return (
@@ -313,15 +314,20 @@ export function RegistroManualPage() {
             <>
               <div style={{ fontSize: 15, fontWeight: 600 }}>{empleado.nombre}</div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginBottom: 20 }}>{empleado.posicion}</div>
+              {preview?.esRetroactivo && (
+                <div style={{ background: 'rgba(255,196,104,.16)', color: 'var(--c-sun-400)', borderRadius: 8, padding: '8px 12px', fontSize: 12.5, fontWeight: 500, marginBottom: 16 }}>
+                  Retroactivo: se pagará en este periodo con el cálculo de su fecha real.
+                </div>
+              )}
               {cargandoPreview ? (
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', display: 'flex', alignItems: 'center', gap: 9 }}>
                   <Spinner size={13} /> Calculando…
                 </div>
-              ) : !preview || preview.length === 0 ? (
+              ) : !preview || preview.calculos.length === 0 ? (
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>Sin exceso de horas para estos datos (jornada normal).</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 13 }}>
-                  {preview.map((c, i) => {
+                  {preview.calculos.map((c, i) => {
                     const etiqueta = etiquetaTipoHora(c.tipoHoraCodigo);
                     return (
                       <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -399,7 +405,14 @@ export function RegistroManualPage() {
                   <td className="hx-td">
                     <input type="checkbox" checked={marcado} onChange={() => alternarSeleccion(r.id)} />
                   </td>
-                  <td className="hx-td tnum">{formatFechaDia(r.fecha)}</td>
+                  <td className="hx-td tnum">
+                    {formatFechaDia(r.fecha)}
+                    {r.esRetroactivo && (
+                      <span className="hx-badge hx-badge-sun" style={{ marginLeft: 6 }} title="Fecha fuera del rango de este periodo: se paga aquí con el cálculo de su fecha real.">
+                        Retroactivo
+                      </span>
+                    )}
+                  </td>
                   <td className="hx-td tnum">{emp?.codigo ?? '—'}</td>
                   <td className="hx-td" style={{ fontWeight: 600 }}>{emp?.nombre ?? '—'}</td>
                   <td className="hx-td tnum">{r.horaEntrada}</td>

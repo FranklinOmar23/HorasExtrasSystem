@@ -58,7 +58,10 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
                 {data.dias.map((d, i) => (
                   d.calculos.length === 0 ? (
                     <tr key={i}>
-                      <td className="hx-td tnum">{formatFechaCorta(d.fecha)}</td>
+                      <td className="hx-td tnum">
+                        {formatFechaCorta(d.fecha)}
+                        {d.esRetroactivo && <span className="hx-badge hx-badge-sun" style={{ marginLeft: 6 }}>Retroactivo</span>}
+                      </td>
                       <td className="hx-td tnum">{d.horaEntrada}</td>
                       <td className="hx-td tnum">{d.horaSalida}</td>
                       <td className="hx-td"><span className={`hx-badge hx-badge-${tonoTurno(d.turnoCodigo)}`}>{d.turnoNombre}</span></td>
@@ -72,7 +75,10 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
                       <tr key={`${i}-${j}`}>
                         {j === 0 && (
                           <>
-                            <td className="hx-td tnum" rowSpan={d.calculos.length}>{formatFechaCorta(d.fecha)}</td>
+                            <td className="hx-td tnum" rowSpan={d.calculos.length}>
+                              {formatFechaCorta(d.fecha)}
+                              {d.esRetroactivo && <span className="hx-badge hx-badge-sun" style={{ marginLeft: 6 }}>Retroactivo</span>}
+                            </td>
                             <td className="hx-td tnum" rowSpan={d.calculos.length}>{d.horaEntrada}</td>
                             <td className="hx-td tnum" rowSpan={d.calculos.length}>{d.horaSalida}</td>
                             <td className="hx-td" rowSpan={d.calculos.length}>
@@ -276,7 +282,14 @@ export function ReportePage() {
                   <tr className="hx-row hx-row-in" style={{ cursor: 'pointer' }} onClick={() => setExpandido((s) => ({ ...s, [f.empleado.id]: !s[f.empleado.id] }))}>
                     <td className="hx-td" style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>{expandido[f.empleado.id] ? '▾' : '▸'}</td>
                     <td className="hx-td tnum">{f.empleado.codigo}</td>
-                    <td className="hx-td"><div style={{ fontWeight: 600 }}>{f.empleado.nombre}</div></td>
+                    <td className="hx-td">
+                      <div style={{ fontWeight: 600 }}>{f.empleado.nombre}</div>
+                      {f.retroactivo && f.retroactivo.dias > 0 && (
+                        <div style={{ fontSize: 11, color: 'var(--c-sun-400)', marginTop: 2 }}>
+                          incluye {formatMonto(f.retroactivo.monto)} de {f.retroactivo.dias} día{f.retroactivo.dias === 1 ? '' : 's'} retroactivo{f.retroactivo.dias === 1 ? '' : 's'}
+                        </div>
+                      )}
+                    </td>
                     <td className="hx-td tnum" style={{ textAlign: 'right' }}>{formatNumero(f.salarioHora)}</td>
                     <td className="hx-td tnum" style={{ textAlign: 'right' }}>{formatNumero(f.horas.he35)}</td>
                     <td className="hx-td tnum" style={{ textAlign: 'right' }}>{formatNumero(f.horas.he100)}</td>

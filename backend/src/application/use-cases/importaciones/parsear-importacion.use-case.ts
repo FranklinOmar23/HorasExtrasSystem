@@ -26,6 +26,9 @@ export interface ResultadoParseoImportacion {
 function contarPorEstado(filas: FilaImportacionValidada[]) {
   return {
     ok: filas.filter((f) => f.estado === EstadoFilaImportacion.OK).length,
+    retroactivas: filas.filter(
+      (f) => f.estado === EstadoFilaImportacion.RETROACTIVO,
+    ).length,
     advertencias: filas.filter(
       (f) => f.estado === EstadoFilaImportacion.ADVERTENCIA,
     ).length,
@@ -68,6 +71,7 @@ export class ParsearImportacionUseCase {
       filasOk: resumen.ok,
       filasAdvertencia: resumen.advertencias,
       filasError: resumen.errores,
+      filasRetroactivas: resumen.retroactivas,
     });
 
     return { importacion, filas };

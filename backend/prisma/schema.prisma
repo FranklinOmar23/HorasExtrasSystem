@@ -165,6 +165,12 @@ model RegistroHoras {
   origen        String   @db.VarChar(10)
   importacionId String?
   comentario    String?
+  /// true cuando `fecha` cae fuera de [periodo.fechaInicio, periodo.fechaFin]:
+  /// horas de quincenas anteriores que RRHH decide pagar en el periodo actual.
+  /// El cálculo (turno, feriado, salario vigente) siempre usa `fecha`, nunca
+  /// las fechas del periodo — ver docs/02 §6. El monto sí se paga/reporta en
+  /// este periodo (periodoId manda para efectos de pago).
+  esRetroactivo Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -212,6 +218,7 @@ model Importacion {
   filasOk          Int
   filasAdvertencia Int
   filasError       Int
+  filasRetroactivas Int      @default(0)
   importadoEn      DateTime  @default(now())
   confirmadaEn     DateTime?
 

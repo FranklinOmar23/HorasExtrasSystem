@@ -33,6 +33,7 @@ function aDominioRegistro(registro: RegistroHorasPrisma): RegistroHoras {
     registro.origen as OrigenRegistro,
     registro.importacionId,
     registro.comentario,
+    registro.esRetroactivo,
   );
 }
 
@@ -137,6 +138,20 @@ export class RegistroHorasPrismaRepository implements RegistroHorasRepository {
     return registro ? aDominio(registro, codigosPorTipoId) : null;
   }
 
+  async buscarPorEmpleadoYFecha(
+    empleadoId: string,
+    fecha: Date,
+  ): Promise<RegistroConCalculos | null> {
+    const [registro, codigosPorTipoId] = await Promise.all([
+      this.prisma.registroHoras.findFirst({
+        where: { empleadoId, fecha },
+        include: { calculos: true },
+      }),
+      this.mapaCodigosPorTipoId(),
+    ]);
+    return registro ? aDominio(registro, codigosPorTipoId) : null;
+  }
+
   async crear(
     datos: CrearRegistroDatos,
     filas: FilaCalculo[],
@@ -152,6 +167,7 @@ export class RegistroHorasPrismaRepository implements RegistroHorasRepository {
           origen: datos.origen,
           importacionId: datos.importacionId,
           comentario: datos.comentario,
+          esRetroactivo: datos.esRetroactivo,
           calculos: { create: datosCalculos(filas) },
         },
         include: { calculos: true },
@@ -174,6 +190,7 @@ export class RegistroHorasPrismaRepository implements RegistroHorasRepository {
           horaEntrada: datos.horaEntrada,
           horaSalida: datos.horaSalida,
           comentario: datos.comentario,
+          esRetroactivo: datos.esRetroactivo,
           calculos: {
             deleteMany: {},
             create: datosCalculos(filas),

@@ -18,6 +18,7 @@ function aDominio(importacion: ImportacionSinContenido): Importacion {
     importacion.filasOk,
     importacion.filasAdvertencia,
     importacion.filasError,
+    importacion.filasRetroactivas,
     importacion.importadoEn,
     importacion.confirmadaEn,
   );
@@ -31,6 +32,7 @@ const SELECT_SIN_CONTENIDO = {
   filasOk: true,
   filasAdvertencia: true,
   filasError: true,
+  filasRetroactivas: true,
   importadoEn: true,
   confirmadaEn: true,
 } as const;
@@ -52,6 +54,7 @@ export class ImportacionPrismaRepository implements ImportacionRepository {
         filasOk: datos.filasOk,
         filasAdvertencia: datos.filasAdvertencia,
         filasError: datos.filasError,
+        filasRetroactivas: datos.filasRetroactivas,
       },
     });
     return aDominio(importacion);

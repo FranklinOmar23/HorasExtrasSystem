@@ -35,6 +35,10 @@ function aFilaDto(fila: FilaReportePeriodo): FilaReportePeriodoDto {
     horas: aDesgloseDto(fila.horas),
     montos: aDesgloseDto(fila.montos),
     total: fila.total.toFixed(2),
+    retroactivo: {
+      dias: fila.retroactivo.dias,
+      monto: fila.retroactivo.monto.toFixed(2),
+    },
   };
 }
 
@@ -64,6 +68,7 @@ export function aReporteEmpleadoRespuestaDto(
       total: calculos
         .reduce((acumulado, c) => acumulado.plus(c.monto), new Decimal(0))
         .toFixed(2),
+      esRetroactivo: registro.esRetroactivo,
     }));
 
   return {
