@@ -124,12 +124,29 @@ confirmó entretanto y ahora hay duplicados).
 
 ### `auditorias` (modelo `Auditoria`)
 Bitácora de solo lectura: quién (`usuarioId`), qué acción (`CREAR` |
-`ACTUALIZAR` | `ELIMINAR` | `CERRAR` | `RESTAURAR` | `CONFIRMAR`), sobre qué
-entidad (`PERIODO`, `EMPLEADO`, `SALARIO`, `CONFIGURACION`, `FERIADO`,
-`TIPO_HORA_EXTRA`, `REGISTRO_HORAS`, `IMPORTACION`, `USUARIO`, `TURNO`,
-`ASIGNACION_TURNO`), `entidadId` opcional (ej. `null` para un cambio de
-configuración que no es sobre una fila puntual) y una `descripcion` legible
-en español. Nunca se edita ni se borra una fila de esta tabla.
+`ACTUALIZAR` | `ELIMINAR` | `ELIMINAR_PERMANENTE` | `CERRAR` | `RESTAURAR` |
+`CONFIRMAR`), sobre qué entidad (`PERIODO`, `EMPLEADO`, `SALARIO`,
+`CONFIGURACION`, `FERIADO`, `TIPO_HORA_EXTRA`, `REGISTRO_HORAS`,
+`IMPORTACION`, `USUARIO`, `TURNO`, `ASIGNACION_TURNO`), `entidadId` opcional
+(ej. `null` para un cambio de configuración que no es sobre una fila
+puntual) y una `descripcion` legible en español. Nunca se edita ni se borra
+una fila de esta tabla — crece indefinidamente, así que es la única lista
+con paginación real de servidor (`GET /auditoria?pagina=&porPagina=`,
+default 25, máximo 100 por página).
+
+#### `vw_auditoria` (vista SQL, modelo Prisma `VwAuditoria`)
+Vista de solo lectura que pre-une `auditorias` con `usuarios.nombre AS
+usuarioNombre`, para no resolver ese join en cada consulta de la app. Es la
+única vista del proyecto por ahora — un experimento deliberado para mover
+consultas de lectura pesadas/frecuentes a la base en vez de Prisma
+`include`. **Importante**: Prisma no puede crear ni alterar vistas vía
+`db push`/`migrate` — su DDL (`CREATE VIEW`) vive únicamente en
+`prisma/migrations/20260729181543_vw_auditoria/migration.sql` y hay que
+aplicarlo a mano en cualquier entorno nuevo (no se ejecuta solo). El bloque
+`view VwAuditoria` en `schema.prisma` solo la mapea para poder consultarla;
+requiere `previewFeatures = ["views"]` en el `generator client`. Como
+cualquier vista sin PK real, el campo `id` se declara `@unique` (no `@id`,
+Prisma lo prohíbe en vistas) — sigue siendo único porque el join es 1 a 1.
 
 ### `turnos` (modelo `Turno`)
 Catálogo de horarios asignables (`DIURNO`, `SABADO`, `NOCTURNO` de semilla, y

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
 import { PageHeader } from '../components/PageHeader';
@@ -46,20 +46,34 @@ const BADGE_ACCION: Record<AccionAuditoria, { tono: 'success' | 'warning' | 'dan
   CONFIRMAR: { tono: 'sea', texto: 'Confirmó' },
 };
 
+const POR_PAGINA = 25;
+
 export function AuditoriaPage() {
   const [entidad, setEntidad] = useState<EntidadAuditoria | ''>('');
   const [desde, setDesde] = useState('');
   const [hasta, setHasta] = useState('');
+  const [pagina, setPagina] = useState(1);
 
-  const { data: auditorias = [], isLoading } = useQuery({
-    queryKey: ['auditoria', entidad, desde, hasta],
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['auditoria', entidad, desde, hasta, pagina],
     queryFn: () =>
       listarAuditoria({
         entidad: entidad || undefined,
         desde: desde || undefined,
         hasta: hasta || undefined,
+        pagina,
+        porPagina: POR_PAGINA,
       }),
+    placeholderData: (anterior) => anterior,
   });
+
+  const auditorias = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const totalPaginas = data?.totalPaginas ?? 1;
+
+  useEffect(() => {
+    setPagina(1);
+  }, [entidad, desde, hasta]);
 
   function limpiarFiltros() {
     setEntidad('');
@@ -127,6 +141,34 @@ export function AuditoriaPage() {
           </tbody>
         </table>
       </div>
+
+      {!isLoading && total > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Mostrando {(pagina - 1) * POR_PAGINA + 1}–{Math.min(pagina * POR_PAGINA, total)} de {total}
+            {isFetching && ' · actualizando…'}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              type="button"
+              className="hx-btn hx-btn-secondary hx-btn-sm"
+              disabled={pagina <= 1}
+              onClick={() => setPagina((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </button>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Página {pagina} de {totalPaginas}</span>
+            <button
+              type="button"
+              className="hx-btn hx-btn-secondary hx-btn-sm"
+              disabled={pagina >= totalPaginas}
+              onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

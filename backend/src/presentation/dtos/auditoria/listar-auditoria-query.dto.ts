@@ -1,5 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsUUID,
+  Max,
+  Min,
+} from 'class-validator';
 import { EntidadAuditoria } from '../../../domain/enums/entidad-auditoria.enum';
 
 export class ListarAuditoriaQueryDto {
@@ -22,4 +31,19 @@ export class ListarAuditoriaQueryDto {
   @IsOptional()
   @IsDateString()
   hasta?: string;
+
+  @ApiPropertyOptional({ example: 1, description: '1-based. Default 1.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  pagina?: number;
+
+  @ApiPropertyOptional({ example: 25, description: 'Default 25, máximo 100.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  porPagina?: number;
 }

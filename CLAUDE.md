@@ -86,6 +86,18 @@ infrastructure implementa los puertos de application
   SQL Server rechaza múltiples rutas de cascada entre las mismas tablas; además
   tiene sentido de negocio: los registros de cálculo/importación son historial
   y no deben borrarse en cascada.
+- Las consultas de lectura pesadas/frecuentes pueden resolverse con **vistas
+  SQL** (`view` en `schema.prisma`, requiere `previewFeatures = ["views"]`)
+  en vez de `include` de Prisma — ver `vw_auditoria` en docs/03. Prisma no
+  crea ni gestiona el DDL de una vista vía `db push`/`migrate`: el
+  `CREATE VIEW` vive a mano en su carpeta de migración y hay que aplicarlo
+  manualmente en cada entorno; el bloque `view` en el schema solo la mapea
+  para consultarla (siempre de solo lectura, y su campo "id" debe declararse
+  `@unique`, no `@id`, porque Prisma prohíbe PKs en vistas).
+- Listas que pueden crecer sin límite (ej. auditoría) usan paginación real
+  de servidor (`skip`/`take` + `count` en el repositorio, `pagina`/`porPagina`
+  en la API) en vez de devolver el arreglo completo. No todas las listas lo
+  necesitan — solo las que no tienen un tope natural bajo (decenas de filas).
 
 ## Testing
 

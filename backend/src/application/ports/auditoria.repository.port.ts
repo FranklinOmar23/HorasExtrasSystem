@@ -17,6 +17,14 @@ export interface FiltroAuditoria {
   usuarioId?: string;
   desde?: Date;
   hasta?: Date;
+  /** 1-based. */
+  pagina: number;
+  porPagina: number;
+}
+
+export interface AuditoriaPaginada {
+  items: AuditoriaConUsuario[];
+  total: number;
 }
 
 /** Fila de auditoría enriquecida con el nombre del usuario, para la vista de lectura. */
@@ -33,5 +41,5 @@ export interface AuditoriaConUsuario {
 
 export interface AuditoriaRepository {
   registrar(datos: RegistrarAuditoriaDatos): Promise<Auditoria>;
-  listar(filtro: FiltroAuditoria): Promise<AuditoriaConUsuario[]>;
+  listar(filtro: FiltroAuditoria): Promise<AuditoriaPaginada>;
 }

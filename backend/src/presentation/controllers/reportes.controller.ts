@@ -17,7 +17,9 @@ import { ObtenerReporteEmpleadoUseCase } from '../../application/use-cases/repor
 import { ObtenerReporteHistoricoUseCase } from '../../application/use-cases/reportes/obtener-reporte-historico.use-case';
 import { ObtenerReportePeriodoUseCase } from '../../application/use-cases/reportes/obtener-reporte-periodo.use-case';
 import {
+  construirReporteEmpleadoExcel,
   construirReporteExcel,
+  nombreArchivoReporteEmpleadoExcel,
   nombreArchivoReporteExcel,
 } from '../../infrastructure/excel/reporte-excel.builder';
 import { HistoricoPeriodoDto } from '../dtos/reportes/historico-periodo.dto';
@@ -91,6 +93,31 @@ export class ReportesController {
     const buffer = await construirReporteExcel(reporte);
     return new StreamableFile(buffer, {
       disposition: `attachment; filename="${nombreArchivoReporteExcel(reporte)}"`,
+    });
+  }
+
+  @Get('periodos/:periodoId/reporte/empleados/:empleadoId/excel')
+  @Header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @ApiOperation({ summary: 'Descarga el reporte de un empleado en un periodo como .xlsx' })
+  @ApiResponse({ status: 200, description: 'Archivo .xlsx' })
+  @ApiResponse({
+    status: 404,
+    description: 'Periodo o empleado no encontrado',
+  })
+  async reporteEmpleadoExcel(
+    @Param('periodoId') periodoId: string,
+    @Param('empleadoId') empleadoId: string,
+  ): Promise<StreamableFile> {
+    const reporte = await this.obtenerReporteEmpleado.ejecutar(
+      periodoId,
+      empleadoId,
+    );
+    const buffer = await construirReporteEmpleadoExcel(reporte);
+    return new StreamableFile(buffer, {
+      disposition: `attachment; filename="${nombreArchivoReporteEmpleadoExcel(reporte)}"`,
     });
   }
 

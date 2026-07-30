@@ -3,7 +3,8 @@
 // Ajustar cuando exista docs/03-modelo-datos.md como fuente de verdad definitiva.
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -248,6 +249,27 @@ model Auditoria {
   @@index([entidad, entidadId])
   @@index([creadoEn])
   @@map("auditorias")
+}
+
+/// Vista SQL (`vw_auditoria`, ver prisma/migrations) que pre-une `auditorias`
+/// con `usuarios.nombre`: la pantalla de Auditoría siempre necesita el nombre
+/// del usuario, así que se resuelve una sola vez en la base en vez de en cada
+/// consulta de la aplicación. Es de solo lectura — Prisma no puede escribir
+/// en una vista. `id` se declara `@unique` porque Prisma exige una clave para
+/// cualquier vista, aunque SQL Server no admite PK sobre vistas: sigue siendo
+/// único porque la vista es un join 1 a 1 (cada fila de auditorías tiene
+/// exactamente un usuario).
+view VwAuditoria {
+  id            String   @unique
+  usuarioId     String
+  usuarioNombre String
+  accion        String   @db.VarChar(20)
+  entidad       String   @db.VarChar(30)
+  entidadId     String?
+  descripcion   String
+  creadoEn      DateTime
+
+  @@map("vw_auditoria")
 }
 
 /// Catálogo de turnos de trabajo. horaInicio/horaFin en formato "HH:mm"

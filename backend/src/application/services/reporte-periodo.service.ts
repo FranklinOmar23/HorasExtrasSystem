@@ -36,6 +36,10 @@ export interface ReportePeriodo {
   periodo: Periodo;
   filas: FilaReportePeriodo[];
   granTotal: Decimal;
+  /** Todos los registros (con sus cálculos) del periodo, de todos los
+   *  empleados — usado para armar la hoja de "detalle día por día" del
+   *  Excel global. */
+  registros: RegistroConCalculos[];
 }
 
 export interface ReporteFilaEmpleado {
@@ -108,7 +112,7 @@ export class ReportePeriodoService {
       new Decimal(0),
     );
 
-    return { periodo, filas, granTotal };
+    return { periodo, filas, granTotal, registros };
   }
 
   /** Igual que `generar`, pero acotado a un solo empleado; incluye sus

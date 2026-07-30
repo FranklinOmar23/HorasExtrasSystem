@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import type { MouseEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
 import { PageHeader } from '../components/PageHeader';
@@ -7,7 +8,7 @@ import { Spinner } from '../components/Spinner';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { mensajeError } from '../api/client';
 import { cerrarPeriodo } from '../api/periodos';
-import { descargarReporteExcel, obtenerReporteEmpleado, obtenerReportePeriodo } from '../api/reportes';
+import { descargarReporteEmpleadoExcel, descargarReporteExcel, obtenerReporteEmpleado, obtenerReportePeriodo } from '../api/reportes';
 import { etiquetaTipoHora, formatFechaCorta, formatMonto, formatNumero, formatRangoPeriodo } from '../utils/format';
 
 const TONO_TURNO: Record<string, 'neutral' | 'sun' | 'sea' | 'coral'> = {
@@ -25,14 +26,51 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
     queryKey: ['reporte-empleado', periodoId, empleadoId],
     queryFn: () => obtenerReporteEmpleado(periodoId, empleadoId),
   });
+  const [descargando, setDescargando] = useState(false);
+  const [errorDescarga, setErrorDescarga] = useState<string | null>(null);
+
+  async function exportarExcelEmpleado(e: MouseEvent) {
+    e.stopPropagation();
+    setDescargando(true);
+    setErrorDescarga(null);
+    try {
+      const { blob, nombreArchivo } = await descargarReporteEmpleadoExcel(periodoId, empleadoId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setErrorDescarga(mensajeError(err, 'No se pudo descargar el reporte de este empleado.'));
+    } finally {
+      setDescargando(false);
+    }
+  }
 
   return (
     <tr>
       <td className="hx-td" colSpan={13} style={{ padding: 0, background: 'var(--c-paper-2)' }}>
         <div style={{ padding: '14px 20px 18px 52px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '.09em', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 8 }}>
-            Detalle día por día
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '.09em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
+              Detalle día por día
+            </div>
+            <button
+              type="button"
+              className="hx-btn hx-btn-secondary hx-btn-sm"
+              onClick={exportarExcelEmpleado}
+              disabled={descargando || !data || data.dias.length === 0}
+            >
+              {descargando && <Spinner size={12} />}
+              {descargando ? 'Descargando…' : 'Exportar Excel'}
+            </button>
           </div>
+          {errorDescarga && (
+            <div style={{ background: 'var(--c-danger-bg)', color: 'var(--c-danger)', borderRadius: 10, padding: '8px 12px', fontSize: 12.5, fontWeight: 500, marginBottom: 10 }}>
+              {errorDescarga}
+            </div>
+          )}
           {isLoading ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 480 }}>
               <SkeletonLine width="90%" height={13} />

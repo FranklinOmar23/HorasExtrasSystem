@@ -6,9 +6,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ListarAuditoriaUseCase } from '../../application/use-cases/auditoria/listar-auditoria.use-case';
-import { AuditoriaRespuestaDto } from '../dtos/auditoria/auditoria-respuesta.dto';
+import { AuditoriaPaginadaRespuestaDto } from '../dtos/auditoria/auditoria-paginada-respuesta.dto';
 import { ListarAuditoriaQueryDto } from '../dtos/auditoria/listar-auditoria-query.dto';
-import { aAuditoriaRespuestaDto } from '../mappers/auditoria.mapper';
+import { aAuditoriaPaginadaRespuestaDto } from '../mappers/auditoria.mapper';
 
 @ApiTags('auditoria')
 @ApiBearerAuth()
@@ -22,18 +22,20 @@ export class AuditoriaController {
   @Get()
   @ApiOperation({
     summary:
-      'Lista la bitácora de auditoría (quién hizo qué cambio y cuándo), con filtros opcionales',
+      'Lista paginada de la bitácora de auditoría (quién hizo qué cambio y cuándo), con filtros opcionales',
   })
-  @ApiResponse({ status: 200, type: [AuditoriaRespuestaDto] })
+  @ApiResponse({ status: 200, type: AuditoriaPaginadaRespuestaDto })
   async listar(
     @Query() query: ListarAuditoriaQueryDto,
-  ): Promise<AuditoriaRespuestaDto[]> {
-    const auditorias = await this.listarAuditoria.ejecutar({
+  ): Promise<AuditoriaPaginadaRespuestaDto> {
+    const resultado = await this.listarAuditoria.ejecutar({
       entidad: query.entidad,
       usuarioId: query.usuarioId,
       desde: query.desde ? new Date(query.desde) : undefined,
       hasta: query.hasta ? new Date(query.hasta) : undefined,
+      pagina: query.pagina,
+      porPagina: query.porPagina,
     });
-    return auditorias.map(aAuditoriaRespuestaDto);
+    return aAuditoriaPaginadaRespuestaDto(resultado);
   }
 }

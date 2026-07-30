@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Auditoria as AuditoriaPrisma, Prisma } from '@prisma/client';
+import {
+  Auditoria as AuditoriaPrisma,
+  Prisma,
+  VwAuditoria as VwAuditoriaPrisma,
+} from '@prisma/client';
 import {
   AuditoriaConUsuario,
+  AuditoriaPaginada,
   AuditoriaRepository,
   FiltroAuditoria,
   RegistrarAuditoriaDatos,
@@ -23,20 +28,16 @@ function aDominio(auditoria: AuditoriaPrisma): Auditoria {
   );
 }
 
-type AuditoriaConUsuarioPrisma = AuditoriaPrisma & {
-  usuario: { nombre: string };
-};
-
-function aConUsuario(auditoria: AuditoriaConUsuarioPrisma): AuditoriaConUsuario {
+function aConUsuario(fila: VwAuditoriaPrisma): AuditoriaConUsuario {
   return {
-    id: auditoria.id,
-    usuarioId: auditoria.usuarioId,
-    usuarioNombre: auditoria.usuario.nombre,
-    accion: auditoria.accion as AccionAuditoria,
-    entidad: auditoria.entidad as EntidadAuditoria,
-    entidadId: auditoria.entidadId,
-    descripcion: auditoria.descripcion,
-    creadoEn: auditoria.creadoEn,
+    id: fila.id,
+    usuarioId: fila.usuarioId,
+    usuarioNombre: fila.usuarioNombre,
+    accion: fila.accion as AccionAuditoria,
+    entidad: fila.entidad as EntidadAuditoria,
+    entidadId: fila.entidadId,
+    descripcion: fila.descripcion,
+    creadoEn: fila.creadoEn,
   };
 }
 
@@ -57,8 +58,10 @@ export class AuditoriaPrismaRepository implements AuditoriaRepository {
     return aDominio(auditoria);
   }
 
-  async listar(filtro: FiltroAuditoria): Promise<AuditoriaConUsuario[]> {
-    const where: Prisma.AuditoriaWhereInput = {
+  /** Lee de `vw_auditoria` (vista SQL que ya trae el nombre del usuario
+   *  unido) en vez de hacer el join con Prisma `include` en cada consulta. */
+  async listar(filtro: FiltroAuditoria): Promise<AuditoriaPaginada> {
+    const where: Prisma.VwAuditoriaWhereInput = {
       entidad: filtro.entidad,
       usuarioId: filtro.usuarioId,
     };
@@ -69,11 +72,16 @@ export class AuditoriaPrismaRepository implements AuditoriaRepository {
       };
     }
 
-    const auditorias = await this.prisma.auditoria.findMany({
-      where,
-      include: { usuario: { select: { nombre: true } } },
-      orderBy: { creadoEn: 'desc' },
-    });
-    return auditorias.map(aConUsuario);
+    const [filas, total] = await Promise.all([
+      this.prisma.vwAuditoria.findMany({
+        where,
+        orderBy: { creadoEn: 'desc' },
+        skip: (filtro.pagina - 1) * filtro.porPagina,
+        take: filtro.porPagina,
+      }),
+      this.prisma.vwAuditoria.count({ where }),
+    ]);
+
+    return { items: filas.map(aConUsuario), total };
   }
 }
