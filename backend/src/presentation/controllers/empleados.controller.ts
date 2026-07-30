@@ -28,11 +28,15 @@ import { EntidadAuditoria } from '../../domain/enums/entidad-auditoria.enum';
 import { UsuarioActual } from '../decorators/usuario-actual.decorator';
 import { ActualizarEmpleadoDto } from '../dtos/empleados/actualizar-empleado.dto';
 import { CrearEmpleadoDto } from '../dtos/empleados/crear-empleado.dto';
+import { EmpleadosPaginadosRespuestaDto } from '../dtos/empleados/empleado-lista-respuesta.dto';
 import { EmpleadoRespuestaDto } from '../dtos/empleados/empleado-respuesta.dto';
 import { ListarEmpleadosQueryDto } from '../dtos/empleados/listar-empleados-query.dto';
 import { CrearSalarioDto } from '../dtos/salarios/crear-salario.dto';
 import { SalarioRespuestaDto } from '../dtos/salarios/salario-respuesta.dto';
-import { aEmpleadoRespuestaDto } from '../mappers/empleado.mapper';
+import {
+  aEmpleadoRespuestaDto,
+  aEmpleadosPaginadosRespuestaDto,
+} from '../mappers/empleado.mapper';
 import { aSalarioRespuestaDto } from '../mappers/salario.mapper';
 
 @ApiTags('empleados')
@@ -58,14 +62,24 @@ export class EmpleadosController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lista empleados, con búsqueda opcional por código o nombre',
+    summary:
+      'Lista paginada de empleados, con búsqueda y filtro de rango de salario opcionales',
   })
-  @ApiResponse({ status: 200, type: [EmpleadoRespuestaDto] })
+  @ApiResponse({ status: 200, type: EmpleadosPaginadosRespuestaDto })
   async listar(
     @Query() query: ListarEmpleadosQueryDto,
-  ): Promise<EmpleadoRespuestaDto[]> {
-    const empleados = await this.listarEmpleados.ejecutar(query);
-    return empleados.map(aEmpleadoRespuestaDto);
+  ): Promise<EmpleadosPaginadosRespuestaDto> {
+    const resultado = await this.listarEmpleados.ejecutar({
+      search: query.search,
+      activo: query.activo,
+      salarioMin:
+        query.salarioMin !== undefined ? new Decimal(query.salarioMin) : undefined,
+      salarioMax:
+        query.salarioMax !== undefined ? new Decimal(query.salarioMax) : undefined,
+      pagina: query.pagina,
+      porPagina: query.porPagina,
+    });
+    return aEmpleadosPaginadosRespuestaDto(resultado);
   }
 
   @Get(':id')

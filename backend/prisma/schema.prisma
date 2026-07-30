@@ -57,6 +57,28 @@ model Empleado {
   @@map("empleados")
 }
 
+/// Vista SQL (`vw_empleados`, ver prisma/migrations) que pre-une `empleados`
+/// con su `Salario` VIGENTE (`vigenteHasta IS NULL`). Antes de esta vista, la
+/// pantalla de Empleados hacía una petición GET /empleados/:id/salarios POR
+/// CADA fila para mostrar el salario mensual — un N+1 real a nivel de HTTP.
+/// `montoMensualVigente`/`salarioVigenteDesde` son NULL si el empleado no
+/// tiene ningún salario vigente (no debería pasar en la práctica, pero la
+/// vista no lo garantiza con un INNER JOIN). Es de solo lectura — Prisma no
+/// puede escribir en una vista. `id` se declara `@unique` (no `@id`, Prisma
+/// lo prohíbe en vistas), sigue siendo único porque el join es 1 a 1 o 1 a 0.
+view VwEmpleado {
+  id                  String   @unique
+  codigo              Int
+  nombre              String
+  cedula              String?
+  posicion            String
+  activo              Boolean
+  montoMensualVigente Decimal? @db.Decimal(12, 2)
+  salarioVigenteDesde DateTime?
+
+  @@map("vw_empleados")
+}
+
 /// Historial de salarios con vigencia: el cálculo usa el salario vigente
 /// en la fecha del registro, no el salario actual del empleado.
 model Salario {

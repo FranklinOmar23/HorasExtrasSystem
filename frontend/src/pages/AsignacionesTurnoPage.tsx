@@ -38,11 +38,12 @@ export function AsignacionesTurnoPage() {
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: candidatos = [] } = useQuery({
+  const { data: candidatosResultado } = useQuery({
     queryKey: ['empleados-buscar', query],
     queryFn: () => listarEmpleados({ search: query || undefined, activo: true }),
     enabled: focus,
   });
+  const candidatos = candidatosResultado?.items ?? [];
   const resultados = candidatos.slice(0, 6);
 
   const { data: turnos = [] } = useQuery({ queryKey: ['turnos'], queryFn: listarTurnos });

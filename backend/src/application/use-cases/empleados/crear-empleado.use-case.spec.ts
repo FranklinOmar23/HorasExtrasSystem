@@ -3,6 +3,7 @@ import {
   ActualizarEmpleadoDatos,
   CrearEmpleadoDatos,
   EmpleadoRepository,
+  EmpleadosPaginados,
   FiltroEmpleados,
 } from '../../ports/empleado.repository.port';
 import { Empleado } from '../../../domain/entities/empleado.entity';
@@ -13,8 +14,9 @@ import { CrearEmpleadoUseCase } from './crear-empleado.use-case';
 class EmpleadoRepositoryFake implements EmpleadoRepository {
   empleados: Empleado[] = [];
 
-  listar(_filtro: FiltroEmpleados): Promise<Empleado[]> {
-    return Promise.resolve(this.empleados);
+  listar(_filtro: FiltroEmpleados): Promise<EmpleadosPaginados> {
+    const items = this.empleados.map((e) => ({ ...e, montoMensualVigente: null }));
+    return Promise.resolve({ items, total: items.length });
   }
 
   buscarPorId(id: string): Promise<Empleado | null> {

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '../components/PageHeader';
 import { Spinner } from '../components/Spinner';
+import { Confetti } from '../components/Confetti';
 import { EmpleadosNuevosModal } from '../components/EmpleadosNuevosModal';
 import type { EmpleadoNuevoPendiente } from '../components/EmpleadosNuevosModal';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
@@ -54,9 +55,13 @@ export function ImportarPage() {
   const [confirmacion, setConfirmacion] = useState<Importacion | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [empleadosNuevosPendientes, setEmpleadosNuevosPendientes] = useState<EmpleadoNuevoPendiente[]>([]);
+  const [progresoSubida, setProgresoSubida] = useState(0);
 
   const subir = useMutation({
-    mutationFn: (archivo: File) => subirImportacion(periodoActivoId as string, archivo),
+    mutationFn: (archivo: File) => {
+      setProgresoSubida(0);
+      return subirImportacion(periodoActivoId as string, archivo, setProgresoSubida);
+    },
     onSuccess: (data) => {
       setResultado(data);
       setError(null);
@@ -185,11 +190,21 @@ export function ImportarPage() {
       )}
 
       {paso === 1 && (
-        <div {...getRootProps()} className={`hx-dropzone${isDragActive ? ' active' : ''}${subir.isPending ? ' disabled' : ''}`}>
+        <div
+          {...getRootProps()}
+          className={`hx-dropzone${isDragActive ? ' active hx-glow-pulse' : ''}${subir.isPending ? ' disabled' : ''}`}
+        >
           <input {...getInputProps()} />
-          <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--c-sea-50)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+          <div
+            className={subir.isPending ? 'hx-icon-working' : undefined}
+            style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--c-sea-50)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}
+          >
             {subir.isPending ? (
-              <Spinner size={26} />
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
             ) : (
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -199,15 +214,26 @@ export function ImportarPage() {
             )}
           </div>
           <div style={{ fontSize: 18, fontWeight: 600, fontFamily: 'var(--font-display)' }}>
-            {subir.isPending ? 'Leyendo archivo…' : 'Arrastra tu archivo .xlsx aquí'}
+            {subir.isPending ? 'Subiendo y leyendo archivo…' : 'Arrastra tu archivo .xlsx aquí'}
           </div>
-          <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 6 }}>o haz clic para seleccionarlo desde tu equipo</div>
-          <div className="hx-btn hx-btn-primary" style={{ display: 'inline-flex', marginTop: 20, height: 42 }}>
-            Seleccionar archivo
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 18, fontFamily: 'var(--font-mono)' }}>
-            Formato esperado: fecha · código · nombre · hora entrada · hora salida — periodo {periodoActivo.fechaInicio} a {periodoActivo.fechaFin}
-          </div>
+          {subir.isPending ? (
+            <div style={{ maxWidth: 340, margin: '16px auto 0' }}>
+              <div className="hx-progress-track">
+                <div className="hx-progress-fill" style={{ width: `${Math.max(6, progresoSubida)}%` }} />
+              </div>
+              <div className="tnum" style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 8 }}>{progresoSubida}%</div>
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 6 }}>o haz clic para seleccionarlo desde tu equipo</div>
+              <div className="hx-btn hx-btn-primary" style={{ display: 'inline-flex', marginTop: 20, height: 42 }}>
+                Seleccionar archivo
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 18, fontFamily: 'var(--font-mono)' }}>
+                Formato esperado: fecha · código · nombre · hora entrada · hora salida — periodo {periodoActivo.fechaInicio} a {periodoActivo.fechaFin}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -296,10 +322,13 @@ export function ImportarPage() {
 
       {paso === 3 && confirmacion && (
         <div className="hx-card hx-fade-in" style={{ maxWidth: 600, padding: '44px 40px', textAlign: 'center' }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--c-success-bg)', color: 'var(--c-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', animation: 'hx-scale-in 420ms var(--ease-spring) both' }}>
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+          <div style={{ position: 'relative', width: 72, height: 72, margin: '0 auto 22px' }}>
+            <Confetti />
+            <div className="hx-check-ring" style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--c-success-bg)', color: 'var(--c-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline className="hx-check-draw" points="20 6 9 17 4 12" />
+              </svg>
+            </div>
           </div>
           <h2 style={{ margin: '0 0 8px', fontSize: 26 }}>Importación completada</h2>
           <p style={{ color: 'var(--text-secondary)', margin: '0 0 26px' }}>

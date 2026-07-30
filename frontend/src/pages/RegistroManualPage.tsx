@@ -43,16 +43,20 @@ export function RegistroManualPage() {
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
   const [pagina, setPagina] = useState(1);
 
-  const { data: candidatos = [] } = useQuery({
+  const { data: candidatosResultado } = useQuery({
     queryKey: ['empleados-buscar', regQuery],
     queryFn: () => listarEmpleados({ search: regQuery || undefined, activo: true }),
     enabled: regFocus,
   });
+  const candidatos = candidatosResultado?.items ?? [];
 
-  const { data: empleadosTodos = [] } = useQuery({
+  const { data: empleadosTodosResultado } = useQuery({
     queryKey: ['empleados-todos'],
-    queryFn: () => listarEmpleados({}),
+    // porPagina alto: este mapa necesita TODOS los empleados de la empresa
+    // (para resolver nombre/código en la tabla de registros), no una página.
+    queryFn: () => listarEmpleados({ porPagina: 500 }),
   });
+  const empleadosTodos = empleadosTodosResultado?.items ?? [];
   const empleadosPorId = useMemo(() => new Map(empleadosTodos.map((e) => [e.id, e])), [empleadosTodos]);
 
   const { data: registros = [], isLoading: cargandoRegistros } = useQuery({

@@ -16,7 +16,12 @@ import { UsuariosPage } from './pages/UsuariosPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { retry: 1, refetchOnWindowFocus: false },
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchInterval: 30_000,
+    },
   },
 });
 

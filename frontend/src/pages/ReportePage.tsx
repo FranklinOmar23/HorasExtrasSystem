@@ -2,9 +2,11 @@ import { Fragment, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
+import { BotonExportarExcel } from '../components/BotonExportarExcel';
 import { PageHeader } from '../components/PageHeader';
 import { SkeletonLine, SkeletonTableRows } from '../components/Skeleton';
 import { Spinner } from '../components/Spinner';
+import { useDescargaArchivo } from '../hooks/useDescargaArchivo';
 import { usePeriodoActivo } from '../periodos/PeriodoContext';
 import { mensajeError } from '../api/client';
 import { cerrarPeriodo } from '../api/periodos';
@@ -26,26 +28,14 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
     queryKey: ['reporte-empleado', periodoId, empleadoId],
     queryFn: () => obtenerReporteEmpleado(periodoId, empleadoId),
   });
-  const [descargando, setDescargando] = useState(false);
-  const [errorDescarga, setErrorDescarga] = useState<string | null>(null);
+  const { descargando, progreso, exito, error: errorDescarga, ejecutar } = useDescargaArchivo();
 
-  async function exportarExcelEmpleado(e: MouseEvent) {
+  function exportarExcelEmpleado(e: MouseEvent) {
     e.stopPropagation();
-    setDescargando(true);
-    setErrorDescarga(null);
-    try {
-      const { blob, nombreArchivo } = await descargarReporteEmpleadoExcel(periodoId, empleadoId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = nombreArchivo;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      setErrorDescarga(mensajeError(err, 'No se pudo descargar el reporte de este empleado.'));
-    } finally {
-      setDescargando(false);
-    }
+    void ejecutar(
+      (onProgreso) => descargarReporteEmpleadoExcel(periodoId, empleadoId, onProgreso),
+      'No se pudo descargar el reporte de este empleado.',
+    );
   }
 
   return (
@@ -56,15 +46,13 @@ function ExpandedRow({ periodoId, empleadoId }: { periodoId: string; empleadoId:
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '.09em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
               Detalle día por día
             </div>
-            <button
-              type="button"
-              className="hx-btn hx-btn-secondary hx-btn-sm"
+            <BotonExportarExcel
               onClick={exportarExcelEmpleado}
-              disabled={descargando || !data || data.dias.length === 0}
-            >
-              {descargando && <Spinner size={12} />}
-              {descargando ? 'Descargando…' : 'Exportar Excel'}
-            </button>
+              descargando={descargando}
+              progreso={progreso}
+              exito={exito}
+              disabled={!data || data.dias.length === 0}
+            />
           </div>
           {errorDescarga && (
             <div style={{ background: 'var(--c-danger-bg)', color: 'var(--c-danger)', borderRadius: 10, padding: '8px 12px', fontSize: 12.5, fontWeight: 500, marginBottom: 10 }}>
@@ -146,8 +134,8 @@ export function ReportePage() {
   const [expandido, setExpandido] = useState<Record<string, boolean>>({});
   const [modalCerrar, setModalCerrar] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [descargando, setDescargando] = useState(false);
   const [query, setQuery] = useState('');
+  const { descargando, progreso, exito, error: errorDescarga, ejecutar: ejecutarDescarga } = useDescargaArchivo();
 
   const { data: reporte, isLoading } = useQuery({
     queryKey: ['reporte-periodo', periodoActivoId],
@@ -165,22 +153,12 @@ export function ReportePage() {
     onError: (err) => setError(mensajeError(err, 'No se pudo cerrar el periodo.')),
   });
 
-  async function exportarExcel() {
+  function exportarExcel() {
     if (!periodoActivoId) return;
-    setDescargando(true);
-    try {
-      const { blob, nombreArchivo } = await descargarReporteExcel(periodoActivoId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = nombreArchivo;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(mensajeError(err, 'No se pudo descargar el reporte.'));
-    } finally {
-      setDescargando(false);
-    }
+    void ejecutarDescarga(
+      (onProgreso) => descargarReporteExcel(periodoActivoId, onProgreso),
+      'No se pudo descargar el reporte.',
+    );
   }
 
   if (cargandoPeriodos) {
@@ -241,10 +219,12 @@ export function ReportePage() {
         }
         actions={
           <>
-            <button type="button" className="hx-btn hx-btn-secondary hx-btn-sm" onClick={exportarExcel} disabled={descargando}>
-              {descargando && <Spinner />}
-              {descargando ? 'Descargando…' : 'Exportar Excel'}
-            </button>
+            <BotonExportarExcel
+              onClick={exportarExcel}
+              descargando={descargando}
+              progreso={progreso}
+              exito={exito}
+            />
             {periodoActivo.estado === 'ABIERTO' && (
               <button type="button" className="hx-btn hx-btn-accent hx-btn-sm" onClick={() => setModalCerrar(true)}>
                 Cerrar periodo
@@ -254,9 +234,9 @@ export function ReportePage() {
         }
       />
 
-      {error && (
+      {(error || errorDescarga) && (
         <div style={{ background: 'var(--c-danger-bg)', color: 'var(--c-danger)', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 500, marginBottom: 16 }}>
-          {error}
+          {error || errorDescarga}
         </div>
       )}
 

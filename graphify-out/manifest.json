@@ -1,0 +1,1732 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1785353591.117097,
+    "ast_hash": "1f11b98100ad1112dbd1edf3b0f3cb45",
+    "semantic_hash": "1f11b98100ad1112dbd1edf3b0f3cb45"
+  },
+  "backend/eslint.config.mjs": {
+    "mtime": 1784723286.2117817,
+    "ast_hash": "42b16c18a0cab5aea31823220f15999d",
+    "semantic_hash": "42b16c18a0cab5aea31823220f15999d"
+  },
+  "backend/extraer-reporte-viejo-temp.ts": {
+    "mtime": 1784723286.2117817,
+    "ast_hash": "2e765ca11f49cd217a045d7e45bd81c8",
+    "semantic_hash": "2e765ca11f49cd217a045d7e45bd81c8"
+  },
+  "backend/nest-cli.json": {
+    "mtime": 1784723286.2127748,
+    "ast_hash": "fa439650fa28a1a7aa8c2b6d81c8cc20",
+    "semantic_hash": "fa439650fa28a1a7aa8c2b6d81c8cc20"
+  },
+  "backend/package.json": {
+    "mtime": 1785237701.8781908,
+    "ast_hash": "3306c1552743c02aa03377d552c974ee",
+    "semantic_hash": "3306c1552743c02aa03377d552c974ee"
+  },
+  "backend/prisma.config.ts": {
+    "mtime": 1784723286.2147818,
+    "ast_hash": "444647e41040b623b99346e28373e2b7",
+    "semantic_hash": "444647e41040b623b99346e28373e2b7"
+  },
+  "backend/prisma/migrations/20260716012610_init/migration.sql": {
+    "mtime": 1784723286.2157772,
+    "ast_hash": "b0e541d669fed1b130bbb9929208ca6e",
+    "semantic_hash": "b0e541d669fed1b130bbb9929208ca6e"
+  },
+  "backend/prisma/migrations/20260716234355_empleados_salarios/migration.sql": {
+    "mtime": 1784723286.2157772,
+    "ast_hash": "ef0475580d8deef71c3ee7a657174bac",
+    "semantic_hash": "ef0475580d8deef71c3ee7a657174bac"
+  },
+  "backend/prisma/migrations/20260717000542_configuracion/migration.sql": {
+    "mtime": 1784723286.2157772,
+    "ast_hash": "b0c250e0e34d3f5b5f71915e2a608337",
+    "semantic_hash": "b0c250e0e34d3f5b5f71915e2a608337"
+  },
+  "backend/prisma/migrations/20260717001812_periodos/migration.sql": {
+    "mtime": 1784723286.2167752,
+    "ast_hash": "0ccb823ba909a5cac2b005c3f21b9b2f",
+    "semantic_hash": "0ccb823ba909a5cac2b005c3f21b9b2f"
+  },
+  "backend/prisma/migrations/20260717011633_registros_calculos/migration.sql": {
+    "mtime": 1784723286.2167752,
+    "ast_hash": "3210874e7e66d7253b80619789f16f9d",
+    "semantic_hash": "3210874e7e66d7253b80619789f16f9d"
+  },
+  "backend/prisma/migrations/20260717014159_importaciones/migration.sql": {
+    "mtime": 1784723286.2167752,
+    "ast_hash": "fd500c8cc41830a763e04534117069dc",
+    "semantic_hash": "fd500c8cc41830a763e04534117069dc"
+  },
+  "backend/prisma/migrations/20260717174442_cedula_indice_filtrado_nulos/migration.sql": {
+    "mtime": 1784723286.2177835,
+    "ast_hash": "b0554ef82b7fe93c4d18b7fba927d21b",
+    "semantic_hash": "b0554ef82b7fe93c4d18b7fba927d21b"
+  },
+  "backend/prisma/migrations/20260717191959_salario_unico_vigente_por_empleado/migration.sql": {
+    "mtime": 1784723286.2177835,
+    "ast_hash": "2d6322ca24fa76983721a11099dc982f",
+    "semantic_hash": "2d6322ca24fa76983721a11099dc982f"
+  },
+  "backend/prisma/migrations/20260728152217_registros_retroactivos/migration.sql": {
+    "mtime": 1785252171.968253,
+    "ast_hash": "b65eddba0b00ff440ffc2e9368beac8a",
+    "semantic_hash": "b65eddba0b00ff440ffc2e9368beac8a"
+  },
+  "backend/prisma/migrations/20260729181543_vw_auditoria/migration.sql": {
+    "mtime": 1785348952.0544922,
+    "ast_hash": "ef7385ed8324a2ed4f4677d17e932ef3",
+    "semantic_hash": "ef7385ed8324a2ed4f4677d17e932ef3"
+  },
+  "backend/prisma/migrations/20260729185607_vw_empleados/migration.sql": {
+    "mtime": 1785351378.2210298,
+    "ast_hash": "636e5abf34995e894b5deb493170d028",
+    "semantic_hash": "636e5abf34995e894b5deb493170d028"
+  },
+  "backend/prisma/seed.ts": {
+    "mtime": 1785180703.6854837,
+    "ast_hash": "9c31ceb64bc37716051da302b06b84cc",
+    "semantic_hash": "9c31ceb64bc37716051da302b06b84cc"
+  },
+  "backend/seed-empleados-hartemania.sql": {
+    "mtime": 1784723286.218775,
+    "ast_hash": "6939befc951ebc04a3c65c7e047ba082",
+    "semantic_hash": "6939befc951ebc04a3c65c7e047ba082"
+  },
+  "backend/src/app.module.ts": {
+    "mtime": 1785185980.4360166,
+    "ast_hash": "11c7d3fd2efb902fd64489d9d2b009af",
+    "semantic_hash": "11c7d3fd2efb902fd64489d9d2b009af"
+  },
+  "backend/src/application/ports/asignacion-turno.repository.port.ts": {
+    "mtime": 1785185511.826575,
+    "ast_hash": "2012598ce95e9ba118971f3e9b72a822",
+    "semantic_hash": "2012598ce95e9ba118971f3e9b72a822"
+  },
+  "backend/src/application/ports/auditoria.repository.port.ts": {
+    "mtime": 1785349039.186092,
+    "ast_hash": "48093498ee35eb5e24fc80d3c5fb4af0",
+    "semantic_hash": "48093498ee35eb5e24fc80d3c5fb4af0"
+  },
+  "backend/src/application/ports/configuracion.repository.port.ts": {
+    "mtime": 1784723286.218775,
+    "ast_hash": "99cf1ee56947e5dcd17771b2f4b4dc80",
+    "semantic_hash": "99cf1ee56947e5dcd17771b2f4b4dc80"
+  },
+  "backend/src/application/ports/empleado.repository.port.ts": {
+    "mtime": 1785351490.1343632,
+    "ast_hash": "cb00738b2b50a520dac6756f6dc9ade4",
+    "semantic_hash": "cb00738b2b50a520dac6756f6dc9ade4"
+  },
+  "backend/src/application/ports/excel-parser.port.ts": {
+    "mtime": 1784723286.2197747,
+    "ast_hash": "1ef3996d930d516de3601237d4507d3e",
+    "semantic_hash": "1ef3996d930d516de3601237d4507d3e"
+  },
+  "backend/src/application/ports/feriado.repository.port.ts": {
+    "mtime": 1784723286.2197747,
+    "ast_hash": "b7b4fabc624458c3dbccb87ca315aa54",
+    "semantic_hash": "b7b4fabc624458c3dbccb87ca315aa54"
+  },
+  "backend/src/application/ports/importacion.repository.port.ts": {
+    "mtime": 1785252474.438389,
+    "ast_hash": "e72caac95871b064681afa9007241cc2",
+    "semantic_hash": "e72caac95871b064681afa9007241cc2"
+  },
+  "backend/src/application/ports/password-hasher.port.ts": {
+    "mtime": 1784723286.2197747,
+    "ast_hash": "284a1363064a6493963a86cb048122c1",
+    "semantic_hash": "284a1363064a6493963a86cb048122c1"
+  },
+  "backend/src/application/ports/periodo.repository.port.ts": {
+    "mtime": 1785258613.392866,
+    "ast_hash": "f63805f39b1d4e8de38a4926a82bff54",
+    "semantic_hash": "f63805f39b1d4e8de38a4926a82bff54"
+  },
+  "backend/src/application/ports/registro-horas.repository.port.ts": {
+    "mtime": 1785252251.3906207,
+    "ast_hash": "4501d7fb7ff6869fb75d6730de1b367c",
+    "semantic_hash": "4501d7fb7ff6869fb75d6730de1b367c"
+  },
+  "backend/src/application/ports/salario.repository.port.ts": {
+    "mtime": 1784723286.2207756,
+    "ast_hash": "100b4bc7c94c70c9272ca984c115b9f1",
+    "semantic_hash": "100b4bc7c94c70c9272ca984c115b9f1"
+  },
+  "backend/src/application/ports/tipo-hora-extra.repository.port.ts": {
+    "mtime": 1784723286.2207756,
+    "ast_hash": "b3de2e502640d4976d52d3b980a0c8a0",
+    "semantic_hash": "b3de2e502640d4976d52d3b980a0c8a0"
+  },
+  "backend/src/application/ports/token.port.ts": {
+    "mtime": 1784723286.2207756,
+    "ast_hash": "e1b04f7fa3cee0fb08ad8b47231a366f",
+    "semantic_hash": "e1b04f7fa3cee0fb08ad8b47231a366f"
+  },
+  "backend/src/application/ports/turno.repository.port.ts": {
+    "mtime": 1785185500.1111677,
+    "ast_hash": "89c87090d5cf0f8d7252e00c32b4549e",
+    "semantic_hash": "89c87090d5cf0f8d7252e00c32b4549e"
+  },
+  "backend/src/application/ports/usuario.repository.port.ts": {
+    "mtime": 1784723286.2207756,
+    "ast_hash": "eecf9368791396606d9250781e801773",
+    "semantic_hash": "eecf9368791396606d9250781e801773"
+  },
+  "backend/src/application/services/buscar-registro-duplicado.service.ts": {
+    "mtime": 1785252259.508961,
+    "ast_hash": "e945c9dc9d9f2608cb6b5bed07e3b638",
+    "semantic_hash": "e945c9dc9d9f2608cb6b5bed07e3b638"
+  },
+  "backend/src/application/services/calcular-desglose.service.ts": {
+    "mtime": 1785183070.9311292,
+    "ast_hash": "8887a270a94ad4c6f9d2c9ecdf3fb2cd",
+    "semantic_hash": "8887a270a94ad4c6f9d2c9ecdf3fb2cd"
+  },
+  "backend/src/application/services/configuracion-calculo.mapper.ts": {
+    "mtime": 1785253876.9324167,
+    "ast_hash": "c41336aa989f7066c6938b85714eba01",
+    "semantic_hash": "c41336aa989f7066c6938b85714eba01"
+  },
+  "backend/src/application/services/paginacion.util.ts": {
+    "mtime": 1785351308.6341414,
+    "ast_hash": "c80c78d18c3c6a6d40eb61a9065cae22",
+    "semantic_hash": "c80c78d18c3c6a6d40eb61a9065cae22"
+  },
+  "backend/src/application/services/recalcular-registros-turno.service.spec.ts": {
+    "mtime": 1785258761.732288,
+    "ast_hash": "307167da07d9dd524b93382abef36f6b",
+    "semantic_hash": "307167da07d9dd524b93382abef36f6b"
+  },
+  "backend/src/application/services/recalcular-registros-turno.service.ts": {
+    "mtime": 1785252853.179,
+    "ast_hash": "1d4a97b11f06476b3dba818d834e4fd1",
+    "semantic_hash": "1d4a97b11f06476b3dba818d834e4fd1"
+  },
+  "backend/src/application/services/reporte-periodo.service.spec.ts": {
+    "mtime": 1785351771.3716311,
+    "ast_hash": "5db36cf9fe5d7b1de4637481a55ae5b4",
+    "semantic_hash": "5db36cf9fe5d7b1de4637481a55ae5b4"
+  },
+  "backend/src/application/services/reporte-periodo.service.ts": {
+    "mtime": 1785337609.3134844,
+    "ast_hash": "86a35cb17fd0cae03dcba1bf00c0e3bc",
+    "semantic_hash": "86a35cb17fd0cae03dcba1bf00c0e3bc"
+  },
+  "backend/src/application/services/validar-filas-importacion.service.spec.ts": {
+    "mtime": 1785351719.9528267,
+    "ast_hash": "e64dc49627fdc9980b27ae6707725b17",
+    "semantic_hash": "e64dc49627fdc9980b27ae6707725b17"
+  },
+  "backend/src/application/services/validar-filas-importacion.service.ts": {
+    "mtime": 1785252392.3820586,
+    "ast_hash": "7a933326b8a8bc8e715874b67e8a42eb",
+    "semantic_hash": "7a933326b8a8bc8e715874b67e8a42eb"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/actualizar-asignacion-turno.use-case.spec.ts": {
+    "mtime": 1785185643.5589871,
+    "ast_hash": "9e4f1bc71394535f90637a0f435543cc",
+    "semantic_hash": "9e4f1bc71394535f90637a0f435543cc"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/actualizar-asignacion-turno.use-case.ts": {
+    "mtime": 1785185173.7679515,
+    "ast_hash": "4eb08c59d8ad19c89768cd8e1382ad43",
+    "semantic_hash": "4eb08c59d8ad19c89768cd8e1382ad43"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/crear-asignacion-turno.use-case.spec.ts": {
+    "mtime": 1785351788.1539907,
+    "ast_hash": "9a1f3cc2564a1881ab6f1554e2d06d41",
+    "semantic_hash": "9a1f3cc2564a1881ab6f1554e2d06d41"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/crear-asignacion-turno.use-case.ts": {
+    "mtime": 1785185153.7230284,
+    "ast_hash": "cbb37b90ef7c4def728811f4e0835cd2",
+    "semantic_hash": "cbb37b90ef7c4def728811f4e0835cd2"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/eliminar-asignacion-turno.use-case.spec.ts": {
+    "mtime": 1785185691.6422005,
+    "ast_hash": "060e5248e50504a4557f1ef273183d6c",
+    "semantic_hash": "060e5248e50504a4557f1ef273183d6c"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/eliminar-asignacion-turno.use-case.ts": {
+    "mtime": 1785185191.3739374,
+    "ast_hash": "c30299a5ddff6bf0745f75c1e56cd5b7",
+    "semantic_hash": "c30299a5ddff6bf0745f75c1e56cd5b7"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/listar-asignaciones-por-empleado.use-case.ts": {
+    "mtime": 1785180893.6579654,
+    "ast_hash": "e8fccbac18205bd4860bb1271b72478d",
+    "semantic_hash": "e8fccbac18205bd4860bb1271b72478d"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/resolver-turno-del-empleado.use-case.spec.ts": {
+    "mtime": 1785185715.5253189,
+    "ast_hash": "15a977c2d889328180481446c0cc37ab",
+    "semantic_hash": "15a977c2d889328180481446c0cc37ab"
+  },
+  "backend/src/application/use-cases/asignaciones-turno/resolver-turno-del-empleado.use-case.ts": {
+    "mtime": 1785182794.050215,
+    "ast_hash": "0ecd4f7ee44a20ddca8d5a230e9c1b65",
+    "semantic_hash": "0ecd4f7ee44a20ddca8d5a230e9c1b65"
+  },
+  "backend/src/application/use-cases/auditoria/listar-auditoria.use-case.spec.ts": {
+    "mtime": 1785349202.233711,
+    "ast_hash": "30d269151898ba7ec22701dacaf19c7b",
+    "semantic_hash": "30d269151898ba7ec22701dacaf19c7b"
+  },
+  "backend/src/application/use-cases/auditoria/listar-auditoria.use-case.ts": {
+    "mtime": 1785351338.3251188,
+    "ast_hash": "67089bdfe2ffe0edeabbab96ee00864c",
+    "semantic_hash": "67089bdfe2ffe0edeabbab96ee00864c"
+  },
+  "backend/src/application/use-cases/auditoria/registrar-auditoria.use-case.ts": {
+    "mtime": 1784901980.365602,
+    "ast_hash": "1467cb36208fa1bc6d2b5a0dbbc9f3ab",
+    "semantic_hash": "1467cb36208fa1bc6d2b5a0dbbc9f3ab"
+  },
+  "backend/src/application/use-cases/auth/autenticar-usuario.use-case.ts": {
+    "mtime": 1784723286.222777,
+    "ast_hash": "f14785d90db36cbefe422620a257847c",
+    "semantic_hash": "f14785d90db36cbefe422620a257847c"
+  },
+  "backend/src/application/use-cases/configuracion/actualizar-configuracion.use-case.ts": {
+    "mtime": 1784723286.223825,
+    "ast_hash": "ca67532a86ebcc594ffa2aa0f0eb3628",
+    "semantic_hash": "ca67532a86ebcc594ffa2aa0f0eb3628"
+  },
+  "backend/src/application/use-cases/configuracion/obtener-configuracion.use-case.ts": {
+    "mtime": 1784723286.223825,
+    "ast_hash": "a2b0d247708c4b5e6dcb221c11f6e946",
+    "semantic_hash": "a2b0d247708c4b5e6dcb221c11f6e946"
+  },
+  "backend/src/application/use-cases/empleados/actualizar-empleado.use-case.ts": {
+    "mtime": 1784723286.223825,
+    "ast_hash": "81fba2fb7aaf00718432c12ea3e0b08e",
+    "semantic_hash": "81fba2fb7aaf00718432c12ea3e0b08e"
+  },
+  "backend/src/application/use-cases/empleados/crear-empleado.use-case.spec.ts": {
+    "mtime": 1785351690.7094412,
+    "ast_hash": "8994ad70959c4a4743a389e563b9398d",
+    "semantic_hash": "8994ad70959c4a4743a389e563b9398d"
+  },
+  "backend/src/application/use-cases/empleados/crear-empleado.use-case.ts": {
+    "mtime": 1784723286.223825,
+    "ast_hash": "f7204f899a3374873b39308db9d570be",
+    "semantic_hash": "f7204f899a3374873b39308db9d570be"
+  },
+  "backend/src/application/use-cases/empleados/listar-empleados.use-case.spec.ts": {
+    "mtime": 1785351849.9587443,
+    "ast_hash": "59f896e2af2e08b52cfa04f2e4ff46af",
+    "semantic_hash": "59f896e2af2e08b52cfa04f2e4ff46af"
+  },
+  "backend/src/application/use-cases/empleados/listar-empleados.use-case.ts": {
+    "mtime": 1785351528.8506436,
+    "ast_hash": "c03f1d7cbd80ac49df48537a784c555e",
+    "semantic_hash": "c03f1d7cbd80ac49df48537a784c555e"
+  },
+  "backend/src/application/use-cases/empleados/obtener-empleado.use-case.ts": {
+    "mtime": 1784723286.224834,
+    "ast_hash": "8345a56fd654a22881a3c6a746f419f1",
+    "semantic_hash": "8345a56fd654a22881a3c6a746f419f1"
+  },
+  "backend/src/application/use-cases/feriados/crear-feriado.use-case.spec.ts": {
+    "mtime": 1784723286.224834,
+    "ast_hash": "2d40668a054ebf3b9fe27c9218856995",
+    "semantic_hash": "2d40668a054ebf3b9fe27c9218856995"
+  },
+  "backend/src/application/use-cases/feriados/crear-feriado.use-case.ts": {
+    "mtime": 1784723286.2258327,
+    "ast_hash": "77d750952fdecd188aa64fcaa514e301",
+    "semantic_hash": "77d750952fdecd188aa64fcaa514e301"
+  },
+  "backend/src/application/use-cases/feriados/eliminar-feriado.use-case.ts": {
+    "mtime": 1784901784.0354185,
+    "ast_hash": "1aaa2390ec74b12aced80f730714403f",
+    "semantic_hash": "1aaa2390ec74b12aced80f730714403f"
+  },
+  "backend/src/application/use-cases/feriados/listar-feriados.use-case.ts": {
+    "mtime": 1784723286.2258327,
+    "ast_hash": "f7e521b9b08770854f2e3161974abcd1",
+    "semantic_hash": "f7e521b9b08770854f2e3161974abcd1"
+  },
+  "backend/src/application/use-cases/importaciones/confirmar-importacion.use-case.spec.ts": {
+    "mtime": 1785351738.341844,
+    "ast_hash": "c3ab42afff8d467c91b7cd649707d884",
+    "semantic_hash": "c3ab42afff8d467c91b7cd649707d884"
+  },
+  "backend/src/application/use-cases/importaciones/confirmar-importacion.use-case.ts": {
+    "mtime": 1785252445.9962287,
+    "ast_hash": "22f7788f2d15f92704b8b4b276ba1cb3",
+    "semantic_hash": "22f7788f2d15f92704b8b4b276ba1cb3"
+  },
+  "backend/src/application/use-cases/importaciones/listar-importaciones.use-case.ts": {
+    "mtime": 1784723286.2268324,
+    "ast_hash": "9ba0409649629d0d8b13b9f4a2c515ac",
+    "semantic_hash": "9ba0409649629d0d8b13b9f4a2c515ac"
+  },
+  "backend/src/application/use-cases/importaciones/parsear-importacion.use-case.ts": {
+    "mtime": 1785252462.2090423,
+    "ast_hash": "7e5ba9a0c67c80f46df93d35fff6f811",
+    "semantic_hash": "7e5ba9a0c67c80f46df93d35fff6f811"
+  },
+  "backend/src/application/use-cases/periodos/cerrar-periodo.use-case.spec.ts": {
+    "mtime": 1785258794.0472493,
+    "ast_hash": "46545ae2db91ed7742ab71549ee69aa1",
+    "semantic_hash": "46545ae2db91ed7742ab71549ee69aa1"
+  },
+  "backend/src/application/use-cases/periodos/cerrar-periodo.use-case.ts": {
+    "mtime": 1784901710.0266678,
+    "ast_hash": "99f3fbd775cbb8efc4cabd786cda2686",
+    "semantic_hash": "99f3fbd775cbb8efc4cabd786cda2686"
+  },
+  "backend/src/application/use-cases/periodos/crear-periodo.use-case.ts": {
+    "mtime": 1784723286.2278323,
+    "ast_hash": "1ee7be2d853474f984d1f6d0e915dcea",
+    "semantic_hash": "1ee7be2d853474f984d1f6d0e915dcea"
+  },
+  "backend/src/application/use-cases/periodos/eliminar-periodo-permanentemente.use-case.spec.ts": {
+    "mtime": 1785258829.1604493,
+    "ast_hash": "1d38e6d23df2b9654adc73485e941f0a",
+    "semantic_hash": "1d38e6d23df2b9654adc73485e941f0a"
+  },
+  "backend/src/application/use-cases/periodos/eliminar-periodo-permanentemente.use-case.ts": {
+    "mtime": 1785258631.5386593,
+    "ast_hash": "271b5e1b2694390cd06b9957e23bf01f",
+    "semantic_hash": "271b5e1b2694390cd06b9957e23bf01f"
+  },
+  "backend/src/application/use-cases/periodos/eliminar-periodo.use-case.spec.ts": {
+    "mtime": 1785258781.0870678,
+    "ast_hash": "96d4de71f4f8055f4c973c92ca8093d5",
+    "semantic_hash": "96d4de71f4f8055f4c973c92ca8093d5"
+  },
+  "backend/src/application/use-cases/periodos/eliminar-periodo.use-case.ts": {
+    "mtime": 1784901684.65987,
+    "ast_hash": "3944a41d06d813e24fb1f246514df816",
+    "semantic_hash": "3944a41d06d813e24fb1f246514df816"
+  },
+  "backend/src/application/use-cases/periodos/listar-periodos-eliminados.use-case.ts": {
+    "mtime": 1784902930.722316,
+    "ast_hash": "9d65d1617f82743fd18f953778ed2e95",
+    "semantic_hash": "9d65d1617f82743fd18f953778ed2e95"
+  },
+  "backend/src/application/use-cases/periodos/listar-periodos.use-case.ts": {
+    "mtime": 1784723286.2278323,
+    "ast_hash": "a6f8c0704323d72f6af674172a97eef3",
+    "semantic_hash": "a6f8c0704323d72f6af674172a97eef3"
+  },
+  "backend/src/application/use-cases/periodos/obtener-periodo.use-case.ts": {
+    "mtime": 1784723286.2278323,
+    "ast_hash": "8e2e893d1d7df1a382aa6c906766919e",
+    "semantic_hash": "8e2e893d1d7df1a382aa6c906766919e"
+  },
+  "backend/src/application/use-cases/periodos/restaurar-periodo.use-case.spec.ts": {
+    "mtime": 1785258807.6513963,
+    "ast_hash": "94389505523e54c1c9a29946d163c15d",
+    "semantic_hash": "94389505523e54c1c9a29946d163c15d"
+  },
+  "backend/src/application/use-cases/periodos/restaurar-periodo.use-case.ts": {
+    "mtime": 1784901700.7452106,
+    "ast_hash": "2027eb8f37390d1eba9d008193eadb76",
+    "semantic_hash": "2027eb8f37390d1eba9d008193eadb76"
+  },
+  "backend/src/application/use-cases/registros/actualizar-registro.use-case.ts": {
+    "mtime": 1785252314.8267086,
+    "ast_hash": "c293a1a06d039179e1ad08cf596d3531",
+    "semantic_hash": "c293a1a06d039179e1ad08cf596d3531"
+  },
+  "backend/src/application/use-cases/registros/crear-registro.use-case.spec.ts": {
+    "mtime": 1785351754.2898872,
+    "ast_hash": "e52a5f30ad6b70a7145f33976bb4554f",
+    "semantic_hash": "e52a5f30ad6b70a7145f33976bb4554f"
+  },
+  "backend/src/application/use-cases/registros/crear-registro.use-case.ts": {
+    "mtime": 1785252297.1726284,
+    "ast_hash": "ade65dda38ccc7702af4e8a8a61c06aa",
+    "semantic_hash": "ade65dda38ccc7702af4e8a8a61c06aa"
+  },
+  "backend/src/application/use-cases/registros/eliminar-registro.use-case.ts": {
+    "mtime": 1784901723.2755911,
+    "ast_hash": "36f495cf2fbaf0453eee654092e27af5",
+    "semantic_hash": "36f495cf2fbaf0453eee654092e27af5"
+  },
+  "backend/src/application/use-cases/registros/listar-registros.use-case.ts": {
+    "mtime": 1784723286.2288322,
+    "ast_hash": "8893655812456fa6561f31b1a6e5b6f4",
+    "semantic_hash": "8893655812456fa6561f31b1a6e5b6f4"
+  },
+  "backend/src/application/use-cases/registros/preview-calculo.use-case.ts": {
+    "mtime": 1785252328.8320935,
+    "ast_hash": "742553218d763ef5521d290979f52261",
+    "semantic_hash": "742553218d763ef5521d290979f52261"
+  },
+  "backend/src/application/use-cases/reportes/obtener-reporte-empleado.use-case.ts": {
+    "mtime": 1785186086.0001373,
+    "ast_hash": "60d354cfb00eca25f710c824a9076cf6",
+    "semantic_hash": "60d354cfb00eca25f710c824a9076cf6"
+  },
+  "backend/src/application/use-cases/reportes/obtener-reporte-historico.use-case.ts": {
+    "mtime": 1784723286.2298324,
+    "ast_hash": "18a76641feb8726a7f6a30ac27b12669",
+    "semantic_hash": "18a76641feb8726a7f6a30ac27b12669"
+  },
+  "backend/src/application/use-cases/reportes/obtener-reporte-periodo.use-case.ts": {
+    "mtime": 1784723286.2298324,
+    "ast_hash": "a193a3f91174457cd2b42fa3a70abbeb",
+    "semantic_hash": "a193a3f91174457cd2b42fa3a70abbeb"
+  },
+  "backend/src/application/use-cases/salarios/crear-salario.use-case.spec.ts": {
+    "mtime": 1785351803.7831645,
+    "ast_hash": "75cfc75a4926d0b8a1d276a0fd236855",
+    "semantic_hash": "75cfc75a4926d0b8a1d276a0fd236855"
+  },
+  "backend/src/application/use-cases/salarios/crear-salario.use-case.ts": {
+    "mtime": 1784723286.2308319,
+    "ast_hash": "78b0c472d86da32b1d96c3fd7c0432db",
+    "semantic_hash": "78b0c472d86da32b1d96c3fd7c0432db"
+  },
+  "backend/src/application/use-cases/salarios/listar-salarios.use-case.ts": {
+    "mtime": 1784723286.2308319,
+    "ast_hash": "1136e43dd0bb9b47cd607f18658c987b",
+    "semantic_hash": "1136e43dd0bb9b47cd607f18658c987b"
+  },
+  "backend/src/application/use-cases/tipos-hora-extra/actualizar-tipo-hora-extra.use-case.spec.ts": {
+    "mtime": 1784723286.2308319,
+    "ast_hash": "0fbf78e833dd1647f485e6bae05a1459",
+    "semantic_hash": "0fbf78e833dd1647f485e6bae05a1459"
+  },
+  "backend/src/application/use-cases/tipos-hora-extra/actualizar-tipo-hora-extra.use-case.ts": {
+    "mtime": 1784723286.2308319,
+    "ast_hash": "059601bd93bd09a201343b49eca2c0d3",
+    "semantic_hash": "059601bd93bd09a201343b49eca2c0d3"
+  },
+  "backend/src/application/use-cases/tipos-hora-extra/listar-tipos-hora-extra.use-case.ts": {
+    "mtime": 1784723286.231839,
+    "ast_hash": "1640f4e64fa93913f118ced469994cf6",
+    "semantic_hash": "1640f4e64fa93913f118ced469994cf6"
+  },
+  "backend/src/application/use-cases/turnos/actualizar-turno.use-case.ts": {
+    "mtime": 1785180885.9239624,
+    "ast_hash": "dab2645f31c17a63ac39765697505a65",
+    "semantic_hash": "dab2645f31c17a63ac39765697505a65"
+  },
+  "backend/src/application/use-cases/turnos/crear-turno.use-case.spec.ts": {
+    "mtime": 1785185561.5123777,
+    "ast_hash": "0a2bc9c54553407b085cfbd04028af69",
+    "semantic_hash": "0a2bc9c54553407b085cfbd04028af69"
+  },
+  "backend/src/application/use-cases/turnos/crear-turno.use-case.ts": {
+    "mtime": 1785180879.3333726,
+    "ast_hash": "84e845aa1ade44ba94accd073e966ffe",
+    "semantic_hash": "84e845aa1ade44ba94accd073e966ffe"
+  },
+  "backend/src/application/use-cases/turnos/eliminar-turno.use-case.spec.ts": {
+    "mtime": 1785185600.3242416,
+    "ast_hash": "f7c19db964b6713c5ea60284cb883256",
+    "semantic_hash": "f7c19db964b6713c5ea60284cb883256"
+  },
+  "backend/src/application/use-cases/turnos/eliminar-turno.use-case.ts": {
+    "mtime": 1785185548.452924,
+    "ast_hash": "190d1d6fadeaeb3e4f9fa6de85fa6d3c",
+    "semantic_hash": "190d1d6fadeaeb3e4f9fa6de85fa6d3c"
+  },
+  "backend/src/application/use-cases/turnos/listar-turnos.use-case.ts": {
+    "mtime": 1785180873.3010094,
+    "ast_hash": "b142897d3199560ef81c3683d21b9657",
+    "semantic_hash": "b142897d3199560ef81c3683d21b9657"
+  },
+  "backend/src/application/use-cases/usuarios/actualizar-usuario.use-case.spec.ts": {
+    "mtime": 1784723286.231839,
+    "ast_hash": "df4285fb137a530ed3b2dd7d3b63b515",
+    "semantic_hash": "df4285fb137a530ed3b2dd7d3b63b515"
+  },
+  "backend/src/application/use-cases/usuarios/actualizar-usuario.use-case.ts": {
+    "mtime": 1784723286.231839,
+    "ast_hash": "b52b2488776568d9d30b54d6db843be7",
+    "semantic_hash": "b52b2488776568d9d30b54d6db843be7"
+  },
+  "backend/src/application/use-cases/usuarios/crear-usuario.use-case.spec.ts": {
+    "mtime": 1784723286.231839,
+    "ast_hash": "f92f50d1017cff901a35d93e7c65f6ef",
+    "semantic_hash": "f92f50d1017cff901a35d93e7c65f6ef"
+  },
+  "backend/src/application/use-cases/usuarios/crear-usuario.use-case.ts": {
+    "mtime": 1784723286.2328393,
+    "ast_hash": "0663ced9df1f2a0a8b3c4779ab155866",
+    "semantic_hash": "0663ced9df1f2a0a8b3c4779ab155866"
+  },
+  "backend/src/application/use-cases/usuarios/listar-usuarios.use-case.ts": {
+    "mtime": 1784723286.2328393,
+    "ast_hash": "57c6c5aa0f271b305bec5a6b1164049b",
+    "semantic_hash": "57c6c5aa0f271b305bec5a6b1164049b"
+  },
+  "backend/src/domain/entities/asignacion-turno.entity.ts": {
+    "mtime": 1785180808.4488413,
+    "ast_hash": "0a9fcea77f96aa0da58b79a8082b89ab",
+    "semantic_hash": "0a9fcea77f96aa0da58b79a8082b89ab"
+  },
+  "backend/src/domain/entities/auditoria.entity.ts": {
+    "mtime": 1784901624.3627942,
+    "ast_hash": "381773848dee90f765d7ef896b95ed4a",
+    "semantic_hash": "381773848dee90f765d7ef896b95ed4a"
+  },
+  "backend/src/domain/entities/calculo.entity.ts": {
+    "mtime": 1784723286.2328393,
+    "ast_hash": "989f7dfe1654b914686a10c87d3a94f1",
+    "semantic_hash": "989f7dfe1654b914686a10c87d3a94f1"
+  },
+  "backend/src/domain/entities/empleado.entity.ts": {
+    "mtime": 1784723286.2328393,
+    "ast_hash": "8ada5f1b9c09fbe9b66859bd1aaac967",
+    "semantic_hash": "8ada5f1b9c09fbe9b66859bd1aaac967"
+  },
+  "backend/src/domain/entities/feriado.entity.ts": {
+    "mtime": 1784723286.2328393,
+    "ast_hash": "6ff27878a652e6cf2ed1dae53d0a4bce",
+    "semantic_hash": "6ff27878a652e6cf2ed1dae53d0a4bce"
+  },
+  "backend/src/domain/entities/importacion.entity.ts": {
+    "mtime": 1785252469.652356,
+    "ast_hash": "044b6a59ed7b98d850059011d0e5c871",
+    "semantic_hash": "044b6a59ed7b98d850059011d0e5c871"
+  },
+  "backend/src/domain/entities/periodo.entity.ts": {
+    "mtime": 1784901609.0013359,
+    "ast_hash": "b922a4b8bbc0a8d4d7a269b770aa8e5e",
+    "semantic_hash": "b922a4b8bbc0a8d4d7a269b770aa8e5e"
+  },
+  "backend/src/domain/entities/registro-horas.entity.ts": {
+    "mtime": 1785252222.9790199,
+    "ast_hash": "257006c8abe5739cb5f249da9af9c815",
+    "semantic_hash": "257006c8abe5739cb5f249da9af9c815"
+  },
+  "backend/src/domain/entities/salario.entity.ts": {
+    "mtime": 1784723286.2338326,
+    "ast_hash": "36656cd70761a0e5856e27f1578d4a82",
+    "semantic_hash": "36656cd70761a0e5856e27f1578d4a82"
+  },
+  "backend/src/domain/entities/tipo-hora-extra.entity.ts": {
+    "mtime": 1784723286.2338326,
+    "ast_hash": "fc05382584f45b370e945d92e7aa574d",
+    "semantic_hash": "fc05382584f45b370e945d92e7aa574d"
+  },
+  "backend/src/domain/entities/turno.entity.ts": {
+    "mtime": 1785180800.1247127,
+    "ast_hash": "b4db134d7e2d6ae74c27183e17928e4b",
+    "semantic_hash": "b4db134d7e2d6ae74c27183e17928e4b"
+  },
+  "backend/src/domain/entities/usuario.entity.ts": {
+    "mtime": 1784723286.2348406,
+    "ast_hash": "cc419ecafb384152237d4e08ad11048d",
+    "semantic_hash": "cc419ecafb384152237d4e08ad11048d"
+  },
+  "backend/src/domain/enums/accion-auditoria.enum.ts": {
+    "mtime": 1785258605.579187,
+    "ast_hash": "26215c97dac2938f68bb4902e412b335",
+    "semantic_hash": "26215c97dac2938f68bb4902e412b335"
+  },
+  "backend/src/domain/enums/entidad-auditoria.enum.ts": {
+    "mtime": 1785185910.02202,
+    "ast_hash": "250f5e87f2a66fb97675ad4d8d7c3a2e",
+    "semantic_hash": "250f5e87f2a66fb97675ad4d8d7c3a2e"
+  },
+  "backend/src/domain/enums/estado-fila-importacion.enum.ts": {
+    "mtime": 1785252230.0870457,
+    "ast_hash": "0a63245511284d0b08a82136f1a20c02",
+    "semantic_hash": "0a63245511284d0b08a82136f1a20c02"
+  },
+  "backend/src/domain/enums/estado-periodo.enum.ts": {
+    "mtime": 1784723286.2348406,
+    "ast_hash": "355112d8c19562bf10e38e3939364ead",
+    "semantic_hash": "355112d8c19562bf10e38e3939364ead"
+  },
+  "backend/src/domain/enums/modo-valorizacion.enum.ts": {
+    "mtime": 1784723286.2348406,
+    "ast_hash": "b62adb3e7daf10b9714f70d639431e76",
+    "semantic_hash": "b62adb3e7daf10b9714f70d639431e76"
+  },
+  "backend/src/domain/enums/origen-registro.enum.ts": {
+    "mtime": 1784723286.2348406,
+    "ast_hash": "1b762f6a5434fb3e0ece23e33073fc8d",
+    "semantic_hash": "1b762f6a5434fb3e0ece23e33073fc8d"
+  },
+  "backend/src/domain/enums/rol-usuario.enum.ts": {
+    "mtime": 1784723286.2358398,
+    "ast_hash": "455934aff8551e5d7fe50874179a9599",
+    "semantic_hash": "455934aff8551e5d7fe50874179a9599"
+  },
+  "backend/src/domain/enums/tipo-hora-extra-codigo.enum.ts": {
+    "mtime": 1784723286.2358398,
+    "ast_hash": "5b6289682af53a9d74c730ba89b09b73",
+    "semantic_hash": "5b6289682af53a9d74c730ba89b09b73"
+  },
+  "backend/src/domain/errors/asignacion-rango-fechas-invalido.error.ts": {
+    "mtime": 1785180850.4134786,
+    "ast_hash": "64691ee216506a8b7c0c878166fe926a",
+    "semantic_hash": "64691ee216506a8b7c0c878166fe926a"
+  },
+  "backend/src/domain/errors/asignacion-solapada.error.ts": {
+    "mtime": 1785180844.890222,
+    "ast_hash": "d4c1d9493e285bcbcc14b1862b32c059",
+    "semantic_hash": "d4c1d9493e285bcbcc14b1862b32c059"
+  },
+  "backend/src/domain/errors/asignacion-turno-no-encontrada.error.ts": {
+    "mtime": 1785180839.8065515,
+    "ast_hash": "1b93f917970351ac869a8b696b3f6f98",
+    "semantic_hash": "1b93f917970351ac869a8b696b3f6f98"
+  },
+  "backend/src/domain/errors/credenciales-invalidas.error.ts": {
+    "mtime": 1784723286.2358398,
+    "ast_hash": "bd9b5634ef8c1f83d4e18d511559250a",
+    "semantic_hash": "bd9b5634ef8c1f83d4e18d511559250a"
+  },
+  "backend/src/domain/errors/domain.error.ts": {
+    "mtime": 1784723286.2358398,
+    "ast_hash": "fc87ed848b052d1e4c88240d7b04b2ee",
+    "semantic_hash": "fc87ed848b052d1e4c88240d7b04b2ee"
+  },
+  "backend/src/domain/errors/empleado-cedula-duplicada.error.ts": {
+    "mtime": 1784723286.2358398,
+    "ast_hash": "71c0e3d7803e10d3bd7c6603510c020b",
+    "semantic_hash": "71c0e3d7803e10d3bd7c6603510c020b"
+  },
+  "backend/src/domain/errors/empleado-codigo-duplicado.error.ts": {
+    "mtime": 1784723286.2358398,
+    "ast_hash": "cafe71d7ff14d4b1c54c01ba360c2c51",
+    "semantic_hash": "cafe71d7ff14d4b1c54c01ba360c2c51"
+  },
+  "backend/src/domain/errors/empleado-no-encontrado.error.ts": {
+    "mtime": 1784723286.2368345,
+    "ast_hash": "db77f2a10c47b5547b1e159c41468a12",
+    "semantic_hash": "db77f2a10c47b5547b1e159c41468a12"
+  },
+  "backend/src/domain/errors/feriado-fecha-duplicada.error.ts": {
+    "mtime": 1784723286.2368345,
+    "ast_hash": "c83fdbafa822732657e33350a2c7e3f1",
+    "semantic_hash": "c83fdbafa822732657e33350a2c7e3f1"
+  },
+  "backend/src/domain/errors/feriado-no-encontrado.error.ts": {
+    "mtime": 1784723286.2368345,
+    "ast_hash": "b5cf47e8cd4d735d2143c22cee3a37d2",
+    "semantic_hash": "b5cf47e8cd4d735d2143c22cee3a37d2"
+  },
+  "backend/src/domain/errors/importacion-formato-invalido.error.ts": {
+    "mtime": 1784723286.2368345,
+    "ast_hash": "25c3bc39ab3aaacaf25a69545226f1aa",
+    "semantic_hash": "25c3bc39ab3aaacaf25a69545226f1aa"
+  },
+  "backend/src/domain/errors/importacion-no-encontrada.error.ts": {
+    "mtime": 1784723286.2378347,
+    "ast_hash": "b6645ac9260de5fde436235605a06ab0",
+    "semantic_hash": "b6645ac9260de5fde436235605a06ab0"
+  },
+  "backend/src/domain/errors/importacion-ya-confirmada.error.ts": {
+    "mtime": 1784723286.2378347,
+    "ast_hash": "d8611fec415509f21af3dc50c85575a2",
+    "semantic_hash": "d8611fec415509f21af3dc50c85575a2"
+  },
+  "backend/src/domain/errors/periodo-cerrado.error.ts": {
+    "mtime": 1784723286.2378347,
+    "ast_hash": "8ea4c933d81781f24cd3479e6d5e0da1",
+    "semantic_hash": "8ea4c933d81781f24cd3479e6d5e0da1"
+  },
+  "backend/src/domain/errors/periodo-eliminado.error.ts": {
+    "mtime": 1784901629.1895978,
+    "ast_hash": "89da922a6c6cc8bbe7a6f0faf391ab78",
+    "semantic_hash": "89da922a6c6cc8bbe7a6f0faf391ab78"
+  },
+  "backend/src/domain/errors/periodo-fechas-duplicadas.error.ts": {
+    "mtime": 1784723286.2378347,
+    "ast_hash": "b584d4266b70ab1955fc73c7d0b05dfd",
+    "semantic_hash": "b584d4266b70ab1955fc73c7d0b05dfd"
+  },
+  "backend/src/domain/errors/periodo-no-eliminado.error.ts": {
+    "mtime": 1784901633.8561063,
+    "ast_hash": "f36192cd86a9eb13a12c5b1e7c7ec767",
+    "semantic_hash": "f36192cd86a9eb13a12c5b1e7c7ec767"
+  },
+  "backend/src/domain/errors/periodo-no-encontrado.error.ts": {
+    "mtime": 1784723286.2378347,
+    "ast_hash": "de89f2a4f34edf03b72349754759f889",
+    "semantic_hash": "de89f2a4f34edf03b72349754759f889"
+  },
+  "backend/src/domain/errors/periodo-rango-fechas-invalido.error.ts": {
+    "mtime": 1784723286.2388337,
+    "ast_hash": "39fcd2b24d56aa134686edc0a107fe7a",
+    "semantic_hash": "39fcd2b24d56aa134686edc0a107fe7a"
+  },
+  "backend/src/domain/errors/periodo-restauracion-expirada.error.ts": {
+    "mtime": 1784901638.6083279,
+    "ast_hash": "d9bd380eb321c6209687154ea43d2145",
+    "semantic_hash": "d9bd380eb321c6209687154ea43d2145"
+  },
+  "backend/src/domain/errors/registro-duplicado-en-otro-periodo.error.ts": {
+    "mtime": 1785252237.2357745,
+    "ast_hash": "f5173d902190a271efd62cd2b729ca73",
+    "semantic_hash": "f5173d902190a271efd62cd2b729ca73"
+  },
+  "backend/src/domain/errors/registro-horas-no-encontrado.error.ts": {
+    "mtime": 1784723286.2388337,
+    "ast_hash": "8e59bf2ef49b0d87db50980d41e0a525",
+    "semantic_hash": "8e59bf2ef49b0d87db50980d41e0a525"
+  },
+  "backend/src/domain/errors/salario-no-vigente.error.ts": {
+    "mtime": 1784723286.2388337,
+    "ast_hash": "a0b266607c6531926c4ae12c1f863570",
+    "semantic_hash": "a0b266607c6531926c4ae12c1f863570"
+  },
+  "backend/src/domain/errors/tipo-hora-extra-no-encontrado.error.ts": {
+    "mtime": 1784723286.2388337,
+    "ast_hash": "95eb3e8648f54a3aeeb5592fe87c4a66",
+    "semantic_hash": "95eb3e8648f54a3aeeb5592fe87c4a66"
+  },
+  "backend/src/domain/errors/turno-codigo-duplicado.error.ts": {
+    "mtime": 1785180833.7895803,
+    "ast_hash": "4797a94bb461fdbc544d42cd6205cc7e",
+    "semantic_hash": "4797a94bb461fdbc544d42cd6205cc7e"
+  },
+  "backend/src/domain/errors/turno-con-asignaciones.error.ts": {
+    "mtime": 1785185486.8038113,
+    "ast_hash": "bb95b316596c18ef709657e23437c489",
+    "semantic_hash": "bb95b316596c18ef709657e23437c489"
+  },
+  "backend/src/domain/errors/turno-no-encontrado.error.ts": {
+    "mtime": 1785180828.721648,
+    "ast_hash": "21633347ca5fbacbc44d5a242d198d6d",
+    "semantic_hash": "21633347ca5fbacbc44d5a242d198d6d"
+  },
+  "backend/src/domain/errors/turno-por-defecto-no-eliminable.error.ts": {
+    "mtime": 1785185481.2855322,
+    "ast_hash": "b6f1426c7df8f91b0dd52000f2f9f45b",
+    "semantic_hash": "b6f1426c7df8f91b0dd52000f2f9f45b"
+  },
+  "backend/src/domain/errors/usuario-email-duplicado.error.ts": {
+    "mtime": 1784723286.2388337,
+    "ast_hash": "baf652875f77f6bed7459c85ff02434e",
+    "semantic_hash": "baf652875f77f6bed7459c85ff02434e"
+  },
+  "backend/src/domain/errors/usuario-no-encontrado.error.ts": {
+    "mtime": 1784723286.239842,
+    "ast_hash": "5eb3401d301bdc2c746abae205c97bc5",
+    "semantic_hash": "5eb3401d301bdc2c746abae205c97bc5"
+  },
+  "backend/src/domain/services/fecha.util.ts": {
+    "mtime": 1784723286.239842,
+    "ast_hash": "7aaf84f24803d99bcd085ab83c286e7e",
+    "semantic_hash": "7aaf84f24803d99bcd085ab83c286e7e"
+  },
+  "backend/src/domain/services/hora.util.spec.ts": {
+    "mtime": 1785182246.5297775,
+    "ast_hash": "58970caa11925a03cf09ac0797ba25f0",
+    "semantic_hash": "58970caa11925a03cf09ac0797ba25f0"
+  },
+  "backend/src/domain/services/hora.util.ts": {
+    "mtime": 1785182233.8229704,
+    "ast_hash": "87649c24473db56971d1ff463b52a8f4",
+    "semantic_hash": "87649c24473db56971d1ff463b52a8f4"
+  },
+  "backend/src/domain/services/motor-calculo.spec.ts": {
+    "mtime": 1785253914.5874596,
+    "ast_hash": "49b9076d3b62de054a8adea3e8f8c57e",
+    "semantic_hash": "49b9076d3b62de054a8adea3e8f8c57e"
+  },
+  "backend/src/domain/services/motor-calculo.ts": {
+    "mtime": 1785253863.718144,
+    "ast_hash": "ecb9e6959068804ee1e8c2056ea6c2b7",
+    "semantic_hash": "ecb9e6959068804ee1e8c2056ea6c2b7"
+  },
+  "backend/src/domain/services/rango-fechas.util.spec.ts": {
+    "mtime": 1785181044.5784378,
+    "ast_hash": "765612e4f654ac270aca3c3ea0070f69",
+    "semantic_hash": "765612e4f654ac270aca3c3ea0070f69"
+  },
+  "backend/src/domain/services/rango-fechas.util.ts": {
+    "mtime": 1785252277.643222,
+    "ast_hash": "4f0afdd5a6bc4a03695d844dd0d55eb1",
+    "semantic_hash": "4f0afdd5a6bc4a03695d844dd0d55eb1"
+  },
+  "backend/src/infrastructure/auth/bcrypt-password-hasher.ts": {
+    "mtime": 1784723286.2408328,
+    "ast_hash": "89556acb03a5967f6933959bec9b07b2",
+    "semantic_hash": "89556acb03a5967f6933959bec9b07b2"
+  },
+  "backend/src/infrastructure/auth/jwt-token.service.ts": {
+    "mtime": 1784723286.2408328,
+    "ast_hash": "ca0458df778421f7d7c762d46c562d34",
+    "semantic_hash": "ca0458df778421f7d7c762d46c562d34"
+  },
+  "backend/src/infrastructure/auth/jwt.strategy.ts": {
+    "mtime": 1784723286.2418323,
+    "ast_hash": "544d9bf38bf3c88efd37e11026d9f84f",
+    "semantic_hash": "544d9bf38bf3c88efd37e11026d9f84f"
+  },
+  "backend/src/infrastructure/excel/reporte-excel.builder.ts": {
+    "mtime": 1785337698.6256106,
+    "ast_hash": "7078966dc9eaeaeb047cab13f9677f25",
+    "semantic_hash": "7078966dc9eaeaeb047cab13f9677f25"
+  },
+  "backend/src/infrastructure/excel/xlsx-parser.adapter.spec.ts": {
+    "mtime": 1785184869.995087,
+    "ast_hash": "7c6f4e153b382dcc85191e369f5f813f",
+    "semantic_hash": "7c6f4e153b382dcc85191e369f5f813f"
+  },
+  "backend/src/infrastructure/excel/xlsx-parser.adapter.ts": {
+    "mtime": 1785184790.633464,
+    "ast_hash": "5ffc88443022f96d901c1109f3afe9d2",
+    "semantic_hash": "5ffc88443022f96d901c1109f3afe9d2"
+  },
+  "backend/src/infrastructure/prisma/decimal.mapper.ts": {
+    "mtime": 1784723286.2428324,
+    "ast_hash": "2ee8f775246e13d285b9ce74fe96d0e2",
+    "semantic_hash": "2ee8f775246e13d285b9ce74fe96d0e2"
+  },
+  "backend/src/infrastructure/prisma/prisma.module.ts": {
+    "mtime": 1784723286.2428324,
+    "ast_hash": "0d14fad4b4742f49ea6d9d9c48069e8b",
+    "semantic_hash": "0d14fad4b4742f49ea6d9d9c48069e8b"
+  },
+  "backend/src/infrastructure/prisma/prisma.service.ts": {
+    "mtime": 1784723286.2428324,
+    "ast_hash": "85027aff0deed9222514248c9ec449e4",
+    "semantic_hash": "85027aff0deed9222514248c9ec449e4"
+  },
+  "backend/src/infrastructure/repositories/asignacion-turno.prisma.repository.ts": {
+    "mtime": 1785185536.3897717,
+    "ast_hash": "3dcd7ed54d167ff766d10811ac3af407",
+    "semantic_hash": "3dcd7ed54d167ff766d10811ac3af407"
+  },
+  "backend/src/infrastructure/repositories/auditoria.prisma.repository.ts": {
+    "mtime": 1785349061.886517,
+    "ast_hash": "6603bd166b5ca584e34b7ad8db9aa089",
+    "semantic_hash": "6603bd166b5ca584e34b7ad8db9aa089"
+  },
+  "backend/src/infrastructure/repositories/configuracion.prisma.repository.ts": {
+    "mtime": 1784723286.2428324,
+    "ast_hash": "80056b1fba9323f2af85190c13a68b7b",
+    "semantic_hash": "80056b1fba9323f2af85190c13a68b7b"
+  },
+  "backend/src/infrastructure/repositories/empleado.prisma.repository.ts": {
+    "mtime": 1785351508.589355,
+    "ast_hash": "8051078953891d7b3dd8db63396e44be",
+    "semantic_hash": "8051078953891d7b3dd8db63396e44be"
+  },
+  "backend/src/infrastructure/repositories/feriado.prisma.repository.ts": {
+    "mtime": 1784723286.2438323,
+    "ast_hash": "fa37ea98abd785cfbd7d2dfc9676e3e4",
+    "semantic_hash": "fa37ea98abd785cfbd7d2dfc9676e3e4"
+  },
+  "backend/src/infrastructure/repositories/importacion.prisma.repository.ts": {
+    "mtime": 1785252486.8025916,
+    "ast_hash": "2fd0b2a99b7931c2c694582bf09ca3cf",
+    "semantic_hash": "2fd0b2a99b7931c2c694582bf09ca3cf"
+  },
+  "backend/src/infrastructure/repositories/periodo.prisma.repository.ts": {
+    "mtime": 1785258621.7156987,
+    "ast_hash": "4db1fced546862ec9ef960ebb65da31b",
+    "semantic_hash": "4db1fced546862ec9ef960ebb65da31b"
+  },
+  "backend/src/infrastructure/repositories/registro-horas.prisma.repository.ts": {
+    "mtime": 1785252513.6348975,
+    "ast_hash": "0370a80b1bcc64bece7d26b77000168a",
+    "semantic_hash": "0370a80b1bcc64bece7d26b77000168a"
+  },
+  "backend/src/infrastructure/repositories/salario.prisma.repository.ts": {
+    "mtime": 1784723286.2448318,
+    "ast_hash": "c25714361cdedd86d38aee99566c4651",
+    "semantic_hash": "c25714361cdedd86d38aee99566c4651"
+  },
+  "backend/src/infrastructure/repositories/tipo-hora-extra.prisma.repository.ts": {
+    "mtime": 1784723286.2448318,
+    "ast_hash": "e4b815e48bc1ebab2ce4fed37c22478a",
+    "semantic_hash": "e4b815e48bc1ebab2ce4fed37c22478a"
+  },
+  "backend/src/infrastructure/repositories/turno.prisma.repository.ts": {
+    "mtime": 1785185523.659819,
+    "ast_hash": "cf45a5ee57068a33b9b1fb8b91a7df61",
+    "semantic_hash": "cf45a5ee57068a33b9b1fb8b91a7df61"
+  },
+  "backend/src/infrastructure/repositories/usuario.prisma.repository.ts": {
+    "mtime": 1784723286.2448318,
+    "ast_hash": "9165a66bd3a37e59b1d5dd1b96113783",
+    "semantic_hash": "9165a66bd3a37e59b1d5dd1b96113783"
+  },
+  "backend/src/main.ts": {
+    "mtime": 1784723998.7972755,
+    "ast_hash": "3a06ad20e39aff9469d9c16ca7b5defe",
+    "semantic_hash": "3a06ad20e39aff9469d9c16ca7b5defe"
+  },
+  "backend/src/presentation/controllers/asignaciones-turno.controller.ts": {
+    "mtime": 1785185936.5257654,
+    "ast_hash": "a5697b27e508319737bbeaec6a44951b",
+    "semantic_hash": "a5697b27e508319737bbeaec6a44951b"
+  },
+  "backend/src/presentation/controllers/auditoria.controller.ts": {
+    "mtime": 1785349152.986597,
+    "ast_hash": "efcebebf0dcb5ee6dd10d0a215356aa7",
+    "semantic_hash": "efcebebf0dcb5ee6dd10d0a215356aa7"
+  },
+  "backend/src/presentation/controllers/auth.controller.ts": {
+    "mtime": 1784723286.2458327,
+    "ast_hash": "87d8517f6961f60775d461bd40e0224a",
+    "semantic_hash": "87d8517f6961f60775d461bd40e0224a"
+  },
+  "backend/src/presentation/controllers/configuracion.controller.ts": {
+    "mtime": 1784903001.1331935,
+    "ast_hash": "d0c4e39802eb63bc6f469845dc112c3d",
+    "semantic_hash": "d0c4e39802eb63bc6f469845dc112c3d"
+  },
+  "backend/src/presentation/controllers/empleados.controller.ts": {
+    "mtime": 1785351598.235675,
+    "ast_hash": "7654dca397ec499a083a2d45505e4d6e",
+    "semantic_hash": "7654dca397ec499a083a2d45505e4d6e"
+  },
+  "backend/src/presentation/controllers/feriados.controller.ts": {
+    "mtime": 1784903016.2836447,
+    "ast_hash": "08183c8e14dc09c50067c0166863ec50",
+    "semantic_hash": "08183c8e14dc09c50067c0166863ec50"
+  },
+  "backend/src/presentation/controllers/health.controller.ts": {
+    "mtime": 1784723286.2458327,
+    "ast_hash": "99442803267132ee84cf651e55a523d3",
+    "semantic_hash": "99442803267132ee84cf651e55a523d3"
+  },
+  "backend/src/presentation/controllers/importaciones.controller.ts": {
+    "mtime": 1785252843.8530712,
+    "ast_hash": "d1e6a2035ea7500e9842d5b59e509b36",
+    "semantic_hash": "d1e6a2035ea7500e9842d5b59e509b36"
+  },
+  "backend/src/presentation/controllers/periodos.controller.ts": {
+    "mtime": 1785258675.7045052,
+    "ast_hash": "301e1e171481667d51a5ef74aa128f30",
+    "semantic_hash": "301e1e171481667d51a5ef74aa128f30"
+  },
+  "backend/src/presentation/controllers/registros.controller.ts": {
+    "mtime": 1785252683.5778162,
+    "ast_hash": "740d55a14a4f294c76332abc5aace04b",
+    "semantic_hash": "740d55a14a4f294c76332abc5aace04b"
+  },
+  "backend/src/presentation/controllers/reportes.controller.ts": {
+    "mtime": 1785337725.0182953,
+    "ast_hash": "d9c23244ce257a4d6178745a4ffd54c6",
+    "semantic_hash": "d9c23244ce257a4d6178745a4ffd54c6"
+  },
+  "backend/src/presentation/controllers/tipos-hora-extra.controller.ts": {
+    "mtime": 1784903029.3150673,
+    "ast_hash": "6551c5fd7e03fffbb3455cb3ee3db52e",
+    "semantic_hash": "6551c5fd7e03fffbb3455cb3ee3db52e"
+  },
+  "backend/src/presentation/controllers/turnos.controller.ts": {
+    "mtime": 1785185896.2285504,
+    "ast_hash": "672c96abdf3b2a5463a8453b0f19ec61",
+    "semantic_hash": "672c96abdf3b2a5463a8453b0f19ec61"
+  },
+  "backend/src/presentation/controllers/usuarios.controller.ts": {
+    "mtime": 1784903095.3919568,
+    "ast_hash": "7bb01738794c047db3f0a0c3d7e9cfef",
+    "semantic_hash": "7bb01738794c047db3f0a0c3d7e9cfef"
+  },
+  "backend/src/presentation/decorators/public.decorator.ts": {
+    "mtime": 1784723286.2478323,
+    "ast_hash": "82c29e3a7a0a8de27073960842a01c53",
+    "semantic_hash": "82c29e3a7a0a8de27073960842a01c53"
+  },
+  "backend/src/presentation/decorators/roles.decorator.ts": {
+    "mtime": 1784723286.2478323,
+    "ast_hash": "db35f8e0793eb1f86fd33d791b3bfe9f",
+    "semantic_hash": "db35f8e0793eb1f86fd33d791b3bfe9f"
+  },
+  "backend/src/presentation/decorators/usuario-actual.decorator.ts": {
+    "mtime": 1784723286.2478323,
+    "ast_hash": "c8c18212b158cd063b7f56cc210b0fe2",
+    "semantic_hash": "c8c18212b158cd063b7f56cc210b0fe2"
+  },
+  "backend/src/presentation/dtos/asignaciones-turno/actualizar-asignacion-turno.dto.ts": {
+    "mtime": 1785185846.5264027,
+    "ast_hash": "adeea4c6fc80a3bcba3fd13b625e2a34",
+    "semantic_hash": "adeea4c6fc80a3bcba3fd13b625e2a34"
+  },
+  "backend/src/presentation/dtos/asignaciones-turno/asignacion-turno-respuesta.dto.ts": {
+    "mtime": 1785185854.8725364,
+    "ast_hash": "e230d7075e1f9de782d4dd06a87b4a54",
+    "semantic_hash": "e230d7075e1f9de782d4dd06a87b4a54"
+  },
+  "backend/src/presentation/dtos/asignaciones-turno/crear-asignacion-turno.dto.ts": {
+    "mtime": 1785185823.4370422,
+    "ast_hash": "fc696eb9f63ba681432c6a674d1834e9",
+    "semantic_hash": "fc696eb9f63ba681432c6a674d1834e9"
+  },
+  "backend/src/presentation/dtos/auditoria/auditoria-paginada-respuesta.dto.ts": {
+    "mtime": 1785349124.9306777,
+    "ast_hash": "bc37fe2f1ce5550cf1648f1656f49f81",
+    "semantic_hash": "bc37fe2f1ce5550cf1648f1656f49f81"
+  },
+  "backend/src/presentation/dtos/auditoria/auditoria-respuesta.dto.ts": {
+    "mtime": 1784902846.0423908,
+    "ast_hash": "1bba47d1792e7c26c1bc0f229feac08d",
+    "semantic_hash": "1bba47d1792e7c26c1bc0f229feac08d"
+  },
+  "backend/src/presentation/dtos/auditoria/listar-auditoria-query.dto.ts": {
+    "mtime": 1785349116.1154242,
+    "ast_hash": "8d964cb539a5afb053fab2c50cffc3a9",
+    "semantic_hash": "8d964cb539a5afb053fab2c50cffc3a9"
+  },
+  "backend/src/presentation/dtos/auth/login-respuesta.dto.ts": {
+    "mtime": 1784723286.2488325,
+    "ast_hash": "f74aa14f4ce4b6b79c9bb0c192ee684d",
+    "semantic_hash": "f74aa14f4ce4b6b79c9bb0c192ee684d"
+  },
+  "backend/src/presentation/dtos/auth/login.dto.ts": {
+    "mtime": 1784723286.2488325,
+    "ast_hash": "0f39c187c88114410ea17a02a4d6a686",
+    "semantic_hash": "0f39c187c88114410ea17a02a4d6a686"
+  },
+  "backend/src/presentation/dtos/configuracion/actualizar-configuracion.dto.ts": {
+    "mtime": 1785180996.0130975,
+    "ast_hash": "8ad45a73286c34c25e6f0ee1020c5f10",
+    "semantic_hash": "8ad45a73286c34c25e6f0ee1020c5f10"
+  },
+  "backend/src/presentation/dtos/configuracion/configuracion-respuesta.dto.ts": {
+    "mtime": 1785181001.6832907,
+    "ast_hash": "73d851cf12148b341a52e0f1e4ccc30d",
+    "semantic_hash": "73d851cf12148b341a52e0f1e4ccc30d"
+  },
+  "backend/src/presentation/dtos/empleados/actualizar-empleado.dto.ts": {
+    "mtime": 1784723286.2498398,
+    "ast_hash": "7f210a8dabff0dc87c988f3c2753d7a8",
+    "semantic_hash": "7f210a8dabff0dc87c988f3c2753d7a8"
+  },
+  "backend/src/presentation/dtos/empleados/crear-empleado.dto.ts": {
+    "mtime": 1784723286.2498398,
+    "ast_hash": "177c088a2e9091ddfac01765774ee9f3",
+    "semantic_hash": "177c088a2e9091ddfac01765774ee9f3"
+  },
+  "backend/src/presentation/dtos/empleados/empleado-lista-respuesta.dto.ts": {
+    "mtime": 1785351559.9181168,
+    "ast_hash": "3123a4e27b6d9c6da0a0322299aa50fe",
+    "semantic_hash": "3123a4e27b6d9c6da0a0322299aa50fe"
+  },
+  "backend/src/presentation/dtos/empleados/empleado-respuesta.dto.ts": {
+    "mtime": 1784723286.2498398,
+    "ast_hash": "8b97a5e25f01026d293ad04034412465",
+    "semantic_hash": "8b97a5e25f01026d293ad04034412465"
+  },
+  "backend/src/presentation/dtos/empleados/listar-empleados-query.dto.ts": {
+    "mtime": 1785351544.6628838,
+    "ast_hash": "0db8c93a1eaa061fad7293d8d885a450",
+    "semantic_hash": "0db8c93a1eaa061fad7293d8d885a450"
+  },
+  "backend/src/presentation/dtos/empleados/salario-inicial.dto.ts": {
+    "mtime": 1784723286.2508328,
+    "ast_hash": "057b4d4b57c6a8b9d6eb930cf38a024b",
+    "semantic_hash": "057b4d4b57c6a8b9d6eb930cf38a024b"
+  },
+  "backend/src/presentation/dtos/feriados/crear-feriado.dto.ts": {
+    "mtime": 1784723286.2508328,
+    "ast_hash": "3df1316dbd81de433eff275d053e2d16",
+    "semantic_hash": "3df1316dbd81de433eff275d053e2d16"
+  },
+  "backend/src/presentation/dtos/feriados/feriado-respuesta.dto.ts": {
+    "mtime": 1784723286.2508328,
+    "ast_hash": "f07a8a4da81bbd0ea01f240b8bdd081c",
+    "semantic_hash": "f07a8a4da81bbd0ea01f240b8bdd081c"
+  },
+  "backend/src/presentation/dtos/feriados/listar-feriados-query.dto.ts": {
+    "mtime": 1784723286.2508328,
+    "ast_hash": "02c200e8e26c1e5dfa2cfc9502675366",
+    "semantic_hash": "02c200e8e26c1e5dfa2cfc9502675366"
+  },
+  "backend/src/presentation/dtos/importaciones/confirmar-importacion.dto.ts": {
+    "mtime": 1785252715.50683,
+    "ast_hash": "6908ca52ab238684b22c3c9e88427643",
+    "semantic_hash": "6908ca52ab238684b22c3c9e88427643"
+  },
+  "backend/src/presentation/dtos/importaciones/fila-importacion-respuesta.dto.ts": {
+    "mtime": 1784723286.2518325,
+    "ast_hash": "c493c2bb510f2a28e00f50abe534d69f",
+    "semantic_hash": "c493c2bb510f2a28e00f50abe534d69f"
+  },
+  "backend/src/presentation/dtos/importaciones/importacion-respuesta.dto.ts": {
+    "mtime": 1785252695.4889612,
+    "ast_hash": "893ed1f53ef51d41e3a3b9f7f3ecb8b4",
+    "semantic_hash": "893ed1f53ef51d41e3a3b9f7f3ecb8b4"
+  },
+  "backend/src/presentation/dtos/importaciones/parsear-importacion-respuesta.dto.ts": {
+    "mtime": 1785252702.3039913,
+    "ast_hash": "4cab7dc0d9e2d5e31c6bf9a3b82440df",
+    "semantic_hash": "4cab7dc0d9e2d5e31c6bf9a3b82440df"
+  },
+  "backend/src/presentation/dtos/periodos/crear-periodo.dto.ts": {
+    "mtime": 1784723286.2528327,
+    "ast_hash": "cdd38c41eb602c2b7bcc18faf2b4a251",
+    "semantic_hash": "cdd38c41eb602c2b7bcc18faf2b4a251"
+  },
+  "backend/src/presentation/dtos/periodos/periodo-respuesta.dto.ts": {
+    "mtime": 1784902833.778272,
+    "ast_hash": "ae277a2914ccfc06bfc59814fff4453f",
+    "semantic_hash": "ae277a2914ccfc06bfc59814fff4453f"
+  },
+  "backend/src/presentation/dtos/registros/actualizar-registro.dto.ts": {
+    "mtime": 1784723286.2528327,
+    "ast_hash": "1e792b2063f24123ffe8dac17bcef8ec",
+    "semantic_hash": "1e792b2063f24123ffe8dac17bcef8ec"
+  },
+  "backend/src/presentation/dtos/registros/calculo-respuesta.dto.ts": {
+    "mtime": 1784723286.2528327,
+    "ast_hash": "a44cdfee0b77f3ea0a9f79428ea7931e",
+    "semantic_hash": "a44cdfee0b77f3ea0a9f79428ea7931e"
+  },
+  "backend/src/presentation/dtos/registros/crear-registro.dto.ts": {
+    "mtime": 1784723286.2538342,
+    "ast_hash": "0e0169e0202eed0725933f207274187a",
+    "semantic_hash": "0e0169e0202eed0725933f207274187a"
+  },
+  "backend/src/presentation/dtos/registros/preview-calculo-respuesta.dto.ts": {
+    "mtime": 1785252638.412939,
+    "ast_hash": "2d61e9eaf8f0411ab13001789a9b996d",
+    "semantic_hash": "2d61e9eaf8f0411ab13001789a9b996d"
+  },
+  "backend/src/presentation/dtos/registros/preview-calculo.dto.ts": {
+    "mtime": 1785252632.1610777,
+    "ast_hash": "634de52a8e815597bcf2e6454648a95b",
+    "semantic_hash": "634de52a8e815597bcf2e6454648a95b"
+  },
+  "backend/src/presentation/dtos/registros/registro-respuesta.dto.ts": {
+    "mtime": 1785252614.7239063,
+    "ast_hash": "35e0a47dd66a469a5fdf0f253d94fff2",
+    "semantic_hash": "35e0a47dd66a469a5fdf0f253d94fff2"
+  },
+  "backend/src/presentation/dtos/reportes/desglose-tipo-hora.dto.ts": {
+    "mtime": 1784723286.2538342,
+    "ast_hash": "668df0a454cddc987ec489dcb1e2483f",
+    "semantic_hash": "668df0a454cddc987ec489dcb1e2483f"
+  },
+  "backend/src/presentation/dtos/reportes/dia-reporte-empleado.dto.ts": {
+    "mtime": 1785252565.9944293,
+    "ast_hash": "43a97131bf3ca3380b17b2c4ca7e9b4d",
+    "semantic_hash": "43a97131bf3ca3380b17b2c4ca7e9b4d"
+  },
+  "backend/src/presentation/dtos/reportes/empleado-reporte.dto.ts": {
+    "mtime": 1784723286.2548332,
+    "ast_hash": "e4541c3b93a3d23850f938a15207aa0c",
+    "semantic_hash": "e4541c3b93a3d23850f938a15207aa0c"
+  },
+  "backend/src/presentation/dtos/reportes/fila-reporte-periodo.dto.ts": {
+    "mtime": 1785252554.5991483,
+    "ast_hash": "9bd44accd672fd4566a07080ca209bb6",
+    "semantic_hash": "9bd44accd672fd4566a07080ca209bb6"
+  },
+  "backend/src/presentation/dtos/reportes/historico-periodo.dto.ts": {
+    "mtime": 1784723286.2548332,
+    "ast_hash": "72ebe11053e51f6709a386cf3038cf95",
+    "semantic_hash": "72ebe11053e51f6709a386cf3038cf95"
+  },
+  "backend/src/presentation/dtos/reportes/historico-query.dto.ts": {
+    "mtime": 1784723286.2548332,
+    "ast_hash": "1c409461bf78eaa07b1c25e2e81bfc34",
+    "semantic_hash": "1c409461bf78eaa07b1c25e2e81bfc34"
+  },
+  "backend/src/presentation/dtos/reportes/reporte-empleado-respuesta.dto.ts": {
+    "mtime": 1784723286.255833,
+    "ast_hash": "99d1679462c5959448981eab6a941c67",
+    "semantic_hash": "99d1679462c5959448981eab6a941c67"
+  },
+  "backend/src/presentation/dtos/reportes/reporte-periodo-respuesta.dto.ts": {
+    "mtime": 1784723286.255833,
+    "ast_hash": "b9bac6586a9c79d04871f2eb0e97ebc5",
+    "semantic_hash": "b9bac6586a9c79d04871f2eb0e97ebc5"
+  },
+  "backend/src/presentation/dtos/reportes/retroactivo-resumen.dto.ts": {
+    "mtime": 1785252559.5447786,
+    "ast_hash": "b5ece60afd949832e44999b427e70366",
+    "semantic_hash": "b5ece60afd949832e44999b427e70366"
+  },
+  "backend/src/presentation/dtos/salarios/crear-salario.dto.ts": {
+    "mtime": 1784723286.255833,
+    "ast_hash": "9fbda128e12355328a801ba4bd1f9dd2",
+    "semantic_hash": "9fbda128e12355328a801ba4bd1f9dd2"
+  },
+  "backend/src/presentation/dtos/salarios/salario-respuesta.dto.ts": {
+    "mtime": 1784723286.255833,
+    "ast_hash": "bb7140bfe614e3797bc0cd1e1ecbbee0",
+    "semantic_hash": "bb7140bfe614e3797bc0cd1e1ecbbee0"
+  },
+  "backend/src/presentation/dtos/tipos-hora-extra/actualizar-tipo-hora-extra.dto.ts": {
+    "mtime": 1784723286.2568326,
+    "ast_hash": "1fa613e3d4e52e667729efed13973966",
+    "semantic_hash": "1fa613e3d4e52e667729efed13973966"
+  },
+  "backend/src/presentation/dtos/tipos-hora-extra/tipo-hora-extra-respuesta.dto.ts": {
+    "mtime": 1784723286.2568326,
+    "ast_hash": "a802c5357f60ded1bdc79db1092e11ce",
+    "semantic_hash": "a802c5357f60ded1bdc79db1092e11ce"
+  },
+  "backend/src/presentation/dtos/turnos/actualizar-turno.dto.ts": {
+    "mtime": 1785185807.9117787,
+    "ast_hash": "695919f0b15158d256100f75a5896bde",
+    "semantic_hash": "695919f0b15158d256100f75a5896bde"
+  },
+  "backend/src/presentation/dtos/turnos/crear-turno.dto.ts": {
+    "mtime": 1785185798.607042,
+    "ast_hash": "a7dd40d31def8399dc2bce2e7741c7e1",
+    "semantic_hash": "a7dd40d31def8399dc2bce2e7741c7e1"
+  },
+  "backend/src/presentation/dtos/turnos/turno-respuesta.dto.ts": {
+    "mtime": 1785185815.3017285,
+    "ast_hash": "dec4dbd991444d30fbe08fdca97f075b",
+    "semantic_hash": "dec4dbd991444d30fbe08fdca97f075b"
+  },
+  "backend/src/presentation/dtos/usuarios/actualizar-usuario.dto.ts": {
+    "mtime": 1784723286.2568326,
+    "ast_hash": "bc7fb7dfc001cf12b0e59b3c3188ed78",
+    "semantic_hash": "bc7fb7dfc001cf12b0e59b3c3188ed78"
+  },
+  "backend/src/presentation/dtos/usuarios/crear-usuario.dto.ts": {
+    "mtime": 1784723286.2568326,
+    "ast_hash": "712f0e15482efe9cd576eadd07e2666a",
+    "semantic_hash": "712f0e15482efe9cd576eadd07e2666a"
+  },
+  "backend/src/presentation/dtos/usuarios/usuario-respuesta.dto.ts": {
+    "mtime": 1784723286.2568326,
+    "ast_hash": "3f60435f35b9469ab47ded4be530beaa",
+    "semantic_hash": "3f60435f35b9469ab47ded4be530beaa"
+  },
+  "backend/src/presentation/filters/domain-error.filter.ts": {
+    "mtime": 1784723286.2578347,
+    "ast_hash": "c2c4e02d7662ba6ed558c4a0a3f02c2e",
+    "semantic_hash": "c2c4e02d7662ba6ed558c4a0a3f02c2e"
+  },
+  "backend/src/presentation/guards/jwt-auth.guard.ts": {
+    "mtime": 1784723286.2578347,
+    "ast_hash": "ccb16f67cc9e2591af2fef6706f94dc6",
+    "semantic_hash": "ccb16f67cc9e2591af2fef6706f94dc6"
+  },
+  "backend/src/presentation/guards/roles.guard.ts": {
+    "mtime": 1784723286.2578347,
+    "ast_hash": "6be8452f502ee464837a56d4e5741c6e",
+    "semantic_hash": "6be8452f502ee464837a56d4e5741c6e"
+  },
+  "backend/src/presentation/mappers/asignacion-turno.mapper.ts": {
+    "mtime": 1785185874.3464198,
+    "ast_hash": "04c2a2dbe7580170f0bc3bb2aac9d593",
+    "semantic_hash": "04c2a2dbe7580170f0bc3bb2aac9d593"
+  },
+  "backend/src/presentation/mappers/auditoria.mapper.ts": {
+    "mtime": 1785349138.4594378,
+    "ast_hash": "7f7e2b7a6bbf5e1aa9ef41097d1202bf",
+    "semantic_hash": "7f7e2b7a6bbf5e1aa9ef41097d1202bf"
+  },
+  "backend/src/presentation/mappers/empleado.mapper.ts": {
+    "mtime": 1785351575.425956,
+    "ast_hash": "1e4d68f37c1b5fb6502579b62f3cccc4",
+    "semantic_hash": "1e4d68f37c1b5fb6502579b62f3cccc4"
+  },
+  "backend/src/presentation/mappers/feriado.mapper.ts": {
+    "mtime": 1784723286.2588422,
+    "ast_hash": "6317ddb251d4c610376bc8dd6245dbad",
+    "semantic_hash": "6317ddb251d4c610376bc8dd6245dbad"
+  },
+  "backend/src/presentation/mappers/importacion.mapper.ts": {
+    "mtime": 1785252708.7763603,
+    "ast_hash": "17f0a0fb9552a0347817f8d0aea66af4",
+    "semantic_hash": "17f0a0fb9552a0347817f8d0aea66af4"
+  },
+  "backend/src/presentation/mappers/periodo.mapper.ts": {
+    "mtime": 1784902839.6909618,
+    "ast_hash": "d90002dcccdba554c7504d2606f8203a",
+    "semantic_hash": "d90002dcccdba554c7504d2606f8203a"
+  },
+  "backend/src/presentation/mappers/registro-horas.mapper.ts": {
+    "mtime": 1785252625.102522,
+    "ast_hash": "3efb64b3addfa4fa6a9f115b3e2c2f3e",
+    "semantic_hash": "3efb64b3addfa4fa6a9f115b3e2c2f3e"
+  },
+  "backend/src/presentation/mappers/reporte.mapper.ts": {
+    "mtime": 1785252579.4635108,
+    "ast_hash": "7524b102052e481859dfaee010131457",
+    "semantic_hash": "7524b102052e481859dfaee010131457"
+  },
+  "backend/src/presentation/mappers/salario.mapper.ts": {
+    "mtime": 1784723286.2598326,
+    "ast_hash": "8e1d6386c0387da1c486e3d21998b3ba",
+    "semantic_hash": "8e1d6386c0387da1c486e3d21998b3ba"
+  },
+  "backend/src/presentation/mappers/tipo-hora-extra.mapper.ts": {
+    "mtime": 1784723286.2598326,
+    "ast_hash": "f804a266c8f224a90acb889f32cc49b1",
+    "semantic_hash": "f804a266c8f224a90acb889f32cc49b1"
+  },
+  "backend/src/presentation/mappers/turno.mapper.ts": {
+    "mtime": 1785185866.5875223,
+    "ast_hash": "4a9431dfd645af8e00ad3a500d67fa16",
+    "semantic_hash": "4a9431dfd645af8e00ad3a500d67fa16"
+  },
+  "backend/src/presentation/mappers/usuario.mapper.ts": {
+    "mtime": 1784723286.2598326,
+    "ast_hash": "e8d9f37ba5bb7178307dc67aebf4fd1b",
+    "semantic_hash": "e8d9f37ba5bb7178307dc67aebf4fd1b"
+  },
+  "backend/src/presentation/modules/auditoria.module.ts": {
+    "mtime": 1784902878.485533,
+    "ast_hash": "9c0aff2f43d1377b0fa8242c32aa5d19",
+    "semantic_hash": "9c0aff2f43d1377b0fa8242c32aa5d19"
+  },
+  "backend/src/presentation/modules/auth.module.ts": {
+    "mtime": 1784723286.2608347,
+    "ast_hash": "34c4cd386bf7629f70204cb82f3e57f9",
+    "semantic_hash": "34c4cd386bf7629f70204cb82f3e57f9"
+  },
+  "backend/src/presentation/modules/configuracion.module.ts": {
+    "mtime": 1784723286.2608347,
+    "ast_hash": "2c8fffdf31188812e78004389632bd9c",
+    "semantic_hash": "2c8fffdf31188812e78004389632bd9c"
+  },
+  "backend/src/presentation/modules/empleados.module.ts": {
+    "mtime": 1784723286.2608347,
+    "ast_hash": "69e7cfc18c43b196ba88f9645fb491cd",
+    "semantic_hash": "69e7cfc18c43b196ba88f9645fb491cd"
+  },
+  "backend/src/presentation/modules/health.module.ts": {
+    "mtime": 1784723286.2608347,
+    "ast_hash": "a5971ef6bc6a8eb718f3f77815a9fad9",
+    "semantic_hash": "a5971ef6bc6a8eb718f3f77815a9fad9"
+  },
+  "backend/src/presentation/modules/importaciones.module.ts": {
+    "mtime": 1785252795.8926003,
+    "ast_hash": "852b84c4d6424802834a22ec9f77f34f",
+    "semantic_hash": "852b84c4d6424802834a22ec9f77f34f"
+  },
+  "backend/src/presentation/modules/periodos.module.ts": {
+    "mtime": 1785258648.2796822,
+    "ast_hash": "e2ea28e98e604baebfe251245981e704",
+    "semantic_hash": "e2ea28e98e604baebfe251245981e704"
+  },
+  "backend/src/presentation/modules/registros.module.ts": {
+    "mtime": 1785252781.4559772,
+    "ast_hash": "77bbf6d9d28cbb970dddb1c426d39d78",
+    "semantic_hash": "77bbf6d9d28cbb970dddb1c426d39d78"
+  },
+  "backend/src/presentation/modules/reportes.module.ts": {
+    "mtime": 1785186124.9364398,
+    "ast_hash": "89ed5ae47fa19e4985b68f384a26ea61",
+    "semantic_hash": "89ed5ae47fa19e4985b68f384a26ea61"
+  },
+  "backend/src/presentation/modules/turnos.module.ts": {
+    "mtime": 1785185960.776105,
+    "ast_hash": "f933d523133bb274bc506bc4e6f315e1",
+    "semantic_hash": "f933d523133bb274bc506bc4e6f315e1"
+  },
+  "backend/src/presentation/modules/usuarios.module.ts": {
+    "mtime": 1784723286.2618344,
+    "ast_hash": "76702c3abd19668f42ceaf7ab3439cf3",
+    "semantic_hash": "76702c3abd19668f42ceaf7ab3439cf3"
+  },
+  "backend/src/shared/config/sqlserver-connection.ts": {
+    "mtime": 1784723286.262833,
+    "ast_hash": "b43983549a0c1efa6ba7b3ad656f41b4",
+    "semantic_hash": "b43983549a0c1efa6ba7b3ad656f41b4"
+  },
+  "backend/test/app.e2e-spec.ts": {
+    "mtime": 1784723286.262833,
+    "ast_hash": "392ad0fa2204c35d43228252c7c2ebb1",
+    "semantic_hash": "392ad0fa2204c35d43228252c7c2ebb1"
+  },
+  "backend/test/jest-e2e.json": {
+    "mtime": 1784723286.262833,
+    "ast_hash": "707a50895cb1c565825637916e9cf290",
+    "semantic_hash": "707a50895cb1c565825637916e9cf290"
+  },
+  "backend/tsconfig.build.json": {
+    "mtime": 1784723286.262833,
+    "ast_hash": "d23fc4aff02c91ce9c424c15aea9b49b",
+    "semantic_hash": "d23fc4aff02c91ce9c424c15aea9b49b"
+  },
+  "backend/tsconfig.json": {
+    "mtime": 1784723286.262833,
+    "ast_hash": "e99b998156dc99eda85378413a794718",
+    "semantic_hash": "e99b998156dc99eda85378413a794718"
+  },
+  "frontend/.oxlintrc.json": {
+    "mtime": 1784723286.2648325,
+    "ast_hash": "1f0703525c59e961c2b7f20e78aa1cd4",
+    "semantic_hash": "1f0703525c59e961c2b7f20e78aa1cd4"
+  },
+  "frontend/package.json": {
+    "mtime": 1784723286.2658396,
+    "ast_hash": "beac6d846de4f28f873d6dcc7b3a9ae9",
+    "semantic_hash": "beac6d846de4f28f873d6dcc7b3a9ae9"
+  },
+  "frontend/src/App.tsx": {
+    "mtime": 1785352754.5095973,
+    "ast_hash": "9774d06c692ce3019757247df4936759",
+    "semantic_hash": "9774d06c692ce3019757247df4936759"
+  },
+  "frontend/src/api/asignaciones-turno.ts": {
+    "mtime": 1785186224.5953963,
+    "ast_hash": "6de60aa479a74e1bea754701c99c5be2",
+    "semantic_hash": "6de60aa479a74e1bea754701c99c5be2"
+  },
+  "frontend/src/api/auditoria.ts": {
+    "mtime": 1785349236.471457,
+    "ast_hash": "4ec866389267892c8fb089b25d189641",
+    "semantic_hash": "4ec866389267892c8fb089b25d189641"
+  },
+  "frontend/src/api/auth.ts": {
+    "mtime": 1784723286.2668326,
+    "ast_hash": "ad3f9b22aea7c47a867994ea26e52d47",
+    "semantic_hash": "ad3f9b22aea7c47a867994ea26e52d47"
+  },
+  "frontend/src/api/client.ts": {
+    "mtime": 1784723286.2668326,
+    "ast_hash": "d9bdba842616fe26a9cf9b1b3b23b5fd",
+    "semantic_hash": "d9bdba842616fe26a9cf9b1b3b23b5fd"
+  },
+  "frontend/src/api/configuracion.ts": {
+    "mtime": 1784723286.2668326,
+    "ast_hash": "f3ace4fa38c860797f9fc56eaff9f92b",
+    "semantic_hash": "f3ace4fa38c860797f9fc56eaff9f92b"
+  },
+  "frontend/src/api/empleados.ts": {
+    "mtime": 1785351911.3582492,
+    "ast_hash": "55088e4542262a03b8c9c5a31eef8f46",
+    "semantic_hash": "55088e4542262a03b8c9c5a31eef8f46"
+  },
+  "frontend/src/api/importaciones.ts": {
+    "mtime": 1785349824.541769,
+    "ast_hash": "b6ebe556c1c2e052470c4e91ba62b7f6",
+    "semantic_hash": "b6ebe556c1c2e052470c4e91ba62b7f6"
+  },
+  "frontend/src/api/periodos.ts": {
+    "mtime": 1785258878.3005202,
+    "ast_hash": "eed2cb1e950b247fe4482d78d0b0a8d9",
+    "semantic_hash": "eed2cb1e950b247fe4482d78d0b0a8d9"
+  },
+  "frontend/src/api/registros.ts": {
+    "mtime": 1785253319.7333972,
+    "ast_hash": "ba32f606806e78fb0e7d98f6368c63cb",
+    "semantic_hash": "ba32f606806e78fb0e7d98f6368c63cb"
+  },
+  "frontend/src/api/reportes.ts": {
+    "mtime": 1785349844.9058313,
+    "ast_hash": "e0a4e0115a1f132d30902b1c37940c98",
+    "semantic_hash": "e0a4e0115a1f132d30902b1c37940c98"
+  },
+  "frontend/src/api/turnos.ts": {
+    "mtime": 1785186212.2100866,
+    "ast_hash": "eda7d9422d4ba204c96bbee8e713c0ee",
+    "semantic_hash": "eda7d9422d4ba204c96bbee8e713c0ee"
+  },
+  "frontend/src/api/usuarios.ts": {
+    "mtime": 1785237963.6349325,
+    "ast_hash": "294575b311128fd05e8060dd3cbca4c3",
+    "semantic_hash": "294575b311128fd05e8060dd3cbca4c3"
+  },
+  "frontend/src/auth/AuthContext.tsx": {
+    "mtime": 1784723286.2688327,
+    "ast_hash": "32ae653795e09c83661cb02f5a099c37",
+    "semantic_hash": "32ae653795e09c83661cb02f5a099c37"
+  },
+  "frontend/src/components/Badge.tsx": {
+    "mtime": 1784723286.2688327,
+    "ast_hash": "a766269d337a59983434faff522b816f",
+    "semantic_hash": "a766269d337a59983434faff522b816f"
+  },
+  "frontend/src/components/BotonExportarExcel.tsx": {
+    "mtime": 1785350184.5426893,
+    "ast_hash": "84b712f3e55335b98d506cd92527e721",
+    "semantic_hash": "84b712f3e55335b98d506cd92527e721"
+  },
+  "frontend/src/components/Confetti.tsx": {
+    "mtime": 1785349934.9274182,
+    "ast_hash": "0760187acb3986406a1581bbda985758",
+    "semantic_hash": "0760187acb3986406a1581bbda985758"
+  },
+  "frontend/src/components/EmpleadoDrawer.tsx": {
+    "mtime": 1784723286.2688327,
+    "ast_hash": "17cc5a1097f4370d929c0fb541752419",
+    "semantic_hash": "17cc5a1097f4370d929c0fb541752419"
+  },
+  "frontend/src/components/EmpleadosNuevosModal.tsx": {
+    "mtime": 1785327017.4647555,
+    "ast_hash": "a724e92bb80e006edc718b51960df7fc",
+    "semantic_hash": "a724e92bb80e006edc718b51960df7fc"
+  },
+  "frontend/src/components/PageHeader.tsx": {
+    "mtime": 1784723286.2698343,
+    "ast_hash": "4f3d7308ddcbfe96e9da54d3b81db96b",
+    "semantic_hash": "4f3d7308ddcbfe96e9da54d3b81db96b"
+  },
+  "frontend/src/components/ProtectedLayout.tsx": {
+    "mtime": 1784723286.2698343,
+    "ast_hash": "42b88f760a8408730c8175d377463c1f",
+    "semantic_hash": "42b88f760a8408730c8175d377463c1f"
+  },
+  "frontend/src/components/Sidebar.tsx": {
+    "mtime": 1785352748.8678334,
+    "ast_hash": "3155793616241b2ab9a309a20b561ab1",
+    "semantic_hash": "3155793616241b2ab9a309a20b561ab1"
+  },
+  "frontend/src/components/Skeleton.tsx": {
+    "mtime": 1784723286.2698343,
+    "ast_hash": "6714b9f8bcb85e5db4ddbeffb07b8506",
+    "semantic_hash": "6714b9f8bcb85e5db4ddbeffb07b8506"
+  },
+  "frontend/src/components/Spinner.tsx": {
+    "mtime": 1784723286.2698343,
+    "ast_hash": "00164caeef28ac30eff27fdbc0d623db",
+    "semantic_hash": "00164caeef28ac30eff27fdbc0d623db"
+  },
+  "frontend/src/components/UsuarioDrawer.tsx": {
+    "mtime": 1785237992.4367876,
+    "ast_hash": "3ba33624c7e67ca3da85161f57f45d29",
+    "semantic_hash": "3ba33624c7e67ca3da85161f57f45d29"
+  },
+  "frontend/src/hooks/useDescargaArchivo.ts": {
+    "mtime": 1785350061.2492979,
+    "ast_hash": "d20df94c5dc5c572f0890b454402c167",
+    "semantic_hash": "d20df94c5dc5c572f0890b454402c167"
+  },
+  "frontend/src/main.tsx": {
+    "mtime": 1784723286.2708325,
+    "ast_hash": "df3369963799e47ef5a77cdca932abf0",
+    "semantic_hash": "df3369963799e47ef5a77cdca932abf0"
+  },
+  "frontend/src/pages/AsignacionesTurnoPage.tsx": {
+    "mtime": 1785351939.701381,
+    "ast_hash": "0eff190d9f568a21e1072575eb61ca70",
+    "semantic_hash": "0eff190d9f568a21e1072575eb61ca70"
+  },
+  "frontend/src/pages/AuditoriaPage.tsx": {
+    "mtime": 1785349275.7117224,
+    "ast_hash": "14b7c0d8a11a503e6e5dd5b0ca4aff14",
+    "semantic_hash": "14b7c0d8a11a503e6e5dd5b0ca4aff14"
+  },
+  "frontend/src/pages/ConfiguracionPage.tsx": {
+    "mtime": 1785186299.9301631,
+    "ast_hash": "014b57cdafb479ad472ecdd75ca928bd",
+    "semantic_hash": "014b57cdafb479ad472ecdd75ca928bd"
+  },
+  "frontend/src/pages/DashboardPage.tsx": {
+    "mtime": 1784723286.2708325,
+    "ast_hash": "cb6a8691ba9a5816fcbff88765e54c59",
+    "semantic_hash": "cb6a8691ba9a5816fcbff88765e54c59"
+  },
+  "frontend/src/pages/EmpleadosPage.tsx": {
+    "mtime": 1785351999.3528552,
+    "ast_hash": "357e4d6dc129c4e27dd3c5365a6dd8ed",
+    "semantic_hash": "357e4d6dc129c4e27dd3c5365a6dd8ed"
+  },
+  "frontend/src/pages/ImportarPage.tsx": {
+    "mtime": 1785349999.774287,
+    "ast_hash": "a8fa56dd8b04a6850e6d82a43c0534e1",
+    "semantic_hash": "a8fa56dd8b04a6850e6d82a43c0534e1"
+  },
+  "frontend/src/pages/LoginPage.tsx": {
+    "mtime": 1784723286.271842,
+    "ast_hash": "c94827f7ea38a89e92bd22ae43e814ca",
+    "semantic_hash": "c94827f7ea38a89e92bd22ae43e814ca"
+  },
+  "frontend/src/pages/PeriodosPage.tsx": {
+    "mtime": 1785258929.895588,
+    "ast_hash": "9b1fdd04fd13b67ff8c1520ebf67d929",
+    "semantic_hash": "9b1fdd04fd13b67ff8c1520ebf67d929"
+  },
+  "frontend/src/pages/RegistroManualPage.tsx": {
+    "mtime": 1785351967.2403412,
+    "ast_hash": "03c33728500ae9cda96e486ad75935ec",
+    "semantic_hash": "03c33728500ae9cda96e486ad75935ec"
+  },
+  "frontend/src/pages/ReportePage.tsx": {
+    "mtime": 1785350239.1443202,
+    "ast_hash": "e7ab2c7039849515c0d7404f7813813e",
+    "semantic_hash": "e7ab2c7039849515c0d7404f7813813e"
+  },
+  "frontend/src/pages/UsuariosPage.tsx": {
+    "mtime": 1785238007.632691,
+    "ast_hash": "41153bd2f5e01b31930505a6ffe7a31b",
+    "semantic_hash": "41153bd2f5e01b31930505a6ffe7a31b"
+  },
+  "frontend/src/periodos/PeriodoContext.tsx": {
+    "mtime": 1784723286.2728329,
+    "ast_hash": "8910f29050fb52d397409c2ccf89fc20",
+    "semantic_hash": "8910f29050fb52d397409c2ccf89fc20"
+  },
+  "frontend/src/types/api.ts": {
+    "mtime": 1785258962.3082504,
+    "ast_hash": "6e694865f7febcb5256f4b007aafd0e1",
+    "semantic_hash": "6e694865f7febcb5256f4b007aafd0e1"
+  },
+  "frontend/src/utils/format.ts": {
+    "mtime": 1784903277.2921243,
+    "ast_hash": "7bac25d4e25ce9c8e73b49771851c921",
+    "semantic_hash": "7bac25d4e25ce9c8e73b49771851c921"
+  },
+  "frontend/tsconfig.app.json": {
+    "mtime": 1784723286.2748382,
+    "ast_hash": "e4f83bdfdf660f5e5364945e14291d70",
+    "semantic_hash": "e4f83bdfdf660f5e5364945e14291d70"
+  },
+  "frontend/tsconfig.json": {
+    "mtime": 1784723286.275833,
+    "ast_hash": "852c3a5df14a4b43ac28e9554ebedf4a",
+    "semantic_hash": "852c3a5df14a4b43ac28e9554ebedf4a"
+  },
+  "frontend/tsconfig.node.json": {
+    "mtime": 1784723286.275833,
+    "ast_hash": "74cde0261ad0a13045ca0a05ab1542ae",
+    "semantic_hash": "74cde0261ad0a13045ca0a05ab1542ae"
+  },
+  "frontend/vite.config.ts": {
+    "mtime": 1784723286.275833,
+    "ast_hash": "199e1221ae03d6974fdc8b5e23787b98",
+    "semantic_hash": "199e1221ae03d6974fdc8b5e23787b98"
+  },
+  "CLAUDE.md": {
+    "mtime": 1785353591.109098,
+    "ast_hash": "e3a434ad8032b8c0c0140cd9f4d699e0",
+    "semantic_hash": "e3a434ad8032b8c0c0140cd9f4d699e0"
+  },
+  "backend/README.md": {
+    "mtime": 1785237877.828619,
+    "ast_hash": "51a435a9df43a83949ac646a0912cada",
+    "semantic_hash": "51a435a9df43a83949ac646a0912cada"
+  },
+  "docs/02-reglas-de-negocio.md": {
+    "mtime": 1785259038.2910304,
+    "ast_hash": "253e3d37ea20aed14c6b337c28b6ba4e",
+    "semantic_hash": "253e3d37ea20aed14c6b337c28b6ba4e"
+  },
+  "docs/03-modelo-datos.md": {
+    "mtime": 1785352071.335666,
+    "ast_hash": "a360feab11b91a6542837ee446010cc4",
+    "semantic_hash": "a360feab11b91a6542837ee446010cc4"
+  },
+  "docs/06-plan-de-trabajo.md": {
+    "mtime": 1784723286.2638328,
+    "ast_hash": "1c90ccd313103fafaaf8b8dfd3e873f4",
+    "semantic_hash": "1c90ccd313103fafaaf8b8dfd3e873f4"
+  },
+  "frontend/README.md": {
+    "mtime": 1784723286.2648325,
+    "ast_hash": "3a8e2f41658852c43fdce93a22bc2f90",
+    "semantic_hash": "3a8e2f41658852c43fdce93a22bc2f90"
+  },
+  "frontend/index.html": {
+    "mtime": 1785348520.7179165,
+    "ast_hash": "ab19bd4bf24d0173aad19ba71336ad41",
+    "semantic_hash": "ab19bd4bf24d0173aad19ba71336ad41"
+  },
+  "frontend/public/favicon.svg": {
+    "mtime": 1784723286.2658396,
+    "ast_hash": "7e840862161341271697daa99a40d76b",
+    "semantic_hash": "7e840862161341271697daa99a40d76b"
+  },
+  "frontend/public/icons.svg": {
+    "mtime": 1784723286.2658396,
+    "ast_hash": "21c7473c592c67dc87223d49892c8f0a",
+    "semantic_hash": "21c7473c592c67dc87223d49892c8f0a"
+  },
+  "frontend/src/assets/vite.svg": {
+    "mtime": 1784723286.2688327,
+    "ast_hash": "6d5180a782d64c8cf51ba01c2a2184d8",
+    "semantic_hash": "6d5180a782d64c8cf51ba01c2a2184d8"
+  }
+}

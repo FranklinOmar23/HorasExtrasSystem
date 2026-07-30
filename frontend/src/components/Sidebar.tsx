@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+
+const CLAVE_SIDEBAR_COLAPSADO = 'hx_sidebar_colapsado';
 
 const iconProps = {
   width: 18,
@@ -145,7 +147,7 @@ const iconoNomina = (
   </svg>
 );
 
-function NavItemProximamente({ label, icono }: { label: string; icono: React.ReactNode }) {
+function NavItemProximamente({ label, icono, colapsado }: { label: string; icono: React.ReactNode; colapsado: boolean }) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const [rebote, setRebote] = useState(0);
@@ -159,10 +161,14 @@ function NavItemProximamente({ label, icono }: { label: string; icono: React.Rea
 
   return (
     <div style={{ position: 'relative' }}>
-      <button ref={btnRef} type="button" className="hx-navitem-soon" onClick={onClick}>
+      <button ref={btnRef} type="button" className="hx-navitem-soon" onClick={onClick} title={colapsado ? label : undefined}>
         <span key={rebote} className={`hx-navitem-soon-icon${rebote > 0 ? ' bounce' : ''}`}>{icono}</span>
-        {label}
-        <span className="hx-pill-pronto">Pronto</span>
+        {!colapsado && (
+          <>
+            {label}
+            <span className="hx-pill-pronto">Pronto</span>
+          </>
+        )}
       </button>
       {pos && createPortal(
         <div className="hx-soon-pop" role="status" style={{ top: pos.top, left: pos.left }}>
@@ -191,11 +197,28 @@ export function Sidebar() {
   const { usuario, salir } = useAuth();
   const esAdmin = usuario?.rol === 'ADMIN';
 
+  const [colapsado, setColapsado] = useState(() => localStorage.getItem(CLAVE_SIDEBAR_COLAPSADO) === '1');
+
+  useEffect(() => {
+    localStorage.setItem(CLAVE_SIDEBAR_COLAPSADO, colapsado ? '1' : '0');
+  }, [colapsado]);
+
   return (
-    <aside className="hx-aside">
+    <aside className={`hx-aside${colapsado ? ' hx-aside-colapsado' : ''}`}>
+      <button
+        type="button"
+        className="hx-aside-toggle"
+        onClick={() => setColapsado((c) => !c)}
+        title={colapsado ? 'Expandir menú' : 'Ocultar menú'}
+      >
+        <svg {...iconProps} width={13} height={13}>
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+
       <div className="hx-aside-head">
         <div className="hx-logo">H</div>
-        <div style={{ minWidth: 0 }}>
+        <div className="hx-aside-brand">
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, lineHeight: 1, letterSpacing: '-.02em' }}>
             Hartemanía
           </div>
@@ -208,18 +231,19 @@ export function Sidebar() {
       <nav className="hx-nav">
         {navItems.map((grupo) => (
           <div key={grupo.grupo}>
-            <div className="hx-nav-group">{grupo.grupo}</div>
+            {!colapsado && <div className="hx-nav-group">{grupo.grupo}</div>}
             {grupo.items.filter((item) => !item.soloAdmin || esAdmin).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) => `hx-navitem${isActive ? ' active' : ''}`}
+                title={colapsado ? item.label : undefined}
               >
                 {item.icon}
-                {item.label}
+                {!colapsado && item.label}
               </NavLink>
             ))}
-            {grupo.grupo === 'Operación' && <NavItemProximamente label="Nómina" icono={iconoNomina} />}
+            {grupo.grupo === 'Operación' && <NavItemProximamente label="Nómina" icono={iconoNomina} colapsado={colapsado} />}
           </div>
         ))}
       </nav>
@@ -227,6 +251,7 @@ export function Sidebar() {
       <div className="hx-aside-foot">
         <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: 8, borderRadius: 12 }}>
           <div
+            title={colapsado ? usuario?.nombre : undefined}
             style={{
               width: 36,
               height: 36,
@@ -243,14 +268,16 @@ export function Sidebar() {
           >
             {usuario ? iniciales(usuario.nombre) : ''}
           </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {usuario?.nombre}
+          {!colapsado && (
+            <div className="hx-aside-foot-info" style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {usuario?.nombre}
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>
+                {usuario?.rol === 'ADMIN' ? 'Administrador' : 'RRHH / Digitador'}
+              </div>
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>
-              {usuario?.rol === 'ADMIN' ? 'Administrador' : 'RRHH / Digitador'}
-            </div>
-          </div>
+          )}
           <button
             type="button"
             onClick={salir}

@@ -3,8 +3,8 @@ import {
   AuditoriaRepository,
   FiltroAuditoria,
 } from '../../ports/auditoria.repository.port';
+import { normalizarPaginacion, totalPaginas } from '../../services/paginacion.util';
 
-export const PAGINA_DEFECTO = 1;
 export const POR_PAGINA_DEFECTO = 25;
 export const POR_PAGINA_MAXIMO = 100;
 
@@ -31,10 +31,11 @@ export class ListarAuditoriaUseCase {
   async ejecutar(
     filtro: FiltroListarAuditoria,
   ): Promise<ResultadoListarAuditoria> {
-    const pagina = Math.max(1, filtro.pagina ?? PAGINA_DEFECTO);
-    const porPagina = Math.min(
+    const { pagina, porPagina } = normalizarPaginacion(
+      filtro.pagina,
+      filtro.porPagina,
+      POR_PAGINA_DEFECTO,
       POR_PAGINA_MAXIMO,
-      Math.max(1, filtro.porPagina ?? POR_PAGINA_DEFECTO),
     );
 
     const { items, total } = await this.repository.listar({
@@ -51,7 +52,7 @@ export class ListarAuditoriaUseCase {
       total,
       pagina,
       porPagina,
-      totalPaginas: Math.max(1, Math.ceil(total / porPagina)),
+      totalPaginas: totalPaginas(total, porPagina),
     };
   }
 }

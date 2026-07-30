@@ -4,6 +4,23 @@ import type { Empleado, Salario } from '../types/api';
 export interface FiltroEmpleados {
   search?: string;
   activo?: boolean;
+  salarioMin?: number;
+  salarioMax?: number;
+  pagina?: number;
+  porPagina?: number;
+}
+
+export interface EmpleadoConSalario extends Empleado {
+  /** Salario mensual VIGENTE (null si no tiene ninguno registrado). */
+  montoMensualVigente: string | null;
+}
+
+export interface EmpleadosPaginados {
+  items: EmpleadoConSalario[];
+  total: number;
+  pagina: number;
+  porPagina: number;
+  totalPaginas: number;
 }
 
 export interface SalarioInicialInput {
@@ -31,8 +48,8 @@ export interface CrearSalarioInput {
   vigenteDesde: string;
 }
 
-export async function listarEmpleados(filtro: FiltroEmpleados = {}): Promise<Empleado[]> {
-  const { data } = await apiClient.get<Empleado[]>('/empleados', { params: filtro });
+export async function listarEmpleados(filtro: FiltroEmpleados = {}): Promise<EmpleadosPaginados> {
+  const { data } = await apiClient.get<EmpleadosPaginados>('/empleados', { params: filtro });
   return data;
 }
 

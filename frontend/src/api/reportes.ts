@@ -26,9 +26,15 @@ function nombreDesdeContentDisposition(valor: string | undefined, fallback: stri
   return match ? match[1] : fallback;
 }
 
-export async function descargarReporteExcel(periodoId: string): Promise<ArchivoDescargado> {
+export async function descargarReporteExcel(
+  periodoId: string,
+  onProgreso?: (porcentaje: number | null) => void,
+): Promise<ArchivoDescargado> {
   const response = await apiClient.get(`/periodos/${periodoId}/reporte/excel`, {
     responseType: 'blob',
+    onDownloadProgress: onProgreso
+      ? (e) => onProgreso(e.total ? Math.round((e.loaded / e.total) * 100) : null)
+      : undefined,
   });
   return {
     blob: response.data,
@@ -36,9 +42,16 @@ export async function descargarReporteExcel(periodoId: string): Promise<ArchivoD
   };
 }
 
-export async function descargarReporteEmpleadoExcel(periodoId: string, empleadoId: string): Promise<ArchivoDescargado> {
+export async function descargarReporteEmpleadoExcel(
+  periodoId: string,
+  empleadoId: string,
+  onProgreso?: (porcentaje: number | null) => void,
+): Promise<ArchivoDescargado> {
   const response = await apiClient.get(`/periodos/${periodoId}/reporte/empleados/${empleadoId}/excel`, {
     responseType: 'blob',
+    onDownloadProgress: onProgreso
+      ? (e) => onProgreso(e.total ? Math.round((e.loaded / e.total) * 100) : null)
+      : undefined,
   });
   return {
     blob: response.data,

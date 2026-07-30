@@ -45,7 +45,20 @@ auditoría/periodos cerrados/importaciones que referencian a ese usuario.
 reloj biométrico para casar filas. `cedula` es única pero nullable —en
 producción vía índice único **filtrado** (`WHERE cedula IS NOT NULL`),
 porque SQL Server exige unicidad también entre `NULL`s bajo una constraint
-normal, y muchos empleados no tienen cédula registrada.
+normal, y muchos empleados no tienen cédula registrada. `GET /empleados` es
+paginado (`pagina`/`porPagina`, default 25, máximo 500) y acepta
+`salarioMin`/`salarioMax` para filtrar por el salario mensual vigente.
+
+#### `vw_empleados` (vista SQL, modelo Prisma `VwEmpleado`)
+Vista de solo lectura que pre-une `empleados` con su `Salario` VIGENTE
+(`vigenteHasta IS NULL`), exponiendo `montoMensualVigente`/
+`salarioVigenteDesde`. Antes de esta vista, la pantalla de Empleados hacía
+una petición `GET /empleados/:id/salarios` **por cada fila** para pintar la
+columna de salario (N+1 a nivel de HTTP). Ahora el listado (`GET /empleados`)
+lee directamente de esta vista. Mismas reglas que `vw_auditoria` (ver más
+abajo): Prisma no crea/gestiona su DDL vía `db push`/`migrate` — vive en
+`prisma/migrations/20260729185607_vw_empleados/migration.sql` y hay que
+aplicarlo a mano en cualquier entorno nuevo; `id` es `@unique` (no `@id`).
 
 ### `salarios` (modelo `Salario`)
 Historial de salario mensual por empleado, con vigencia
